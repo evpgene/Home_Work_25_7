@@ -36,7 +36,6 @@ public:
     std::shared_ptr<User> restorUser(std::string &str);
 
     void saveChat(std::shared_ptr<Chat> chat);
-    std::shared_ptr<Chat> restorChat(fs::path path);
 
     std::string saveMessage(Message &message);
 

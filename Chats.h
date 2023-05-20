@@ -38,7 +38,7 @@ public:
 	friend void SaveRestor::saveUsers(std::vector<User>& users);
 	
 	// Restore from files
-	void function10()
+	void restordata()
 	{
 		SaveRestor restor;
 		restor.createPath("/tmp", "/tmp/Chat_Yevgeniy");
@@ -48,7 +48,7 @@ public:
 	}
 
 	//Save to files
-	void function11()
+	void savedata()
 	{
 		SaveRestor save;
 		save.createPath("/tmp", "/tmp/Chat_Yevgeniy");
@@ -57,7 +57,7 @@ public:
 	}
 
 	// Main menu
-	void function0()
+	void mainmenu()
 	{
 		bool commonUserExist {false}; // Пользователь общий уже есть
 		for (auto user : users)
@@ -116,19 +116,19 @@ public:
 					break;
 
 				case 1: // выводим  данные текущего пользователя
-					function1();
+					userinfo();
 					break;
 				case 2: // register user (check user)
-					function2();
+					logon();
 					break;
 				case 3: // Написать пользователю
-					function3();
+					write();
 					break;
 				case 8: // logoff
-					function8();
+					logoff();
 					break;
 				case 9: // Выход из программы
-					function9();
+					exit();
 					break;
 				default:
 					std::cout << "Нет такой команды: " << cmd << std::endl;
@@ -143,7 +143,7 @@ public:
 		}
 	}
 	// выводим  данные текущего пользовател
-	void function1()
+	void userinfo()
 	{
 		if (currentUserPtr)
 		{
@@ -167,7 +167,7 @@ public:
 		}
 	}
 	// register user (check user)
-	void function2()
+	void logon()
 	{
 		if (currentUserPtr)
 		{
@@ -255,7 +255,7 @@ public:
 		}
 	}
 	// Написать пользователю
-	void function3()
+	void write()
 	{
 		// Выводим имя активного пользователя
 		if (currentUserPtr)
@@ -406,7 +406,7 @@ public:
 		}
 	}
 	// logoff
-	void function8()
+	void logoff()
 	{
 		if (currentUserPtr)
 		{
@@ -421,7 +421,7 @@ public:
 		}
 	}
 	// Выход из программы
-	void function9()
+	void exit()
 	{
 		Q = true;
 

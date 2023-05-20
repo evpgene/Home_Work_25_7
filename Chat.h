@@ -17,7 +17,6 @@ public:
 	std::string getChatName() const;
 
 	friend void SaveRestor::saveChat(std::shared_ptr<Chat>  chat);
-    friend std::shared_ptr<Chat> SaveRestor::restorChat(fs::path  path);
 	friend void SaveRestor::restorChats(std::vector<std::shared_ptr<Chat>>& chats);
 protected:
 	std::string _chatname;

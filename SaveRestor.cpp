@@ -157,53 +157,6 @@ void SaveRestor::saveChat(std::shared_ptr<Chat> chat)
 	s.close();
 };
 
-std::shared_ptr<Chat> SaveRestor::restorChat(fs::path path)
-{
-
-	std::string filename{path};
-	std::fstream t{filename};
-
-	if (!t.is_open())
-		{std::cout << "failed to open " << filename << '\n';
-		return nullptr;}
-	else
-	{
-		t.seekg(0);
-		//std::cout << "opened " << filename << '\n';		   // для диагностики - можно убрать
-		//std::cout << "opened " << path.filename() << '\n'; // для диагностики - можно убрать
-		shared_ptr<Chat> restor = make_shared<Chat>(Chat(path.filename()));
-
-		for (std::string line; std::getline(t, line);)
-		{
-			std::string isName, isTime, isMessage;
-			bool doneName{false}, doneTime{false}, doneMessage{false};
-			std::size_t pos = line.find(name);
-			if (pos != std::string::npos)
-			{
-				isName = line.substr(name.size() + sep.size());
-				doneName = true;
-			};
-			pos = line.find(timesend);
-			if (pos != std::string::npos)
-			{
-				isTime = line.substr(timesend.size() + sep.size());
-				doneTime = true;
-			};
-			pos = line.find(mess);
-			if (pos != std::string::npos)
-			{
-				isMessage = line.substr(mess.size() + sep.size());
-				doneMessage = true;
-			};
-			if (doneName && doneTime && doneMessage)
-			{
-				restor->_messages.push_back(Message(isName, isTime, isMessage));
-			}
-		}
-		t.close();
-		return restor;
-	}
-}
 
 void SaveRestor::restorChats(std::vector<std::shared_ptr<Chat>>& chats)
 {

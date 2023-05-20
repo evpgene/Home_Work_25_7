@@ -14,9 +14,9 @@ int main()
 
 
 	Chats chats;
-	chats.function10();
-	chats.function0();
-	chats.function11();
+	chats.restordata();
+	chats.mainmenu();
+	chats.savedata();
 
 	return 0;
 }
