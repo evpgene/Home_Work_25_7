@@ -14,6 +14,7 @@ public:
 	User();
 	explicit User(std::string&);
 	User(unsigned long long ID, const std::string& login, const std::string& pass); 
+	User(const std::string& login, const std::string& pass); 
 	~User();
 	void setID(const unsigned long long);
 	void setLogin(const std::string&);
