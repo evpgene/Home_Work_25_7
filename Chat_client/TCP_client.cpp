@@ -6,7 +6,7 @@ void TCP_client::configureConnection()
     socket_file_descriptor = socket(AF_INET, SOCK_STREAM, 0);
     if (socket_file_descriptor == -1)
     {
-        cout << "Creation of Socket failed!" << endl;
+        std::cout << "Creation of Socket failed!" << std::endl;
         exit(1);
     }
 
@@ -23,7 +23,7 @@ void TCP_client::openConnection()
     connection = connect(socket_file_descriptor, (struct sockaddr *)&serveraddress, sizeof(serveraddress));
     if (connection == -1)
     {
-        cout << "Connection with the server failed.!" << endl;
+        std::cout << "Connection with the server failed.!" << std::endl;
         exit(1);
     }
 }
@@ -31,19 +31,21 @@ void TCP_client::openConnection()
 void TCP_client::send()
 {
     bzero(message, sizeof(message));
-    cout << "Enter the message you want to send to the server: " << endl;
-    cin >> message;
+    std::cout << "Enter the message you want to send to the server: " << std::endl;
+    std::cin >> message;
     if ((strncmp(message, "end", 3)) == 0)
     {
         write(socket_file_descriptor, message, sizeof(message));
-        cout << "Client Exit." << endl;
+        std::cout << "Client Exit." << std::endl;
         // break;
     }
+
+
     ssize_t bytes = write(socket_file_descriptor, message, sizeof(message));
     // Если передали >= 0  байт, значит пересылка прошла успешно
     if (bytes >= 0)
     {
-        cout << "Data send to the server successfully.!" << endl;
+        std::cout << "Data send to the server successfully.!" << std::endl;
     }
 }
 
@@ -51,7 +53,7 @@ void TCP_client::receive()
 {
     // Ждем ответа от сервера
     read(socket_file_descriptor, message, sizeof(message));
-    cout << "Data received from server: " << message << endl;
+    std::cout << "Data received from server: " << message << std::endl;
 }
 
 void TCP_client::closeConnection()
