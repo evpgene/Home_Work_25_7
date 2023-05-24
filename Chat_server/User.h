@@ -35,9 +35,10 @@ friend bool operator!=(const User& u1, const User& u2);
 private:
 	std::string _login;
 	std::string _pass;
-	unsigned long long _ID{ 0 };
+	// unsigned long long _ID{ 0 };
 
-	std::vector<shared_ptr<Chat>> _chats;
-	std::vector<int> _readPos; // array of chats read positions
+	// std::vector<shared_ptr<Chat>> _chats;
+
+	// std::vector<int> _readPos; // array of chats read positions
 
 };

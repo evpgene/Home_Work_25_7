@@ -34,7 +34,7 @@ void SaveRestor::createPath(const fs::path &Path, const fs::path &savePath)
 
 std::string SaveRestor::saveUser(User &user)
 {
-	return ID + sep + to_string(user._ID) + sep + log + sep + user._login + sep + pas + sep + user._pass;
+	return log + sep + user._login + sep + pas + sep + user._pass;
 };
 
 void SaveRestor::saveUsers(std::vector<User> &users)
@@ -67,12 +67,6 @@ std::shared_ptr<User> SaveRestor::restorUser(std::string &str)
 	while (iss >> word)
 	{
 		//std::cout << word << std::endl; // для диагностики - можно убрать
-		if (nextIsID)
-		{
-			user->setID(stoll(word));
-			nextIsID = false;
-			doneID = true;
-		};
 		if (nextIsLogin)
 		{
 			user->setLogin(word);
@@ -85,10 +79,6 @@ std::shared_ptr<User> SaveRestor::restorUser(std::string &str)
 			nextIsPass = false;
 			donePass = true;
 		};
-		if (word == ID)
-		{
-			nextIsID = true;
-		}
 		if (word == log)
 		{
 			nextIsLogin = true;
@@ -98,7 +88,7 @@ std::shared_ptr<User> SaveRestor::restorUser(std::string &str)
 			nextIsPass = true;
 		}
 	}
-	if (doneID && doneLogin /*  && donePass */) // donePass может отсутствовать для общего чата
+	if (doneLogin /*  && donePass */) // donePass может отсутствовать для общего чата
 	{
 		return user;
 	}
