@@ -21,6 +21,23 @@ void Message::setTimeSend(const std::string& time)
 	_timeSend = time;
 }
 
+
+std::string Message::getUserName() const
+{
+	return _userName;
+}
+
+std::string Message::getMessage() const
+{
+	return _message;
+}
+
+std::string Message::getTimeSend() const
+{
+	return _timeSend;
+}
+
+
 void Message::printMessage() const
 {
 	std::cout << _timeSend << _userName << ": " << _message << std::endl;

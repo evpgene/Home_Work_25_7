@@ -1,5 +1,13 @@
 #include "TCP_client.h"
 
+TCP_client::TCP_client(/* args */)
+{
+}
+
+TCP_client::~TCP_client()
+{
+}
+
 void TCP_client::configureConnection()
 {
     // Создадим сокет
@@ -28,20 +36,20 @@ void TCP_client::openConnection()
     }
 }
 
-void TCP_client::send()
+void TCP_client::send(const std::string& str)
 {
-    bzero(message, sizeof(message));
-    std::cout << "Enter the message you want to send to the server: " << std::endl;
-    std::cin >> message;
-    if ((strncmp(message, "end", 3)) == 0)
-    {
-        write(socket_file_descriptor, message, sizeof(message));
-        std::cout << "Client Exit." << std::endl;
+    // bzero(message, sizeof(message));
+    // std::cout << "Enter the message you want to send to the server: " << std::endl;
+    // std::cin >> message;
+    // if ((strncmp(message, "end", 3)) == 0)
+    // {
+        //write(socket_file_descriptor, str.c_str(), str.size());
+        // std::cout << "Client Exit." << std::endl;
         // break;
-    }
+    // }
 
 
-    ssize_t bytes = write(socket_file_descriptor, message, sizeof(message));
+    ssize_t bytes = write(socket_file_descriptor, str.c_str(), str.size());
     // Если передали >= 0  байт, значит пересылка прошла успешно
     if (bytes >= 0)
     {

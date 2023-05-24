@@ -18,6 +18,10 @@ public:
 	void setTimeSend(const std::string& time);
 	void printMessage() const;
 
+	std::string getUserName() const;
+	std::string getMessage() const;
+	std::string getTimeSend() const;
+
 	// friend std::string SaveRestor::saveMessage(Message& message);
 
 private:

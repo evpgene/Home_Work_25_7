@@ -25,14 +25,7 @@ public:
     void openConnection();
     void closeConnection();
     void send();
-    void receive();
+    std::string receive();
     void listening();
 };
 
-TCP_server::TCP_server(/* args */)
-{
-}
-
-TCP_server::~TCP_server()
-{
-}

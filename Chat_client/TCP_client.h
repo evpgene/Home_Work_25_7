@@ -20,21 +20,14 @@ private:
 public:
     TCP_client(/* args */);
     ~TCP_client();
-    int main();
     void configureConnection();
     void openConnection();
     void closeConnection();
-    void send();
+    void send(const std::string& str);
     void receive();
 
 };
 
-TCP_client::TCP_client(/* args */)
-{
-}
 
-TCP_client::~TCP_client()
-{
-}
 
 
