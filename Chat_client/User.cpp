@@ -52,19 +52,19 @@ void User::printUser() const
     std::cout << " " << _login << std::endl;
 }
 
-void User::addChat(shared_ptr<Chat> chat)
-{
-    _chats.push_back(chat);
-}
+// void User::addChat(shared_ptr<Chat> chat)
+// {
+//     _chats.push_back(chat);
+// }
 
-void User::printChatNames()
-{
-   // _chats.printChatNames();
-    for (auto c : _chats)
-        ;// c.
-        //c.printChatName();
+// void User::printChatNames()
+// {
+//    // _chats.printChatNames();
+//     for (auto c : _chats)
+//         ;// c.
+//         //c.printChatName();
     
-}
+// }
 
 
 bool operator== (const User& u1, const User& u2)

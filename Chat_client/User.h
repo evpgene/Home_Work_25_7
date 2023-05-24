@@ -2,7 +2,7 @@
 #include <memory>
 #include <string>
 #include <vector>
-#include "Chat.h"
+// #include "Chat.h"
 //#include "SaveRestor.h"
 
 using namespace std;
@@ -23,7 +23,7 @@ public:
 	std::string getLogin() const;
 	std::string getPass() const;
 	void printUser() const;
-	void addChat(shared_ptr<Chat> chat);
+	//void addChat(shared_ptr<Chat> chat);
 	void printChatNames();
 
 // friend std::string SaveRestor::saveUser(User& user);
@@ -38,7 +38,7 @@ private:
 	std::string _pass;
 	unsigned long long _ID{ 0 };
 
-	std::vector<shared_ptr<Chat>> _chats;
+	//std::vector<shared_ptr<Chat>> _chats;
 	std::vector<int> _readPos; // array of chats read positions
 
 };
