@@ -29,6 +29,10 @@ public:
 // friend std::string SaveRestor::saveUser(User& user);
 // friend std::shared_ptr<User> restorUser(std::string& str);
 
+friend bool operator== (const User& u1, const User& u2);
+friend bool operator!= (const User& u1, const User& u2);
+
+
 private:
 	std::string _login;
 	std::string _pass;

@@ -66,3 +66,11 @@ void User::printChatNames()
     
 }
 
+bool operator== (const User& u1, const User& u2)
+{
+    return u1._login == u2._login;
+}
+bool operator!= (const User& u1, const User& u2)
+{
+    return !(u1 == u2);
+}
