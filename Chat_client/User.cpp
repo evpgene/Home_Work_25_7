@@ -5,9 +5,7 @@ User::User()
 {
 }
 
-User::User(unsigned long long ID, const std::string& login, const std::string& pass) : _ID(ID), _login(login), _pass(pass)
-{
-}
+
 User::User(const std::string& login, const std::string& pass) : _login(login), _pass(pass)
 {
 }
@@ -16,10 +14,6 @@ User::~User()
 {
 }
 
-void User::setID(unsigned long long ID)
-{
-    _ID = ID;
-}
 
 void User::setLogin(const std::string& login)
 {
@@ -29,11 +23,6 @@ void User::setLogin(const std::string& login)
 void User::setPass(const std::string& pass)
 {
     _pass = pass;
-}
-
-unsigned long long User::getID() const
-{
-    return _ID;
 }
 
 std::string User::getLogin() const
@@ -48,7 +37,6 @@ std::string User::getPass() const
 
 void User::printUser() const
 {
-    std::cout << " " << _ID;
     std::cout << " " << _login << std::endl;
 }
 
