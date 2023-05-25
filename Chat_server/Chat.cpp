@@ -53,3 +53,21 @@ bool operator!=(const Chat &ch1, Chat &ch2)
 {
 	return !(ch1 == ch2);
 }
+
+
+bool operator==(const Chat& ch1, const std::string& ch2)
+{
+	return ch1._chatname == ch2;
+}
+bool operator!=(const Chat& ch1, const std::string& ch2)
+{
+	return !(ch1 == ch2);
+}
+bool operator==(const std::string& ch1, const Chat& ch2)
+{
+	return ch1 == ch2._chatname;
+}
+bool operator!=(const std::string& ch1, const Chat& ch2)
+{
+	return !(ch1 == ch2);
+}

@@ -6,9 +6,10 @@ class Message
 public:
 	Message();
 
-	Message(std::string& username, std::string& timesend, std::string& message ) : 
-	_userName(username), 
-	_timeSend(timesend), 
+	Message(const std::string& timesend, const std::string& username, const std::string& message ) : 
+	
+	_timeSend(timesend),
+	_userName(username),  
 	_message(message)
 	{};
 

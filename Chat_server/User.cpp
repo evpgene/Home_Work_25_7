@@ -38,11 +38,11 @@ void User::printUser() const
     std::cout << " " << _login << std::endl;
 }
 
-bool operator== (const User& u1, const User& u2)
-{
-    return u1._login == u2._login;
-}
-bool operator!= (const User& u1, const User& u2)
-{
-    return !(u1 == u2);
-}
+bool operator==(const User &u1, const User &u2) { return u1._login == u2._login && u1._pass == u2._pass; }
+bool operator!=(const User &u1, const User &u2) { return !(u1 == u2); }
+
+bool operator==(const User &u1, const std::string &u2) { return u1._login == u2; }
+bool operator!=(const User &u1, const std::string &u2) { return !(u1 == u2); }
+
+bool operator==(const std::string &u1, const User &u2) { return u1 == u2._login; }
+bool operator!=(const std::string &u1, const User &u2) { return !(u1 == u2); }

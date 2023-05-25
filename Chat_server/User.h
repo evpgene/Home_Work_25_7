@@ -24,13 +24,18 @@ public:
 	std::string getPass() const;
 	void printUser() const;
 	void addChat(shared_ptr<Chat> chat);
-	void printChatNames();
 
-friend std::string SaveRestor::saveUser(User& user);
+friend std::string SaveRestor::saveUser(std::shared_ptr<User> user);
 friend std::shared_ptr<User> restorUser(std::string& str);
 
 friend bool operator==(const User& u1, const User& u2);
 friend bool operator!=(const User& u1, const User& u2);
+
+friend bool operator==(const User& u1, const std::string& u2);
+friend bool operator!=(const User& u1, const std::string& u2);
+
+friend bool operator==(const std::string& u1, const User& u2);
+friend bool operator!=(const std::string& u1, const User& u2);
 
 private:
 	std::string _login;

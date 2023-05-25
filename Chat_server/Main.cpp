@@ -13,21 +13,21 @@ int main()
 
 
 
-	// Chats chats;
+	Chats chats;
 	// chats.restordata();
-	// chats.mainmenu();
+	chats.mainmenu();
 	// chats.savedata();
 
 
 
-	std::string str{"Privet!"};
-    TCP_server tcp_server;
-    tcp_server.configureConnection();
+	// std::string str{"Privet!"};
+    // TCP_server tcp_server;
+    // tcp_server.configureConnection();
    
-    tcp_server.listening();
-	tcp_server.openConnection();
+    // tcp_server.listening();
+	// tcp_server.openConnection();
 	
-	std::cout << tcp_server.receive() << std::endl;
+	// std::cout << tcp_server.receive() << std::endl;
 
 	return 0;
 }

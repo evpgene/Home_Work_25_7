@@ -7,8 +7,6 @@
 #include "Message.h"
 #include "SaveRestor.h"
 
-
-
 using namespace std;
 
 class Chats
@@ -20,7 +18,7 @@ class Chats
 	int cmd{0};
 	std::string cmd_input;
 	char choice{'n'};
-	vector<User> users;						  // массив пользователей
+	vector<shared_ptr<User>> users;			  // массив пользователей
 	vector<shared_ptr<Chat>> chats;			  // массив указателей на чаты
 	Message messageTmp;						  // сообщение
 	User userTmp;							  // временный пользователь
@@ -28,15 +26,14 @@ class Chats
 	shared_ptr<Chat> currentChatPtr{nullptr}; // указатель на текущий чат
 
 public:
-	Chats()
-	{
+	Chats(){
 
 	};
 
 	~Chats(){};
 
-	friend void SaveRestor::saveUsers(std::vector<User>& users);
-	
+	friend void SaveRestor::saveUsers(std::vector<std::shared_ptr<User>> &users);
+
 	// Restore from files
 	void restordata()
 	{
@@ -47,7 +44,7 @@ public:
 		restor.restorChats(chats);
 	}
 
-	//Save to files
+	// Save to files
 	void savedata()
 	{
 		SaveRestor save;
@@ -59,22 +56,26 @@ public:
 	// Main menu
 	void mainmenu()
 	{
-		bool commonUserExist {false}; // Пользователь общий уже есть
+		bool commonUserExist{false}; // Пользователь общий уже есть
 		for (auto user : users)
 		{
-			if(user.getLogin() == "Общий")
-				commonUserExist = true;
+			if (user)
+			{
+				if (*user == std::string("Общий"))
+				{
+					commonUserExist = true;
+					break;
+				}
+			}
 		}
 
 		if (!commonUserExist)
 		{
-			currentChatPtr = make_shared<Chat>(Chat("Общий"));
+			// сщздаём чат общий и делаем его активным
+			currentChatPtr = make_shared<Chat>(Chat(std::string("Общий"))); // тут проверить, может сразу его в список чатов?
 
 			// создаём пользователя для общего чата
-			userTmp.setID(static_cast<unsigned long long>(users.size()) + 1); // формируем ID
-			userTmp.setLogin("Общий");
-			userTmp.setPass("_");
-			users.push_back(userTmp);
+			users.push_back(make_shared<User>(User(std::string("Общий"), "")));
 		}
 
 		while (!Q) // цикл
@@ -110,6 +111,7 @@ public:
 					std::cout << "1 - вывести данные текущего пользователя" << std::endl;
 					std::cout << "2 - авторизоваться" << std::endl;
 					std::cout << "3 - написать сообщение" << std::endl;
+					std::cout << "4 - регистрация пользователя" << std::endl;
 					std::cout << "8 - выйти из учётной записи" << std::endl;
 					std::cout << "9 - выйти из программы" << std::endl;
 					std::cout << "Имя пользователя должно состоять из одного слова" << std::endl;
@@ -118,11 +120,14 @@ public:
 				case 1: // выводим  данные текущего пользователя
 					userinfo();
 					break;
-				case 2: // register user (check user)
+				case 2: // User logon
 					logon();
 					break;
 				case 3: // Написать пользователю
 					write();
+					break;
+				case 4: // User registration
+					userRegistration();
 					break;
 				case 8: // logoff
 					logoff();
@@ -150,15 +155,13 @@ public:
 			std::cout << "Активный пользователь: ";
 			currentUserPtr->printUser();
 			std::cout << endl;
-			std::cout << "Чаты активного пользователя: " << std::endl;
-			currentUserPtr->printChatNames();
 		}
 		// распечатываем имена всех зарегистрированных пользователей
 		if (users.size() > 0)
 		{
 			std::cout << "Зарегистрированные пользователи: " << std::endl; // users
 			for (const auto &u : users)
-				u.printUser(); // print();
+				u->printUser(); // print();
 			std::cout << endl;
 		}
 		else
@@ -166,94 +169,68 @@ public:
 			std::cout << "Нет зарегистрированных пользователей! " << std::endl;
 		}
 	}
-	// register user (check user)
+	// User logon
+	// тут можно сделать возвращаемое значение истина в случае успеха и передавать в функцию готового юзера для входа
+	// чтобы унифицировать процедуру с регистрацией и не вводить по десять раз одно и то же
+	// например сделать функцию инсерт юзер дата, которая возвращает юзера
+
 	void logon()
 	{
-		if (currentUserPtr)
-		{
-			std::cout << "Активный пользователь: ";
-			currentUserPtr->printUser();
-		}
-		if (currentChatPtr)
-		{
-			std::cout << "Активный чат: ";
-			currentChatPtr->printChatName();
-		}
-		{
-			// int foundElement{ 0 }; // временная переменная для индекса найденного пользователя
-			std::cout << "Введите ваше имя" << std::endl; // login
-			std::cin >> userName;
-			std::cout << userName << endl;
-			userTmp.setLogin(userName);
+		std::string tmp_login, tmp_pass;
+		std::cout << "Введите ваше имя" << std::endl; // login
+		std::cin >> tmp_login;
+		std::cout << "Введите ваш пароль: " << std::endl;
+		std::cin >> tmp_pass;
+		User tmp_user(tmp_login, tmp_pass);
 
-			int found_indx{-1};
-
-			for (size_t i = 0; i < users.size(); i++)
+		// ищем пользователя с заданным логином и паролем (или хэшем)
+		for (auto user : users)
+		{
+			if (user)
 			{
-				if (users[i].getLogin() == userTmp.getLogin())
+				if (*user == tmp_user) // если пользователь найден
 				{
-					found_indx = i;
-					break;
-				}
-			}
-
-			// ищем пользователя с заданным логином
-			if (found_indx >= 0) // если пользователь найден
-			{
-				// ввод пароля
-				std::cout << "Введите пароль: " << std::endl;
-				std::string tmp_pass;
-				std::cin >> tmp_pass;
-				if (users[found_indx].getPass() == tmp_pass)
-				{
-					// получаем указатель на найденного пользователя
-					currentUserPtr = make_shared<User>(users[found_indx]); //&users[found_indx];
-					// выводим - залогинен как...
+					currentUserPtr = user;
 					std::cout << "Вы вошли как: ";
 					currentUserPtr->printUser();
-				}
-				else
-				{
-					std::cout << "Вы ввели неверный пароль: " << std::endl;
-				}
-			}
-			else // если пользователь не найден
-			{
-				std::cout << "Нет такого пользователя" << std::endl;
-				std::cout << "Зарегистрировать пользователя " << userTmp.getLogin() << "? (y/n)" << std::endl;
-				std::cin >> choice;
-				if (choice == 'y' || choice == 'Y' /* || choice == 'н' || choice == 'Н' */) // зарегистрировать пользователя с указанным логином
-				{
-					std::cout << "Введите ваш пароль: " << std::endl;
-					std::cin >> pass;
-
-					userTmp.setPass(pass);											  // устанавливаем пароль
-					userTmp.setID(static_cast<unsigned long long>(users.size()) + 1); // формируем ID
-
-					users.push_back(userTmp); // добавляем пользователя в массив пользователей
-
-					// ищем добавленного пользователя в массиве
-					found_indx = -1;
-					for (size_t i = 0; i < users.size(); i++)
-					{
-						if (users[i].getLogin() == userTmp.getLogin())
-						{
-							found_indx = i;
-							break;
-						}
-					}
-
-					if (found_indx >= 0) // если пользователь найден
-					{
-						currentUserPtr = make_shared<User>(users[found_indx]); // получаем указатель на найденного добавленного пользователя и делаем его текущим пользователем
-					}
-				}
-				else if (choice == 'n')
-				{
+					std::cout << std::endl;
+					return;
 				}
 			}
 		}
+		std::cout << "Такого пользователя нет. " << std::endl;
 	}
+
+	// тут можно сделать возвращаемое значение истина в случае успеха
+	void userRegistration()
+	{
+		// по сути тут дальше регистрация пользователя
+		{
+			std::string tmp_login, tmp_pass;
+			std::cout << "Введите ваше имя" << std::endl; // login
+			std::cin >> tmp_login;
+			std::cout << "Введите ваш пароль: " << std::endl;
+			std::cin >> tmp_pass;
+
+			for (auto user : users)
+			{
+				if (user)
+				{
+					if (*user == tmp_login)
+					{
+						std::cout << "Такой пользователь уже существует: " << std::endl;
+						return;
+					}
+				}
+			}
+			currentUserPtr = make_shared<User>(User(tmp_login, tmp_pass)); // делаем нового пользователя активным
+			users.push_back(currentUserPtr);							   // добавляем пользователя в массив пользователей
+			std::cout << "Вы вошли как: " << std::endl;
+			currentUserPtr->printUser();
+			std::cout << std::endl;
+		}
+	}
+
 	// Написать пользователю
 	void write()
 	{
@@ -263,100 +240,84 @@ public:
 			std::cout << "Активный пользователь: ";
 			currentUserPtr->printUser();
 
-			// выводим имена всех пользователей
-			std::cout << "Зарегистрированные пользователи: " << std::endl;
-			for (const auto &u : users)
-				u.printUser();
+			{
+				// выводим имена всех пользователей
+				std::cout << "Зарегистрированные пользователи: " << std::endl;
+				int i{1};
+				for (const auto user : users)
+				{
+					std::cout << i++ << ": ";
+					user->printUser();
+				}
+			}
 
 			{
-				int found_indx{0}; // временная переменная найденный элемент
-				int id;			   // временная переменная идентификатор
+				// int found_indx{0}; // временная переменная найденный элемент
+				// int id{0}; // временная переменная идентификатор
 				std::string id_input;
 				std::cout << "Выберите пользователя для чата (введите номер) " << std::endl;
 				std::cin >> id_input;
+				shared_ptr<User> tmp_companion;
 				// проверяем корректность ввода
 				try
 				{
-					id = std::stoi(id_input);
+					tmp_companion = users.at(std::stoi(id_input) - 1);
 				}
-				catch (exception &except)
+				catch (const std::exception &e)
 				{
 					cout << endl
-						 << except.what() << endl;
-					id = -1;
+						 << e.what() << endl;
 				}
 
-				// поиск пользователя с заданным id
-				for (size_t i = 0; i < users.size(); i++)
+				if (tmp_companion)
 				{
-					if (users[i].getID() == id)
-					{
-						found_indx = i;
-						break;
-					}
-				}
-
-				if (found_indx != -1)
-				{
-					// вывод найденного пользователя для отслеживания поведения программы
+					// вывод найденного пользователя для отслеживания поведения программы - можно удалить
 					std::cout << "Пользователь найден: ";
-					users[found_indx].printUser();
+					tmp_companion->printUser();
 				}
 				else
 				{
 					std::cout << "Нет такого пользователя! " << std::endl;
 				}
-
+				///////////////////////////////////////////////////////////////////////////////////////////////////////продолжить тут
 				std::string chatName;	// имя чата первая комбинация
 				std::string chatName_2; // имя чата вторая комбинация
 				if (currentUserPtr)
 				{
-					if (users[found_indx].getLogin() == "Общий") // имя пользователя - Общий и имя чата задаём тоже Общий.
+					if (tmp_companion)
 					{
-						chatName = "Общий";
+						if (*tmp_companion == std::string("Общий")) // имя пользователя - Общий и имя чата задаём тоже Общий.
+						{
+							chatName = "Общий";
+						}
 					}
 					else
 					{
 						// формирования имени чата первая часть
 						chatName = currentUserPtr->getLogin();
-						chatName += users[found_indx].getLogin();
+						chatName += tmp_companion->getLogin();
 					}
 					// формирования имени чата вторая часть
-					chatName_2 = users[found_indx].getLogin();
+					chatName_2 = tmp_companion->getLogin();
 					chatName_2 += currentUserPtr->getLogin();
 				}
 
 				{
-					int indx{-1};
-					for (size_t i = 0; i < chats.size(); i++)
+					currentChatPtr = nullptr;
+					for (auto chat : chats)
 					{
-						if (chats[i]->getChatName() == chatName)
+						if (chat)
 						{
-							indx = i;
-							break;
+							if (*chat == chatName || *chat == chatName_2)
+							{
+								currentChatPtr = chat;
+								break;
+							}
 						}
 					}
 
-					int indx_2{-1};
-
-					for (size_t i = 0; i < chats.size(); i++)
+					if (currentChatPtr)
 					{
-						if (chats[i]->getChatName() == chatName_2)
-						{
-							indx_2 = i;
-							break;
-						}
-					}
-
-					if (!(indx == -1))
-					{
-						currentChatPtr = chats[indx];
-						std::cout << "Такой чат уже существует: " << currentChatPtr->getChatName() << std::endl;
-						currentChatPtr->printMessage();
-					}
-					else if (!(indx_2 == -1))
-					{
-						currentChatPtr = chats[indx_2];
 						std::cout << "Такой чат уже существует: " << currentChatPtr->getChatName() << std::endl;
 						currentChatPtr->printMessage();
 					}
@@ -364,38 +325,23 @@ public:
 					{
 						currentChatPtr = make_shared<Chat>(chatName);
 						chats.push_back(currentChatPtr);
-						currentUserPtr->addChat(currentChatPtr);						// добавляем чат в текущего пользователя
-						if (currentUserPtr->getLogin() != users[found_indx].getLogin()) // если собеседник не сам текущий пользователь
-						{
-							users[found_indx].addChat(currentChatPtr); // добавляем чат в пользователя собеседника
-						}
 					}
 
 					// послать сообщение
+					if (currentUserPtr)
 					{
 						// формируем сообщение
-						std::string tmpString;
+						std::string tmp_Messge;
 						std::cout << "Введите ваше сообщение: "; //<< std::endl;
 						cin.ignore();
-						std::getline(std::cin, tmpString);
-
-						// текущие дата/время основываясь на текущей системе
-						time_t now = time(0);
-						// преобразуем now в формат string
+						std::getline(std::cin, tmp_Messge);
+						time_t now = time(0); // текущие дата/время основываясь на текущей системе
 						char dt[26];
 						ctime_r(&now, dt);
-						dt[24] = ' ';
-						std::string str = dt;
-						Message currentMessage;
-						currentMessage.setMessage(tmpString);
-						currentMessage.setTimeSend(str);
-						if (currentUserPtr)
-						{
-							currentMessage.userName(currentUserPtr->getLogin());
-						}
-						currentChatPtr->addMessage(currentMessage);
-						currentChatPtr->printMessage(); // закоментить или убрать
-						std::cout << endl;
+						dt[24] = ' '; // убираем перенос строки
+						currentChatPtr->addMessage(Message(std::string(dt), currentUserPtr->getLogin(), tmp_Messge));
+						// currentChatPtr->printMessage(); // закоментить или убрать
+						// std::cout << endl;
 					}
 				}
 			}
@@ -424,6 +370,5 @@ public:
 	void exit()
 	{
 		Q = true;
-
 	}
 };

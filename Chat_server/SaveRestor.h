@@ -32,15 +32,15 @@ public:
     ~SaveRestor();
     void createPath(const fs::path &Path, const fs::path &savePath);
 
-    std::string saveUser(User &user);
+    std::string saveUser(std::shared_ptr<User> user);
     std::shared_ptr<User> restorUser(std::string &str);
 
     void saveChat(std::shared_ptr<Chat> chat);
 
     std::string saveMessage(Message &message);
 
-    void saveUsers(std::vector<User> &users);
-    void restorUsers(std::vector<User> &users);
+    void saveUsers(std::vector<std::shared_ptr<User>> &users);
+    void restorUsers(std::vector<std::shared_ptr<User>> &users);
 
     void restorChats(std::vector<std::shared_ptr<Chat>>& chats);
     void saveChats(std::vector<std::shared_ptr<Chat>> chats);

@@ -32,12 +32,12 @@ void SaveRestor::createPath(const fs::path &Path, const fs::path &savePath)
 	}
 };
 
-std::string SaveRestor::saveUser(User &user)
+std::string SaveRestor::saveUser(std::shared_ptr<User> user)
 {
-	return log + sep + user._login + sep + pas + sep + user._pass;
+	return log + sep + user->_login + sep + pas + sep + user->_pass;
 };
 
-void SaveRestor::saveUsers(std::vector<User> &users)
+void SaveRestor::saveUsers(std::vector<std::shared_ptr<User>> &users)
 {
 	// write
 	std::string filename{savePath / "Users"};
@@ -95,7 +95,7 @@ std::shared_ptr<User> SaveRestor::restorUser(std::string &str)
 	return nullptr;
 }
 
-void SaveRestor::restorUsers(std::vector<User> &users)
+void SaveRestor::restorUsers(std::vector<std::shared_ptr<User>> &users)
 {
 	// read
 	std::string filename{savePath / "Users"};
@@ -112,7 +112,7 @@ void SaveRestor::restorUsers(std::vector<User> &users)
 			//std::cout << line << '\n'; // для диагностики - можно убрать
 			shared_ptr<User> restorUser_ptr = restorUser(line);
 			if (restorUser_ptr)
-				users.push_back(*restorUser_ptr);
+				users.push_back(restorUser_ptr);
 			else
 				std::cout << "User one not restored";
 		}

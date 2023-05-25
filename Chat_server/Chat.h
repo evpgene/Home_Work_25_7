@@ -20,7 +20,14 @@ public:
 	friend void SaveRestor::restorChats(std::vector<std::shared_ptr<Chat>> &chats);
 
 	friend bool operator==(const Chat& ch1, const Chat& ch2);
-	friend bool operator!=(const Chat& ch1, Chat& ch2);
+	friend bool operator!=(const Chat& ch1, const Chat& ch2);
+
+	friend bool operator==(const Chat& ch1, const std::string& ch2);
+	friend bool operator!=(const Chat& ch1, const std::string& ch2);
+
+	friend bool operator==(const std::string& ch1, const Chat& ch2);
+	friend bool operator!=(const std::string&, const Chat& ch2);
+
 
 protected:
 	std::string _chatname;
