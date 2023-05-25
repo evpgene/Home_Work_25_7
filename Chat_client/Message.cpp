@@ -37,7 +37,6 @@ std::string Message::getTimeSend() const
 	return _timeSend;
 }
 
-
 void Message::printMessage() const
 {
 	std::cout << _timeSend << _userName << ": " << _message << std::endl;

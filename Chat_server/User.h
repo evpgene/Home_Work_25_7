@@ -12,18 +12,13 @@ class User
 {
 public:
 	User();
-	explicit User(std::string&);
-	User(unsigned long long ID, const std::string& login, const std::string& pass); 
 	User(const std::string& login, const std::string& pass); 
 	~User();
-	void setID(const unsigned long long);
 	void setLogin(const std::string&);
 	void setPass(const std::string&);
-	unsigned long long getID() const;
 	std::string getLogin() const;
 	std::string getPass() const;
 	void printUser() const;
-	void addChat(shared_ptr<Chat> chat);
 
 friend std::string SaveRestor::saveUser(std::shared_ptr<User> user);
 friend std::shared_ptr<User> restorUser(std::string& str);
@@ -40,10 +35,4 @@ friend bool operator!=(const std::string& u1, const User& u2);
 private:
 	std::string _login;
 	std::string _pass;
-	// unsigned long long _ID{ 0 };
-
-	// std::vector<shared_ptr<Chat>> _chats;
-
-	// std::vector<int> _readPos; // array of chats read positions
-
 };
