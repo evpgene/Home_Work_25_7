@@ -36,32 +36,36 @@ void TCP_client::openConnection()
     }
 }
 
-void TCP_client::send(const std::string& str)
+bool TCP_client::send(const std::string& str)
 {
-    // bzero(message, sizeof(message));
+    bzero(message, sizeof(message));
     // std::cout << "Enter the message you want to send to the server: " << std::endl;
     // std::cin >> message;
-    // if ((strncmp(message, "end", 3)) == 0)
-    // {
-        //write(socket_file_descriptor, str.c_str(), str.size());
-        // std::cout << "Client Exit." << std::endl;
+    strncpy(message, str.c_str(), sizeof(str) > sizeof(message) ? sizeof(message) : sizeof(str));
+    if ((strncmp(message, "end", 3)) == 0)
+    {
+        write(socket_file_descriptor, message, sizeof(message));
+        std::cout << "Client Exit." << std::endl;
         // break;
-    // }
+    }
 
 
-    ssize_t bytes = write(socket_file_descriptor, str.c_str(), str.size());
+    ssize_t bytes = write(socket_file_descriptor, message, sizeof(message));
     // Если передали >= 0  байт, значит пересылка прошла успешно
     if (bytes >= 0)
     {
         std::cout << "Data send to the server successfully.!" << std::endl;
+        return true;
     }
+    return false;
 }
-
-void TCP_client::receive()
+bool TCP_client::receive(std::string& str)
 {
     // Ждем ответа от сервера
-    read(socket_file_descriptor, message, sizeof(message));
+    bool retval = read(socket_file_descriptor, message, sizeof(message));
     std::cout << "Data received from server: " << message << std::endl;
+    str = std::string(message);
+    return retval;
 }
 
 void TCP_client::closeConnection()

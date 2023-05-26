@@ -23,9 +23,8 @@ public:
     void configureConnection();
     void openConnection();
     void closeConnection();
-    void send(const std::string& str);
-    void receive();
-
+    bool send(const std::string& str);
+    bool receive(std::string& str);
 };
 
 

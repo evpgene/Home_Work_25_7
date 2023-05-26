@@ -12,21 +12,31 @@ int main()
 
 
 
-	Chats chats;
-	chats.restordata();
-	chats.mainmenu();
-	chats.savedata();
+	// Chats chats;
+	// chats.restordata();
+	// chats.mainmenu();
+	// chats.savedata();
 
 
 
-	// std::string str{"Privet!"};
-    // TCP_server tcp_server;
-    // tcp_server.configureConnection();
-   
-    // tcp_server.listening();
-	// tcp_server.openConnection();
+
+    TCP_server tcp_server;
+    tcp_server.configureConnection();
+    tcp_server.listening();
+	tcp_server.openConnection();
+
+	std::string string_to_send{"Привет от сервера!"};
+	std::string string_for_receive;
+
+while(true)
+{
+	tcp_server.receive(string_for_receive);
+	string_to_send = string_for_receive;
+	tcp_server.send(string_to_send);
+}
 	
-	// std::cout << tcp_server.receive() << std::endl;
+	bool sendIsReady {false};
+
 
 	return 0;
 }

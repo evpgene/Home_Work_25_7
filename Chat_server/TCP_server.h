@@ -24,8 +24,8 @@ public:
     void configureConnection();
     void openConnection();
     void closeConnection();
-    void send();
-    std::string receive();
+    bool send(const std::string& str);
+    bool receive(std::string& str);
     void listening();
 };
 

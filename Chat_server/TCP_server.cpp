@@ -59,35 +59,38 @@ void TCP_server::openConnection()
     }
 }
 
-void TCP_server::send()
+bool TCP_server::send(const std::string& str)
 {
     bzero(message, MESSAGE_LENGTH);
-    std::cout << "Enter the message you want to send to the client: " << std::endl;
-    std::cin >> message;
+    //std::cout << "Enter the message you want to send to the client: " << std::endl;
+    //std::cin >> message;
+    strncpy(message, str.c_str(), sizeof(str) > sizeof(message) ? sizeof(message) : sizeof(str));
     ssize_t bytes = write(connection, message, sizeof(message));
     // Если передали >= 0  байт, значит пересылка прошла успешно
     if (bytes >= 0)
     {
         std::cout << "Data successfully sent to the client.!" << std::endl;
+        return true;
     }
+    return false;
 }
 
-std::string  TCP_server::receive()
+bool TCP_server::receive(std::string& str)
 {
 
     //std::string str; // потом убрать это
 
     bzero(message, MESSAGE_LENGTH);
-    read(connection, message, sizeof(message));
+    bool retval = read(connection, message, sizeof(message));
     if (strncmp("end", message, 3) == 0)
     {
         std::cout << "Client Exited." << std::endl;
         std::cout << "Server is Exiting..!" << std::endl;
         // break;
     }
-
+    str = std::string(message);
     std::cout << "Data received from client: " << message << std::endl;
-    return message;
+    return retval;
 }
 
 void TCP_server::closeConnection()
