@@ -11,19 +11,6 @@ Message::~Message()
 {
 }
 
-void Message::setTimeSend(const std::string& timeSend)
-{
-	_timeSend = timeSend;
-}
-void Message::setUserName(const std::string& userName)
-{
-	_userName = userName;
-}
-void Message::setMessage(const std::string& message)
-{
-	_message = message;
-}
-
 std::string Message::getTimeSend() const
 {
 	return _timeSend;

@@ -8,10 +8,6 @@ public:
 
 	~Message();
 	
-	void setTimeSend(const std::string& timeSend);
-	void setUserName(const std::string& userName);
-	void setMessage(const std::string& message);
-
 	void printMessage() const;
 
 	std::string getTimeSend() const;
