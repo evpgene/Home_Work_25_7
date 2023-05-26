@@ -1,4 +1,3 @@
-// #pragma once
 
 #include "Chats.h"
 #include "TCP_server.h"
@@ -14,9 +13,9 @@ int main()
 
 
 	Chats chats;
-	// chats.restordata();
+	chats.restordata();
 	chats.mainmenu();
-	// chats.savedata();
+	chats.savedata();
 
 
 

@@ -15,8 +15,11 @@ Chat::~Chat()
 
 void Chat::printMessages()
 {
-	for (auto m : _messages)
-		m.printMessage();
+	for (auto message : _messages)
+	{
+		message.printMessage();
+		std::cout << std::endl;
+	}
 }
 
 void Chat::addMessage(const Message &message)

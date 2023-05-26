@@ -4,30 +4,25 @@
 class Message
 {
 public:
-	Message();
-
-	Message(const std::string& timesend, const std::string& username, const std::string& message ) : 
-	_timeSend(timesend),
-	_userName(username),  
-	_message(message)
-	{};
+	Message(const std::string& timeSend, const std::string& userName, const std::string& message );
 
 	~Message();
-	void userName(const std::string& userName);
+	
+	void setTimeSend(const std::string& timeSend);
+	void setUserName(const std::string& userName);
 	void setMessage(const std::string& message);
-	void setTimeSend(const std::string& time);
+
 	void printMessage() const;
 
+	std::string getTimeSend() const;
 	std::string getUserName() const;
 	std::string getMessage() const;
-	std::string getTimeSend() const;
 
 	friend std::string SaveRestor::saveMessage(Message& message);
 
 private:
-	std::string _userName;
 	std::string _timeSend;
+	std::string _userName;
 	std::string _message;
-	std::string _timeRead;
 };
 

@@ -122,7 +122,7 @@ void SaveRestor::restorUsers(std::vector<std::shared_ptr<User>> &users)
 
 std::string SaveRestor::saveMessage(Message &message)
 {
-	return name + sep + message._userName + '\n' + timesend + sep + message._timeSend + '\n' + mess + sep + message._message;
+	return timesend + sep + message._timeSend + '\n' + name + sep + message._userName + '\n' + mess + sep + message._message;
 };
 
 void SaveRestor::saveChat(std::shared_ptr<Chat> chat)
@@ -163,27 +163,29 @@ void SaveRestor::restorChats(std::vector<std::shared_ptr<Chat>>& chats)
 		t.seekg(0);
 		//std::cout << "opened " << filename << '\n';		   // для диагностики - можно убрать
 		//std::cout << "opened " << path.filename() << '\n'; // для диагностики - можно убрать
-		std::string isName, isTime, isMessage;
+		std::string isTime, isName, isMessage;
 
 		shared_ptr<Chat> restoringChat = make_shared<Chat>(Chat(dir_entry.path().filename()));
-		bool doneName{false}, doneTime{false}, doneMessage{false};
+		bool doneTime{false}, doneName{false}, doneMessage{false};
 		for (std::string line; std::getline(t, line);)
 		{
-			
+
 			std::size_t pos = line.find(name);
+			pos = line.find(timesend);
+			if (pos != std::string::npos)
+			{
+				isTime = line.substr(timesend.size() + sep.size());
+				doneTime = true;
+				// std::cout << "isTime: " << isTime << std::endl;  // для диагностики - можно убрать
+			};
+
 			if (pos != std::string::npos)
 			{
 				isName = line.substr(name.size() + sep.size());
 				doneName = true;
 				//std::cout << "isName: " << isName << std::endl; // для диагностики - можно убрать
 			};
-			pos = line.find(timesend);
-			if (pos != std::string::npos)
-			{
-				isTime = line.substr(timesend.size() + sep.size());
-				doneTime = true;
-				//std::cout << "isTime: " << isTime << std::endl;  // для диагностики - можно убрать
-			};
+
 			pos = line.find(mess);
 			if (pos != std::string::npos)
 			{
@@ -191,9 +193,10 @@ void SaveRestor::restorChats(std::vector<std::shared_ptr<Chat>>& chats)
 				doneMessage = true;
 				//std::cout << "isMessage: " << isMessage << std::endl; // для диагностики - можно убрать
 			};
-			if (doneName && doneTime && doneMessage)
+
+			if (doneTime && doneName && doneMessage)
 			{
-				restoringChat->addMessage((Message(isName, isTime, isMessage)));
+				restoringChat->addMessage((Message(isTime, isName, isMessage)));
 				chats.push_back(restoringChat);
 				doneName = false;
 				doneTime = false;
