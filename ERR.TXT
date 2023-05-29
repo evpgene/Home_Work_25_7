@@ -1,0 +1,18 @@
+[1mChat_client/Message.h:4:1: [31merror:[39m The one definition rule is violated, different classes/structs have the same name 'Message' [ctuOneDefinitionRuleViolation][0m
+class Message
+^
+[1mChat_server/Message.h:4:1: [2mnote:[0m The one definition rule is violated, different classes/structs have the same name 'Message'
+class Message
+^
+[1mChat_client/Message.h:4:1: [2mnote:[0m The one definition rule is violated, different classes/structs have the same name 'Message'
+class Message
+^
+[1mChat_client/User.h:11:1: [31merror:[39m The one definition rule is violated, different classes/structs have the same name 'User' [ctuOneDefinitionRuleViolation][0m
+class User
+^
+[1mChat_server/User.h:11:1: [2mnote:[0m The one definition rule is violated, different classes/structs have the same name 'User'
+class User
+^
+[1mChat_client/User.h:11:1: [2mnote:[0m The one definition rule is violated, different classes/structs have the same name 'User'
+class User
+^

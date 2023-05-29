@@ -3,11 +3,11 @@
 void Chats::mainmenu()
 {
     bool commonUserExist{false}; // Пользователь общий уже есть
-    for (auto user : users)
+    for (const auto user_ptr : users)
     {
-        if (user)
+        if (user_ptr)
         {
-            if (*user == std::string("Общий"))
+            if (*user_ptr == std::string("Общий"))
             {
                 commonUserExist = true;
                 break;
@@ -21,7 +21,7 @@ void Chats::mainmenu()
         currentChatPtr = make_shared<Chat>(Chat(std::string("Общий"))); // тут проверить, может сразу его в список чатов?
 
         // создаём пользователя для общего чата
-        users.push_back(make_shared<User>(User(std::string("Общий"), "")));
+        users.emplace_back(make_shared<User>(User(std::string("Общий"), ""))); // конструируем "на месте", так сказать
     }
 
     while (!Q) // цикл
@@ -120,8 +120,8 @@ void Chats::userinfo()
     if (users.size() > 0)
     {
         std::cout << "Зарегистрированные пользователи: " << std::endl; // users
-        for (const auto user : users)
-            user->printUser(); // print();
+        for (const auto user_ptr : users)
+            user_ptr->printUser(); // print();
         std::cout << endl;
     }
     else
@@ -140,13 +140,13 @@ void Chats::logon()
     User tmp_user(tmp_login, tmp_pass);
 
     // ищем пользователя с заданным логином и паролем (или хэшем)
-    for (auto user : users)
+    for (const auto user_ptr : users)
     {
-        if (user)
+        if (user_ptr)
         {
-            if (*user == tmp_user) // если пользователь найден
+            if (*user_ptr == tmp_user) // если пользователь найден
             {
-                currentUserPtr = user;
+                currentUserPtr = user_ptr;
                 std::cout << "Вы вошли как: ";
                 currentUserPtr->printUser();
                 std::cout << std::endl;
@@ -165,19 +165,24 @@ void Chats::userRegistration()
     std::cout << "Введите ваш пароль: " << std::endl;
     std::cin >> tmp_pass;
 
-    for (auto user : users)
+    for (const auto user_ptr : users)
     {
-        if (user)
+        if (user_ptr)
         {
-            if (*user == tmp_login)
+            if (*user_ptr == tmp_login)
             {
                 std::cout << "Такой пользователь уже существует: " << std::endl;
                 return;
             }
         }
     }
-    currentUserPtr = make_shared<User>(User(tmp_login, tmp_pass)); // делаем нового пользователя активным
-    users.push_back(currentUserPtr);                               // добавляем пользователя в массив пользователей
+
+    // далее запишу несколько строк по другому:
+    // currentUserPtr = make_shared<User>(User(tmp_login, tmp_pass)); // делаем нового пользователя активным
+    // users.push_back(currentUserPtr);                               // добавляем пользователя в массив пользователей
+
+    currentUserPtr = users.emplace_back(make_shared<User>(User(std::move(tmp_login), std::move(tmp_pass))));
+
     std::cout << "Вы вошли как: " << std::endl;
     currentUserPtr->printUser();
     std::cout << std::endl;
@@ -194,10 +199,10 @@ void Chats::write()
         // выводим имена всех пользователей
         std::cout << "Зарегистрированные пользователи: " << std::endl;
         int i{1};
-        for (const auto user : users)
+        for (const auto user_ptr : users)
         {
             std::cout << i++ << ": ";
-            user->printUser();
+            user_ptr->printUser();
         }
 
         std::string id_input;
@@ -250,13 +255,13 @@ void Chats::write()
         }
 
         currentChatPtr = nullptr;
-        for (auto chat : chats) // проверяем, существует ли чат с заданными именами
+        for (const auto chat_ptr : chats) // проверяем, существует ли чат с заданными именами
         {
-            if (chat)
+            if (chat_ptr)
             {
-                if (*chat == chatName || *chat == chatName_2)
+                if (*chat_ptr == chatName || *chat_ptr == chatName_2)
                 {
-                    currentChatPtr = chat;
+                    currentChatPtr = chat_ptr;
                     break;
                 }
             }
@@ -264,8 +269,7 @@ void Chats::write()
 
         if (!(currentChatPtr))// если такого чата нет - создаём чат и добавляем указатели на него в список чатов каждого пользователя
         { 
-            currentChatPtr = make_shared<Chat>(Chat(chatName));
-            chats.push_back(currentChatPtr);
+            currentChatPtr = chats.emplace_back(make_shared<Chat>(Chat(chatName)));
         }
 
 
@@ -281,7 +285,7 @@ void Chats::write()
             char dt[26];
             ctime_r(&now, dt);
             dt[24] = ' '; // убираем перенос строки
-            currentChatPtr->addMessage(Message(std::string(dt), currentUserPtr->getLogin(), tmp_Messge));
+            currentChatPtr->addMessage(std::move(Message(std::string(dt), currentUserPtr->getLogin(), std::move(tmp_Messge))));
         }
     }
     else

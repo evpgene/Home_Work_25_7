@@ -1,3 +1,4 @@
 
 compile server: 
-	sudo g++ -o chat_server   SaveRestor.cpp User.cpp Message.cpp Chat.cpp  Chats.cpp TCP_server.cpp Main.cpp
+	sudo g++ -std=c++20 -o chat_server   SaveRestor.cpp User.cpp Message.cpp Chat.cpp  Chats.cpp TCP_server.cpp Main.cpp
+

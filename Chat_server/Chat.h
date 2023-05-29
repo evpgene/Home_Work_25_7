@@ -11,6 +11,7 @@ public:
 	~Chat();
 	void printMessages();
 	void addMessage(const Message &message);
+	void addMessage(Message &&message);
 	void printChatName() const;
 	std::string getChatName() const;
 

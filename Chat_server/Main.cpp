@@ -12,10 +12,10 @@ int main()
 
 
 
-	// Chats chats;
-	// chats.restordata();
-	// chats.mainmenu();
-	// chats.savedata();
+	Chats chats;
+	chats.restordata();
+	chats.mainmenu();
+	chats.savedata();
 
 
 
@@ -28,10 +28,14 @@ int main()
 	std::string string_to_send{"Привет от сервера!"};
 	std::string string_for_receive;
 
+	std::string tmp;
+
 while(true)
 {
 	tcp_server.receive(string_for_receive);
 	string_to_send = string_for_receive;
+	
+	std::cin >> tmp;
 	tcp_server.send(string_to_send);
 }
 	

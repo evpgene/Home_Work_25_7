@@ -32,9 +32,9 @@ void SaveRestor::createPath(const fs::path &Path, const fs::path &savePath)
 	}
 };
 
-std::string SaveRestor::saveUser(std::shared_ptr<User> user)
+std::string SaveRestor::saveUser(std::shared_ptr<User> user_ptr)
 {
-	return log + sep + user->_login + sep + pas + sep + user->_pass;
+	return log + sep + user_ptr->_login + sep + pas + sep + user_ptr->_pass;
 };
 
 void SaveRestor::saveUsers(std::vector<std::shared_ptr<User>> &users)
@@ -49,9 +49,9 @@ void SaveRestor::saveUsers(std::vector<std::shared_ptr<User>> &users)
 		std::cout << "failed to open " << filename << '\n';
 	else
 	{
-		for (auto user : users)
+		for (const auto user_ptr : users)
 		{
-			s << saveUser(user) << endl;
+			s << saveUser(user_ptr) << endl;
 		}
 	}
 	s.close();
@@ -62,20 +62,20 @@ std::shared_ptr<User> SaveRestor::restorUser(std::string &str)
 
 	bool nextIsID{false}, doneID{false}, nextIsLogin{false}, doneLogin{false}, nextIsPass{false}, donePass{false};
 	std::string word;
-	shared_ptr<User> user = make_shared<User>(User());
+	shared_ptr<User> user_ptr = make_shared<User>(User());
 	std::istringstream iss(str);
 	while (iss >> word)
 	{
 		//std::cout << word << std::endl; // для диагностики - можно убрать
 		if (nextIsLogin)
 		{
-			user->setLogin(word);
+			user_ptr->setLogin(word);
 			nextIsLogin = false;
 			doneLogin = true;
 		};
 		if (nextIsPass)
 		{
-			user->setPass(word);
+			user_ptr->setPass(word);
 			nextIsPass = false;
 			donePass = true;
 		};
@@ -90,7 +90,7 @@ std::shared_ptr<User> SaveRestor::restorUser(std::string &str)
 	}
 	if (doneLogin /*  && donePass */) // donePass может отсутствовать для общего чата
 	{
-		return user;
+		return user_ptr;
 	}
 	return nullptr;
 }
@@ -120,16 +120,16 @@ void SaveRestor::restorUsers(std::vector<std::shared_ptr<User>> &users)
 	s.close();
 }
 
-std::string SaveRestor::saveMessage(Message &message)
+std::string SaveRestor::saveMessage(const Message &message)
 {
 	return timesend + sep + message._timeSend + '\n' + name + sep + message._userName + '\n' + mess + sep + message._message;
 };
 
-void SaveRestor::saveChat(std::shared_ptr<Chat> chat)
+void SaveRestor::saveChat(std::shared_ptr<Chat> chat_ptr)
 {
 	// write
-	//std::cout << savePathChats / chat->getChatName() << std::endl; // для диагностики - можно убрать
-	std::string filename{savePathChats / chat->getChatName()};
+	//std::cout << savePathChats / chat_ptr->getChatName() << std::endl; // для диагностики - можно убрать
+	std::string filename{savePathChats / chat_ptr->getChatName()};
 	std::fstream s{filename, s.binary | s.trunc | s.out};
 
 	s.clear();
@@ -138,7 +138,7 @@ void SaveRestor::saveChat(std::shared_ptr<Chat> chat)
 		std::cout << "failed to open " << filename << '\n';
 	else
 	{
-		for (auto message : chat->_messages)
+		for (auto const &message : chat_ptr->_messages)
 		{
 			//std::cout << saveMessage(message) << std::endl; // для диагностики - можно убрать
 			s << saveMessage(message) << endl;
@@ -211,6 +211,6 @@ void SaveRestor::restorChats(std::vector<std::shared_ptr<Chat>>& chats)
 
 void SaveRestor::saveChats(std::vector<std::shared_ptr<Chat>> chats)
 {
-	for (auto chat : chats)
-		saveChat(chat);
+	for (const auto chat_ptr : chats)
+		saveChat(chat_ptr);
 };

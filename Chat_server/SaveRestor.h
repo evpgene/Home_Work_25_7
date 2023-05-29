@@ -37,7 +37,7 @@ public:
 
     void saveChat(std::shared_ptr<Chat> chat);
 
-    std::string saveMessage(Message &message);
+    std::string saveMessage(const Message &message);
 
     void saveUsers(std::vector<std::shared_ptr<User>> &users);
     void restorUsers(std::vector<std::shared_ptr<User>> &users);

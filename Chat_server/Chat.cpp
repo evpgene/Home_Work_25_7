@@ -15,7 +15,7 @@ Chat::~Chat()
 
 void Chat::printMessages()
 {
-	for (auto message : _messages)
+	for (const auto& message : _messages)
 	{
 		message.printMessage();
 		std::cout << std::endl;
@@ -24,7 +24,12 @@ void Chat::printMessages()
 
 void Chat::addMessage(const Message &message)
 {
-	_messages.push_back(message);
+	_messages.emplace_back(message);
+}
+
+void Chat::addMessage(Message &&message)
+{
+	_messages.emplace_back(std::move(message));
 }
 
 
