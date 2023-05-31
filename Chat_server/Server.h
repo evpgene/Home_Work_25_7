@@ -12,7 +12,10 @@ public:
     Server(/* args */);
     ~Server();
 
-    std::shared_ptr<User> retrieveAccount(const std::string& str);
+    void interpretString(std::string& str);
+
+    void main();
+    std::shared_ptr<User> retrieveUser(const std::string& str);
 
     const std::string ID{"ID:"};             // identifier
     const std::string log{"login:"};         // login string
@@ -21,4 +24,7 @@ public:
     const std::string timesend{"timesend:"}; // timesend string
     const std::string mess{"message:"};      // message string
     const std::string sep{" "};              // separator
+
+    const std::string itRegistration{"&itRegn&"};
+
 };
