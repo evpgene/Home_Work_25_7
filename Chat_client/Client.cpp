@@ -94,31 +94,31 @@ const std::string Client::getGetMessagesString() const
 }
 void Client::interpretString(std::string& str)
 {
-    std::string word;
-	std::istringstream iss(str);
-    //StringType stringtype; //удалить или использовать в другом месте
-    std::string_view str_view; // для чего это??
-    int cnt {0}; // counter
+    // std::string word;
+	// std::istringstream iss(str);
+    // //StringType stringtype; //удалить или использовать в другом месте
+    // std::string_view str_view; // для чего это??
+    // int cnt {0}; // counter
 
-    while (iss >> word)
-    {
-    if (!cnt)
-    {
-        if (word == itUsernames)
-            str_view.remove_prefix(itUsernames.size() + sep.size());
-    }
+    // while (iss >> word)
+    // {
+    // if (!cnt)
+    // {
+    //     if (word == itUsernames)
+    //         str_view.remove_prefix(itUsernames.size() + sep.size());
+    // }
 
-    ++cnt;
-    }
+    // ++cnt;
+    // }
 
-        switch(stringtype)
+    //     switch(stringtype)
 
-        case StringType::USER_NAMES
-
-
+    //     case StringType::USER_NAMES
 
 
 
 
-		};
+
+
+	// 	};
 };

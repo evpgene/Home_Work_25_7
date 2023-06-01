@@ -23,83 +23,9 @@ void Chats::mainmenu()
         // создаём пользователя для общего чата
         users.emplace_back(make_shared<User>(User(std::string("Общий"), ""))); // конструируем "на месте", так сказать
     }
+    localCycle();
 
-    while (!Q) // цикл
-    {
-        // если есть текущий пользователь - то распечатываем его
-        if (currentUserPtr)
-        {
-            std::cout << "Активный пользователь: ";
-            currentUserPtr->printUser();
-        }
-
-        if (currentChatPtr)
-        {
-            std::cout << "Активный чат: ";
-            currentChatPtr->printChatName();
-        }
-
-        std::cout << "Введите комманду (0 - помощ)" << std::endl;
-        std::cin >> cmd_input;
-
-        // проверяем корректность ввода
-        try
-        {
-            cmd = std::stoi(cmd_input);
-        }
-        catch (exception &except)
-        {
-            cout << endl
-                 << except.what() << endl;
-            cmd = 0;
-        }
-
-        try // обработка исключений
-        {
-            switch (cmd)
-            {
-            case 0:
-                std::cout << "0 - помощь" << std::endl;
-                std::cout << "1 - вывести данные текущего пользователя" << std::endl;
-                std::cout << "2 - авторизоваться" << std::endl;
-                std::cout << "3 - написать сообщение" << std::endl;
-                std::cout << "4 - регистрация пользователя" << std::endl;
-                std::cout << "8 - выйти из учётной записи" << std::endl;
-                std::cout << "9 - выйти из программы" << std::endl;
-                std::cout << "Имя пользователя должно состоять из одного слова" << std::endl;
-                break;
-
-            case 1: // выводим  данные текущего пользователя
-                userinfo();
-                break;
-            case 2: // User logon
-                logon();
-                break;
-            case 3: // Написать пользователю
-                write();
-                break;
-            case 4: // User registration
-                userRegistration();
-                break;
-            case 8: // logoff
-                logoff();
-                break;
-            case 9: // Выход из программы
-                exit();
-                break;
-            default:
-                std::cout << "Нет такой команды: " << cmd << std::endl;
-                break;
-            }
-        }
-        catch (exception &except)
-        {
-            cout << endl
-                 << except.what() << endl;
-        }
-    }
 }
-
 void Chats::userinfo()
 {
     if (currentUserPtr)
@@ -155,6 +81,17 @@ void Chats::logon()
         }
     }
     std::cout << "Такого пользователя нет. " << std::endl;
+}
+
+bool Chats::logon(const std::shared_ptr<User> user_ptr) {
+    for (const auto _user_ptr :
+         users) {  // ищем пользователя с заданным логином и паролем (или хэшем)
+        if (*_user_ptr == *user_ptr) {  // если пользователь найден
+            currentUserPtr = _user_ptr;
+            return true;
+        }
+    }
+    return false;
 }
 
 void Chats::userRegistration()
@@ -329,4 +266,78 @@ void Chats::savedata()
     save.createPath("/tmp", "/tmp/Chat_Yevgeniy");
     save.saveUsers(users);
     save.saveChats(chats);
+}
+
+void Chats::localCycle() {
+    while (!Q)  // цикл
+    {
+        // если есть текущий пользователь - то распечатываем его
+        if (currentUserPtr) {
+            std::cout << "Активный пользователь: ";
+            currentUserPtr->printUser();
+        }
+
+        if (currentChatPtr) {
+            std::cout << "Активный чат: ";
+            currentChatPtr->printChatName();
+        }
+
+        std::cout << "Введите комманду (0 - помощ)" << std::endl;
+        std::cin >> cmd_input;
+
+        // проверяем корректность ввода
+        try {
+            cmd = std::stoi(cmd_input);
+        } catch (exception &except) {
+            cout << endl << except.what() << endl;
+            cmd = 0;
+        }
+
+        try  // обработка исключений
+        {
+            switch (cmd) {
+                case 0:
+                    std::cout << "0 - помощь" << std::endl;
+                    std::cout << "1 - вывести данные текущего пользователя"
+                              << std::endl;
+                    std::cout << "2 - авторизоваться" << std::endl;
+                    std::cout << "3 - написать сообщение" << std::endl;
+                    std::cout << "4 - регистрация пользователя" << std::endl;
+                    std::cout << "8 - выйти из учётной записи" << std::endl;
+                    std::cout << "9 - выйти из программы" << std::endl;
+                    std::cout
+                        << "Имя пользователя должно состоять из одного слова"
+                        << std::endl;
+                    break;
+
+                case 1:  // выводим  данные текущего пользователя
+                    userinfo();
+                    break;
+                case 2:  // User logon
+                    logon();
+                    break;
+                case 3:  // Написать пользователю
+                    write();
+                    break;
+                case 4:  // User registration
+                    userRegistration();
+                    break;
+                case 8:  // logoff
+                    logoff();
+                    break;
+                case 9:  // Выход из программы
+                    exit();
+                    break;
+                default:
+                    std::cout << "Нет такой команды: " << cmd << std::endl;
+                    break;
+            }
+        } catch (exception &except) {
+            cout << endl << except.what() << endl;
+        }
+    }
+}
+
+void remoteCycle() {
+    Chats::logon();
 }

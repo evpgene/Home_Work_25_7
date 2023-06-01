@@ -5,17 +5,18 @@
 class Server
 {
 private:
-    unique_ptr<Message> _message;
-    unique_ptr<User> _user;
+    std::shared_ptr<Message> _message;
+    std::shared_ptr<User> _user;
 
 public:
     Server(/* args */);
     ~Server();
 
-    void interpretString(std::string& str);
+    void interpretString(const std::string& str);
 
     void main();
     std::shared_ptr<User> retrieveUser(const std::string& str);
+    std::shared_ptr<Message> retrieveMessage(const std::string& msg);
 
     const std::string ID{"ID:"};             // identifier
     const std::string log{"login:"};         // login string
@@ -26,5 +27,6 @@ public:
     const std::string sep{" "};              // separator
 
     const std::string itRegistration{"&itRegn&"};
+    const std::string itMessage{"&itMess&"};
 
 };

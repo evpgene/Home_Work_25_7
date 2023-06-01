@@ -20,6 +20,7 @@ class Chats
 	shared_ptr<User> currentUserPtr{nullptr}; // указатель на текущего пользователя
 	shared_ptr<Chat> currentChatPtr{nullptr}; // указатель на текущий чат
 
+
 public:
 	Chats(){};
 	~Chats(){};
@@ -41,6 +42,7 @@ public:
 	// например сделать функцию инсерт юзер дата, которая возвращает юзера
 
 	// User logon
+	bool logon(const std::shared_ptr<User> user);
 	void logon();
 	// тут можно сделать возвращаемое значение истина в случае успеха
 	void userRegistration();
@@ -50,5 +52,8 @@ public:
 	void logoff();
 	// Выход из программы
 	void exit();
+
+	void localCycle();
+	void remoteCycle();
 
 };
