@@ -1,18 +1,23 @@
+#pragma once
 #include "Message.h"
 #include "User.h"
 #include "iostream"
+//#include "ReceivedType.h"
+#include "ReceivedData.h"
+//
 
 class Server
 {
 private:
     std::shared_ptr<Message> _message;
     std::shared_ptr<User> _user;
+    
 
 public:
     Server(/* args */);
     ~Server();
 
-    void interpretString(const std::string& str);
+    ReceivedData interpretString(const std::string& str);
 
     void main();
     std::shared_ptr<User> retrieveUser(const std::string& str);
@@ -26,7 +31,10 @@ public:
     const std::string mess{"message:"};      // message string
     const std::string sep{" "};              // separator
 
+    const std::string itLogon{"&itLoon&"};
     const std::string itRegistration{"&itRegn&"};
     const std::string itMessage{"&itMess&"};
+
+    const std::string itCompName{"&itCmnm&"}; // select companion
 
 };

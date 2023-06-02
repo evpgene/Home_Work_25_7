@@ -1,6 +1,7 @@
 #include "Server.h"
 #include "TCP_server.h"
 
+
 Server::Server(/* args */)
 {
 }
@@ -9,29 +10,16 @@ Server::~Server()
 {
 }
 
-void Server::main(void) {
-  TCP_server tcp_server;
-  std::string string_for_receive;
-  std::string string_to_send{"Привет от клиента!"};
+// ReceivedType receivedType;
 
-  tcp_server.configureConnection();
-  tcp_server.openConnection();
+// void Server::main(void) {
 
-  tcp_server.receive(string_for_receive);
+// std::string str;  
+// ReceivedData receivedData(Server:: (str));
 
-  while (true) {
-    // (начало цикла)
-    tcp_server.send(getGetUsernameString());
-    tcp_server.receive(string_for_receive);
-    // тут допустим функция восстановления строки
-    // тут обработка принятой информации (начало цикла)
-    interpretString(string_for_receive);
-    
-    // тут функция подготовки строки к отправке
-    // (конец цикла)
 
-  }
-}
+//   }
+
 
 std::shared_ptr<User> Server::retrieveUser(const std::string& str) {
 bool nextIsLogin{false}, doneLogin{false}, nextIsPass{false}, donePass{false};
@@ -95,17 +83,29 @@ if (pos != std::string::npos) {
 return make_shared<Message>(Message(isTime, isName, isMessage));
 }
 
-void Server::interpretString(const std::string& str) {
+ReceivedData Server::interpretString(const std::string& str) {
 std::string_view str_view{str};  // для чего это??
 std::string_view first_word{str_view.substr(0, str_view.find(sep))};
 
+if (first_word == itLogon) {
+    str_view.remove_prefix(itLogon.size() + sep.size());
+    return ReceivedData(ReceivedType(LOGON), str_view);
+};
+
 if (first_word == itRegistration) {
     str_view.remove_prefix(itRegistration.size() + sep.size());
-    _user = retrieveUser(std::string(str_view));
+    return ReceivedData(ReceivedType(REGISTRATION), str_view);
 };
 
 if (first_word == itMessage) {
     str_view.remove_prefix(itMessage.size() + sep.size());
-    _message = retrieveMessage(std::string(str_view));
+    return ReceivedData(ReceivedType(MESSAGE), str_view);
 };
+
+if (first_word == itCompName) {
+    str_view.remove_prefix(itCompName.size() + sep.size());
+    return ReceivedData(ReceivedType(COMPANION), str_view);
+};
+
+return ReceivedData(ReceivedType(NOTHING), "");
 };

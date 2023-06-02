@@ -6,8 +6,11 @@
 #include "User.h"
 #include "Message.h"
 #include "SaveRestor.h"
+//#include "TCP_server.h"
+#include "Server.h"
 
-using namespace std;
+using User_t = std::shared_ptr<User>;  // указатель на юзера
+using Chat_t = std::shared_ptr<Chat>;  // указатель на чат
 
 class Chats
 {
@@ -15,17 +18,20 @@ class Chats
 	bool Q{false};
 	int cmd{0};
 	std::string cmd_input;
-	vector<shared_ptr<User>> users;			  // массив указателей на пользователей
-	vector<shared_ptr<Chat>> chats;			  // массив указателей на чаты
-	shared_ptr<User> currentUserPtr{nullptr}; // указатель на текущего пользователя
-	shared_ptr<Chat> currentChatPtr{nullptr}; // указатель на текущий чат
+	std::vector<User_t> users; // массив указателей на пользователей
+	std::vector<Chat_t> chats; // массив указателей на чаты
+	User_t currentUserPtr{nullptr}; // указатель на текущего пользователя
+	Chat_t currentChatPtr{nullptr}; // указатель на текущий чат
+
+
 
 
 public:
 	Chats(){};
 	~Chats(){};
 
-	friend void SaveRestor::saveUsers(std::vector<std::shared_ptr<User>> &users);
+	friend void SaveRestor::saveUsers(std::vector<User_t> &users);
+	
 
 	// Restore from files
 	void restordata();
@@ -42,9 +48,10 @@ public:
 	// например сделать функцию инсерт юзер дата, которая возвращает юзера
 
 	// User logon
-	bool logon(const std::shared_ptr<User> user);
+	User_t logon(const User_t user);
 	void logon();
 	// тут можно сделать возвращаемое значение истина в случае успеха
+	User_t  userRegistration(const User_t user);
 	void userRegistration();
 	// Написать пользователю
 	void write();
@@ -55,5 +62,10 @@ public:
 
 	void localCycle();
 	void remoteCycle();
+
+
+	User_t getCompanion(const std::string& companion);
+	Chat_t getActiveChat(const User_t user, const User_t companion);
+	void addMessage(const Chat_t chat, const std::shared_ptr<Message> msg);
 
 };

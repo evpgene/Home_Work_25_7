@@ -64,6 +64,8 @@ public:
     const std::string itUsernames{"&itUnms&"}; // get registered usernames
     const std::string itGetMessages{"&itGtMs&"}; // get last messages
     const std::string itMessages{"&itMsgs&"}; // get last messages
+    
+    const std::string itCompName{"&itCmnm&"}; // select companion
 
 enum class StringType
 {
