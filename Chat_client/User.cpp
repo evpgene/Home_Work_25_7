@@ -9,6 +9,10 @@ User::User(const std::string& login, const std::string& pass) : _login(login), _
 {
 }
 
+User::User(std::string&& login, std::string&& pass) : _login(std::move(login)), _pass(std::move(pass))
+{
+}
+
 User::~User()
 {
 }

@@ -1,124 +1,72 @@
 #include "Client.h"
+
 #include "TCP_client.h"
 
-Client::Client(/* args */)
-{
+Client::Client() {}
+
+Client::~Client() {}
+
+void Client::main(void) {}
+
+User_t Client::inputUser() {
+  std::string login, password;
+  std::cout << "Введите ваше логин" << std::endl;  // login
+  std::cin >> login;
+  std::cout << "Введите пароль: " << std::endl;
+  std::cin >> password;
+  return make_shared<User>(User(std::move(login), std::move(password)));
 }
 
-Client::~Client()
-{
+Message_t Client::inputMessage(const User_t user) {
+  std::string message;
+  std::cout << "Введите ваше сообщение: ";
+  cin.ignore();
+  std::getline(std::cin, message);
+  time_t now = time(0);  // текущие дата/время основываясь на текущей системе
+  char dt[26];
+  ctime_r(&now, dt);
+  dt[24] = ' ';  // убираем перенос строки
+  return make_shared<Message>(Message(std::move(std::string(dt)),
+                                      user->getLogin(), std::move(message)));
 }
 
-
-void Client::main(void)
-{
-    TCP_client tcp_client;
-    tcp_client.configureConnection();
-    tcp_client.openConnection();
-
-
-    // std::string string_to_send{"Привет от клиента!"};
-	std::string string_for_receive;
-
-
-while(true)
-{
-    // (начало цикла)
-    tcp_client.send(getGetUsernameString());
-    tcp_client.receive(string_for_receive);
-    // тут допустим функция восстановления строки
-    // тут обработка принятой информации (начало цикла)
-    // тут функция подготовки строки к отправке
-    // (конец цикла)
-}
-}
-
-int Client::identReceive(std::string receive)
-{
-
-}
-
-
-
-
-void Client::setAccount()
-{
-
-    std::string tmp_log, tmp_pas;
-    std::cout << "Введите ваше логин" << std::endl; // login
-    std::cin >> tmp_log;
-    std::cout << "Введите пароль: " << std::endl;
-    std::cin >> tmp_pas;
-    _user = User(tmp_log, tmp_pas);
-    return;
-
-}
-
-void Client::setMessage()
-{
-
-    // это по сути сообщение как и в сервере - вопрос, можно ли унифицировать?
-
-    std::string tmp_Messge;
-    std::cout << "Введите ваше сообщение: ";
-    cin.ignore();
-    std::getline(std::cin, tmp_Messge);
-    time_t now = time(0); // текущие дата/время основываясь на текущей системе
-    char dt[26];
-    ctime_r(&now, dt);
-    dt[24] = ' '; // убираем перенос строки
-    _message = Message(std::string(dt), _user.getLogin(), std::move(tmp_Messge));
-    return;
-}
-
-const std::string Client::getLogonString(/* User &user */) const
-{
-	return itLogon + sep + log + sep + _user.getLogin() + sep + pas + sep + _user.getPass();
+const std::string Client::getLogonString(const User_t user) {
+  return key.itLogon + key.sep + key.log + key.sep + user->getLogin() +
+         key.sep + key.pas + key.sep + user->getPass();
 };
 
-const std::string Client::getMessageString(/* Message &message */) const
-{
-	return itMessage + sep + name + sep + _message.getUserName() + '\n' + timesend + sep + _message.getTimeSend() + '\n' + mess + sep + _message.getMessage();
+const std::string Client::getMessageString(const Message_t message) {
+  return key.itMessage + key.sep + key.name + key.sep + message->getUserName() +
+         '\n' + key.timesend + key.sep + message->getTimeSend() + '\n' +
+         key.mess + key.sep + message->getMessage();
 }
-const std::string Client::getRegistrationString() const
-{
-    return itRegistration + sep + log + sep + _user.getLogin() + sep + pas + sep + _user.getPass();
+
+const std::string Client::getRegistrationString(const User_t user) {
+  return key.itRegistration + key.sep + key.log + key.sep + user->getLogin() +
+         key.sep + key.pas + key.sep + user->getPass();
 }
-const std::string Client::getGetUsernameString() const
-{
-    return itGetUsernames;
+
+const std::string Client::getGetUsernamesString() { return key.itGetUsernames; }
+
+const std::string Client::getGetMessagesString() { return key.itGetMessages; }
+
+ReceivedData Client::interpretString(const std::string& str) {
+  std::string_view str_view{str};  // для чего это??
+  std::string_view first_word{str_view.substr(0, str_view.find(key.sep))};
+
+  if (first_word == key.itUsernames) {
+    str_view.remove_prefix(key.itUsernames.size() + key.sep.size());
+    return ReceivedData(ReceivedType(USERNAMES), str_view);
+  };
+
+  if (first_word == key.itMessages) {
+    str_view.remove_prefix(key.itMessages.size() + key.sep.size());
+    return ReceivedData(ReceivedType(MESSAGES), str_view);
+  };
+
+  if (first_word == key.itEndOfPackage) {
+    str_view.remove_prefix(key.itEndOfPackage.size() + key.sep.size());
+    return ReceivedData(ReceivedType(PACKAGEEND), str_view);
+  };
+  return ReceivedData(ReceivedType(ANY), str_view);
 }
-const std::string Client::getGetMessagesString() const
-{
-    return itGetMessages;
-}
-void Client::interpretString(std::string& str)
-{
-    // std::string word;
-	// std::istringstream iss(str);
-    // //StringType stringtype; //удалить или использовать в другом месте
-    // std::string_view str_view; // для чего это??
-    // int cnt {0}; // counter
-
-    // while (iss >> word)
-    // {
-    // if (!cnt)
-    // {
-    //     if (word == itUsernames)
-    //         str_view.remove_prefix(itUsernames.size() + sep.size());
-    // }
-
-    // ++cnt;
-    // }
-
-    //     switch(stringtype)
-
-    //     case StringType::USER_NAMES
-
-
-
-
-
-
-	// 	};
-};

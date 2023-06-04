@@ -24,14 +24,14 @@ int main() {
   tcp_server.listening();
   tcp_server.openConnection();
 
-  tcp_server.receive(string_for_receive);
 
-  server.interpretString(string_for_receive);
 
   string_to_send = string_for_receive;
 
-  // std::cin >> tmp;
+
   tcp_server.send(string_to_send);
+  tcp_server.receive(string_for_receive);
+  server.interpretString(string_for_receive);
 
 
   User_t user;
@@ -43,38 +43,31 @@ int main() {
     case REGISTRATION:
       user = chats.userRegistration(
           server.retrieveUser(std::string(receivedData._str_view)));
+      string_to_send = "Активный пользователь: " + user->getLogin();
       break;
 
     case LOGON:
       user =
           chats.logon(server.retrieveUser(std::string(receivedData._str_view)));
+      string_to_send = "Активный пользователь: " + user->getLogin();
       break;
 
     case COMPANION:
-      // тут селект юзер
-      //  тут эдд мессэдж - по аналогии с логоном
-      // тут гетчат
       companion = chats.getCompanion(std::string(receivedData._str_view));
-
+      if (user && companion) chat = chats.getActiveChat(user, companion);
+      string_to_send = "Активный чат: " + chat->getChatName() + " с пользователем: " + companion->getLogin();
       break;
 
     case MESSAGE:
-      // тут селект юзер
-      //  тут эдд мессэдж - по аналогии с логоном
-      chats.addMessage(chat, server.retrieveMessage(std::string(receivedData._str_view)));
-
+      chats.addMessage(
+          chat, server.retrieveMessage(std::string(receivedData._str_view)));
+      string_to_send = "Сообщение доставлено";
       break;
 
     default:
+      string_to_send = "Неизвестная команда";
       break;
   }
-
-  std::string tmp;
-
-  while (true) {
-  }
-
-  bool sendIsReady{false};
 
   return 0;
 }

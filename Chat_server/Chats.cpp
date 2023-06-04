@@ -112,10 +112,10 @@ void Chats::userRegistration() {
 }
 
 User_t Chats::userRegistration(const User_t user_ptr) {
-  for (const auto _user_ptr :
-       users) {  // ищем пользователя с заданным логином и паролем (или хэшем)
-    if (_user_ptr->getLogin() ==
-        user_ptr->getLogin()) {  // если пользователь найден
+  // ищем пользователя с заданным логином и паролем (или хэшем)
+  for (const auto _user_ptr : users) {
+    // если пользователь найден
+    if (_user_ptr->getLogin() == user_ptr->getLogin()) {
       return nullptr;
     }
   }

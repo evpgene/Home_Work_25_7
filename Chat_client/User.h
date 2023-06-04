@@ -12,7 +12,8 @@ class User
 {
 public:
 	User();
-	User(const std::string& login, const std::string& pass); 
+	User(const std::string& login, const std::string& pass);
+	User(std::string&& login, std::string&& pass);  
 	~User();
 	void setLogin(const std::string&);
 	void setPass(const std::string&);

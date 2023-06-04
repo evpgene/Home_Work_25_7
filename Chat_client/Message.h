@@ -4,8 +4,11 @@
 class Message
 {
 public:
+	Message();
 	Message(const std::string &timeSend, const std::string &userName, const std::string &message);
-
+	Message(std::string&& timeSend, std::string&& userName, std::string&& message);
+	Message(const Message&);
+	Message(Message&&);
 	~Message();
 
 	void printMessage() const;
