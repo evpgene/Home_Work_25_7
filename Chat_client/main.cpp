@@ -2,6 +2,8 @@
 #include "Client.h"
 
 #include <string>
+#include <list>
+#include <iostream>
 
 int main()
 {
@@ -30,30 +32,45 @@ while(true)
     // (конец цикла)
 }
 
+  std::vector<std::string> usernames;
+  std::vector<std::string> messages;
 
   ReceivedData receivedData(client.interpretString(string_for_receive));
   switch (receivedData._type) {
     case ANY:
-
+      std::cout << string_for_receive << std::endl;
       break;
 
     case USERNAMES:
-
-
+      usernames.emplace_back(receivedData._str_view);
+      string_to_send = client.getContinueString();
       break;
+
+    case USERNAMES_END: {
+      int numb{0};
+      for (auto username : usernames) {
+        std::cout << ++numb << ": " << username << std::endl;
+      }
+      std::cout << "Выберете пользователя для переписки, введите его номер: " << std::endl;
+      // тут проверить ввод и вренуть в строку для отправки имя пользователя
+
+    }
+    break;
 
     case MESSAGES:
-
-
+      messages.emplace_back(receivedData._str_view);
+      string_to_send = client.getContinueString();
       break;
 
-    case PACKAGEEND:
-
-
+    case MESSAGES_END:
+      for (auto message : messages) {
+        std::cout << message << std::endl;
+      }
+      messages.erase();
       break;
 
     default:
-      string_to_send = "Неизвестная команда";
+      string_to_send = "Неизвестная команда"; // что это??
       break;
   }
 

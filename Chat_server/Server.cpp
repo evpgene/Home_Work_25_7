@@ -89,5 +89,40 @@ ReceivedData Server::interpretString(const std::string& str) {
     return ReceivedData(ReceivedType(COMPANION), str_view);
   };
 
+
+
+  if (first_word == key.itGetUsernames) {
+    str_view.remove_prefix(key.itGetUsernames.size() + key.sep.size());
+    return ReceivedData(ReceivedType(GET_USERNAMES), str_view);
+  };
+
+  if (first_word == key.itContinueUsernames) {
+    str_view.remove_prefix(key.itContinueUsernames.size() + key.sep.size());
+    return ReceivedData(ReceivedType(CONTINUE_USERNAMES), str_view);
+  };
+
+  if (first_word == key.itGetMessages) {
+    str_view.remove_prefix(key.itGetMessages.size() + key.sep.size());
+    return ReceivedData(ReceivedType(GET_MESSAGES), str_view);
+  };
+
+  if (first_word == key.itContinueMassages) {
+    str_view.remove_prefix(key.itContinueMassages.size() + key.sep.size());
+    return ReceivedData(ReceivedType(CONTINUE_MESSAGES), str_view);
+  };
+
+  if (first_word == key.itLogout) {
+    str_view.remove_prefix(key.itLogout.size() + key.sep.size());
+    return ReceivedData(ReceivedType(LOGOUT), str_view);
+  };
+
+    if (first_word == key.itExit) {
+    str_view.remove_prefix(key.itExit.size() + key.sep.size());
+    return ReceivedData(ReceivedType(EXIT), str_view);
+  };
+
+
+  
+
   return ReceivedData(ReceivedType(NOTHING), "");
 };

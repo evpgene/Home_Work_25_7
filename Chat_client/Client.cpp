@@ -50,6 +50,8 @@ const std::string Client::getGetUsernamesString() { return key.itGetUsernames; }
 
 const std::string Client::getGetMessagesString() { return key.itGetMessages; }
 
+const std::string Client::getContinueString() { return key.itContinue; }
+
 ReceivedData Client::interpretString(const std::string& str) {
   std::string_view str_view{str};  // для чего это??
   std::string_view first_word{str_view.substr(0, str_view.find(key.sep))};
@@ -59,9 +61,19 @@ ReceivedData Client::interpretString(const std::string& str) {
     return ReceivedData(ReceivedType(USERNAMES), str_view);
   };
 
+  if (first_word == key.itUsernamesEnd) {
+    str_view.remove_prefix(key.itUsernamesEnd.size() + key.sep.size());
+    return ReceivedData(ReceivedType(USERNAMES_END), str_view);
+  };
+
   if (first_word == key.itMessages) {
     str_view.remove_prefix(key.itMessages.size() + key.sep.size());
     return ReceivedData(ReceivedType(MESSAGES), str_view);
+  };
+
+  if (first_word == key.itMessagesEnd) {
+    str_view.remove_prefix(key.itMessagesEnd.size() + key.sep.size());
+    return ReceivedData(ReceivedType(MESSAGES_END), str_view);
   };
 
   if (first_word == key.itEndOfPackage) {

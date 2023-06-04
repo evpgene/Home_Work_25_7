@@ -26,7 +26,6 @@ struct Keywords
     key_t itContinueUsernames{"&itCntu&"}; // continue send usernames cmd
     key_t itGetMessages{"&itGtMs&"}; // get last messages cmd
     key_t itContinueMassages{"&itCntm&"}; // continue send message cmd
-    
 
     // server to client packages
     key_t itUsernames{"&itUnms&"}; // it is usernames package sts

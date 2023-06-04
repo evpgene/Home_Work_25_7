@@ -28,6 +28,7 @@ public:
 
     const std::string getGetUsernamesString();
     const std::string getGetMessagesString();
+    const std::string getContinueString();
 
     ReceivedData interpretString(const std::string& str);
 

@@ -55,13 +55,32 @@ int main() {
     case COMPANION:
       companion = chats.getCompanion(std::string(receivedData._str_view));
       if (user && companion) chat = chats.getActiveChat(user, companion);
-      string_to_send = "Активный чат: " + chat->getChatName() + " с пользователем: " + companion->getLogin();
+      string_to_send = "Активный чат: " + chat->getChatName() +
+                       " с пользователем: " + companion->getLogin();
       break;
 
     case MESSAGE:
       chats.addMessage(
           chat, server.retrieveMessage(std::string(receivedData._str_view)));
       string_to_send = "Сообщение доставлено";
+      break;
+
+    case GET_USERNAMES:
+      break;
+
+    case CONTINUE_USERNAMES:
+      break;
+
+    case GET_MESSAGES:
+      break;
+
+    case CONTINUE_MESSAGES:
+      break;
+
+    case LOGOUT:
+      break;
+
+    case EXIT:
       break;
 
     default:

@@ -1,6 +1,7 @@
 enum ReceivedType {
     ANY,
     USERNAMES,
+    USERNAMES_END,
     MESSAGES,
-    PACKAGEEND,
+    MESSAGES_END,
 };
