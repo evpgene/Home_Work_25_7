@@ -1,8 +1,14 @@
 #pragma once
 #include <string>
 #include <vector>
+#include <queue>
 #include "Message.h"
 #include "SaveRestor.h"
+
+using User_t = std::shared_ptr<User>;  // указатель на юзера
+using Chat_t = std::shared_ptr<Chat>;  // указатель на чат
+using Message_t = std::shared_ptr<Message>;  // указатель на сообщение
+
 class Chat
 {
 public:
@@ -14,6 +20,8 @@ public:
 	void addMessage(Message &&message);
 	void printChatName() const;
 	std::string getChatName() const;
+
+	std::shared_ptr<std::queue<Message>> getLastMessages();
 
 	friend void SaveRestor::saveChat(std::shared_ptr<Chat> chat);
 	friend void SaveRestor::restorChats(std::vector<std::shared_ptr<Chat>> &chats);

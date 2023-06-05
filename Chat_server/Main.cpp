@@ -11,7 +11,6 @@ int main() {
   Server server;
   Chats chats;
   TCP_server tcp_server;
-  
 
   std::string string_to_send{"Привет от сервера!"};
   std::string string_for_receive;
@@ -24,19 +23,17 @@ int main() {
   tcp_server.listening();
   tcp_server.openConnection();
 
-
-
   string_to_send = string_for_receive;
-
 
   tcp_server.send(string_to_send);
   tcp_server.receive(string_for_receive);
   server.interpretString(string_for_receive);
 
-
   User_t user;
   User_t companion;
   Chat_t chat;
+  std::shared_ptr<std::queue<std::string>> usernames;
+  std::shared_ptr<std::queue<Message_t>> lastMessages;
 
   ReceivedData receivedData(server.interpretString(string_for_receive));
   switch (receivedData._type) {
@@ -66,15 +63,24 @@ int main() {
       break;
 
     case GET_USERNAMES:
-      break;
-
+      usernames = chats.getUserNames();
     case CONTINUE_USERNAMES:
+      if (!usernames->empty()) {
+        string_to_send = usernames->front();
+        usernames->pop();
+      } else
+        string_to_send = server.getUsernamesEnd();
       break;
 
-    case GET_MESSAGES:
-      break;
-
+    case GET_MESSAGES:;
     case CONTINUE_MESSAGES:
+      if (!lastMessages->empty())
+
+      {
+        string_to_send = server.getMessageString(lastMessages->front());
+        lastMessages->pop();
+      } else
+        string_to_send = server.getMessagesEnd();
       break;
 
     case LOGOUT:

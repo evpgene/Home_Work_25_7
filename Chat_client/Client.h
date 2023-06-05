@@ -6,6 +6,7 @@
 #include "ReceivedData.h"
 #include "Keywords.h"
 
+//using keyword_t = const std::string;
 using User_t = std::shared_ptr<User>;  // указатель на юзера
 using Message_t = std::shared_ptr<Message>;  // указатель на чат
 
@@ -27,8 +28,9 @@ public:
     const std::string getRegistrationString(const User_t user);
 
     const std::string getGetUsernamesString();
+    const std::string getContinueUsernamesString();
     const std::string getGetMessagesString();
-    const std::string getContinueString();
+    const std::string getContinueMessagesString();
 
     ReceivedData interpretString(const std::string& str);
 

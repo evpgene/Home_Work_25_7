@@ -43,7 +43,7 @@ while(true)
 
     case USERNAMES:
       usernames.emplace_back(receivedData._str_view);
-      string_to_send = client.getContinueString();
+      string_to_send = client.getContinueMessagesString();
       break;
 
     case USERNAMES_END: {
@@ -59,14 +59,14 @@ while(true)
 
     case MESSAGES:
       messages.emplace_back(receivedData._str_view);
-      string_to_send = client.getContinueString();
+      string_to_send = client.getContinueMessagesString();
       break;
 
     case MESSAGES_END:
       for (auto message : messages) {
         std::cout << message << std::endl;
       }
-      messages.erase();
+      messages.clear();
       break;
 
     default:

@@ -43,6 +43,20 @@ std::string Chat::getChatName() const
 	return _chatname;
 }
 
+
+std::shared_ptr<std::queue<Message>> Chat::getLastMessages(){
+  std::shared_ptr<std::queue<Message>>  lastMessages;
+  size_t i{10};
+  for (auto it = std::crbegin(_messages); it < std::crend(_messages); ++it) {
+                if (i == 0) break;
+
+                lastMessages->push(*it);
+                i--;
+  }
+  return lastMessages;
+}
+
+
 bool operator==(const Chat &ch1, const Chat &ch2)
 {
 	return ch1._chatname == ch2._chatname;

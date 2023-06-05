@@ -36,9 +36,10 @@ const std::string Client::getLogonString(const User_t user) {
 };
 
 const std::string Client::getMessageString(const Message_t message) {
-  return key.itMessage + key.sep + key.name + key.sep + message->getUserName() +
-         '\n' + key.timesend + key.sep + message->getTimeSend() + '\n' +
-         key.mess + key.sep + message->getMessage();
+  return key.itMessage + key.sep + key.timesend + key.sep +
+         message->getTimeSend() + '\n' + key.name + key.sep +
+         message->getUserName() + '\n' + key.mess + key.sep +
+         message->getMessage();
 }
 
 const std::string Client::getRegistrationString(const User_t user) {
@@ -48,9 +49,11 @@ const std::string Client::getRegistrationString(const User_t user) {
 
 const std::string Client::getGetUsernamesString() { return key.itGetUsernames; }
 
+const std::string Client::getContinueUsernamesString() { return key.itContinueUsernames; }
+
 const std::string Client::getGetMessagesString() { return key.itGetMessages; }
 
-const std::string Client::getContinueString() { return key.itContinue; }
+const std::string Client::getContinueMessagesString() { return key.itContinueMassages; }
 
 ReceivedData Client::interpretString(const std::string& str) {
   std::string_view str_view{str};  // для чего это??
@@ -76,9 +79,11 @@ ReceivedData Client::interpretString(const std::string& str) {
     return ReceivedData(ReceivedType(MESSAGES_END), str_view);
   };
 
-  if (first_word == key.itEndOfPackage) {
-    str_view.remove_prefix(key.itEndOfPackage.size() + key.sep.size());
-    return ReceivedData(ReceivedType(PACKAGEEND), str_view);
-  };
-  return ReceivedData(ReceivedType(ANY), str_view);
+  // if (first_word == key.itEndOfPackage) {
+  //   str_view.remove_prefix(key.itEndOfPackage.size() + key.sep.size());
+  //   return ReceivedData(ReceivedType(PACKAGEEND), str_view);
+  // };
+  
+  return ReceivedData(ReceivedType(ANY), str_view);  
+
 }

@@ -358,3 +358,14 @@ void Chats::addMessage(const Chat_t chat, const std::shared_ptr<Message> msg) {
     chat->addMessage(std::move(*msg));
   }
 }
+
+std::shared_ptr<std::queue<std::string>> Chats::getUserNames()
+{
+  std::shared_ptr<std::queue<std::string>> usernames; 
+  for (auto user : users)
+  {
+    usernames->push(user->getLogin());
+  }
+  return usernames;
+}
+

@@ -89,8 +89,6 @@ ReceivedData Server::interpretString(const std::string& str) {
     return ReceivedData(ReceivedType(COMPANION), str_view);
   };
 
-
-
   if (first_word == key.itGetUsernames) {
     str_view.remove_prefix(key.itGetUsernames.size() + key.sep.size());
     return ReceivedData(ReceivedType(GET_USERNAMES), str_view);
@@ -126,3 +124,11 @@ ReceivedData Server::interpretString(const std::string& str) {
 
   return ReceivedData(ReceivedType(NOTHING), "");
 };
+
+const std::string Server::getUsernamesEnd() { return key.itUsernamesEnd; }
+const std::string Server::getMessagesEnd() { return key.itMessagesEnd; }
+
+const std::string Server::getMessageString(const Message_t message) {
+  return message->getTimeSend() + ' ' + message->getUserName() + ' ' +
+         message->getMessage();
+}

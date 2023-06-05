@@ -2,6 +2,7 @@
 #include <iostream>
 #include <string>
 #include <vector>
+#include <queue>
 #include <algorithm>
 #include "User.h"
 #include "Message.h"
@@ -11,6 +12,7 @@
 
 using User_t = std::shared_ptr<User>;  // указатель на юзера
 using Chat_t = std::shared_ptr<Chat>;  // указатель на чат
+using Message_t = std::shared_ptr<Message>;  // указатель на сообщение
 
 class Chats
 {
@@ -67,5 +69,9 @@ public:
 	User_t getCompanion(const std::string& companion);
 	Chat_t getActiveChat(const User_t user, const User_t companion);
 	void addMessage(const Chat_t chat, const std::shared_ptr<Message> msg);
+	std::shared_ptr<std::queue<std::string>> getUserNames();
+	const std::string getMessageString(const Message_t message);
+	
+	
 
 };
