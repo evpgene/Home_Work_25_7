@@ -24,6 +24,8 @@ public:
     User_t inputUser();
     Message_t inputMessage(const User_t user);
     const std::string getLogonString(const User_t user);
+    const std::string getLogoutString();
+    const std::string getExitString();
     const std::string getMessageString(const Message_t message);
     const std::string getRegistrationString(const User_t user);
 

@@ -6,7 +6,10 @@ Client::Client() {}
 
 Client::~Client() {}
 
-void Client::main(void) {}
+void Client::main(void) {
+
+
+}
 
 User_t Client::inputUser() {
   std::string login, password;
@@ -34,6 +37,17 @@ const std::string Client::getLogonString(const User_t user) {
   return key.itLogon + key.sep + key.log + key.sep + user->getLogin() +
          key.sep + key.pas + key.sep + user->getPass();
 };
+
+
+
+const std::string Client::getLogoutString() {
+  return key.itLogout;
+};
+
+const std::string Client::getExitString() {
+  return key.itExit;
+};
+
 
 const std::string Client::getMessageString(const Message_t message) {
   return key.itMessage + key.sep + key.timesend + key.sep +

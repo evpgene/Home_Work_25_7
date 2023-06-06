@@ -12,22 +12,24 @@ int main() {
   Chats chats;
   TCP_server tcp_server;
 
+  bool firstcycle{true};
+
   std::string string_to_send{"Привет от сервера!"};
   std::string string_for_receive;
 
-  chats.restordata();
-  chats.mainmenu();
-  chats.savedata();
+  // chats.restordata();
+  // chats.mainmenu();
+  // chats.savedata();
 
   tcp_server.configureConnection();
   tcp_server.listening();
   tcp_server.openConnection();
 
-  string_to_send = string_for_receive;
-
-  tcp_server.send(string_to_send);
+  if (!firstcycle) {
+    tcp_server.send(string_to_send);
+  }
+  firstcycle = false;
   tcp_server.receive(string_for_receive);
-  server.interpretString(string_for_receive);
 
   User_t user;
   User_t companion;
