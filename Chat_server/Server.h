@@ -26,5 +26,7 @@ public:
     std::shared_ptr<Message> retrieveMessage(const std::string& msg);
     const std::string getUsernamesEnd() ;
     const std::string getMessagesEnd();
-    const std::string getMessageString(const Message_t message);
+    const std::string getMessageString(const Message& message);
+    const std::string getUsernamesString(const std::string& username);
+
 };

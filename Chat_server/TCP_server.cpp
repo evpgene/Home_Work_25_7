@@ -64,12 +64,15 @@ bool TCP_server::send(const std::string& str)
     bzero(message, MESSAGE_LENGTH);
     //std::cout << "Enter the message you want to send to the client: " << std::endl;
     //std::cin >> message;
-    strncpy(message, str.c_str(), sizeof(str) > sizeof(message) ? sizeof(message) : sizeof(str));
+    strncpy(message, str.c_str(), sizeof(message)/* sizeof(str) > sizeof(message) ? sizeof(message) : sizeof(str) */);
     ssize_t bytes = write(connection, message, sizeof(message));
     // Если передали >= 0  байт, значит пересылка прошла успешно
     if (bytes >= 0)
     {
-        std::cout << "Data successfully sent to the client.!" << std::endl;
+        //std::cout << "Data successfully sent to the client.!" << std::endl;
+        std::cout << "sent to client message start " << std::endl;
+        std::cout << message << std::endl;
+        std::cout << " sent to client message end" << std::endl;
         return true;
     }
     return false;
@@ -89,7 +92,10 @@ bool TCP_server::receive(std::string& str)
         // break;
     }
     str = std::string(message);
-    std::cout << "Data received from client: " << message << std::endl;
+    //std::cout << "Data received from client: " << message << std::endl;
+    std::cout << "received from client message start " << std::endl;
+    std::cout << message << std::endl;
+    std::cout << " received from client message end" << std::endl;
     return retval;
 }
 

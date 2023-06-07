@@ -41,20 +41,23 @@ bool TCP_client::send(const std::string& str)
     bzero(message, sizeof(message));
     // std::cout << "Enter the message you want to send to the server: " << std::endl;
     // std::cin >> message;
-    strncpy(message, str.c_str(), sizeof(str) > sizeof(message) ? sizeof(message) : sizeof(str));
-    if ((strncmp(message, "end", 3)) == 0)
-    {
-        write(socket_file_descriptor, message, sizeof(message));
-        std::cout << "Client Exit." << std::endl;
-        // break;
-    }
+    strncpy(message, str.c_str(), sizeof(message)/* sizeof(str) > sizeof(message) ? sizeof(message) : sizeof(str) */);
+    // if ((strncmp(message, "end", 3)) == 0)
+    // {
+    //     write(socket_file_descriptor, message, sizeof(message));
+    //     std::cout << "Client Exit." << std::endl;
+    //     // break;
+    // }
 
 
     ssize_t bytes = write(socket_file_descriptor, message, sizeof(message));
     // Если передали >= 0  байт, значит пересылка прошла успешно
     if (bytes >= 0)
     {
-        std::cout << "Data send to the server successfully.!" << std::endl;
+        //std::cout << "Data send to the server successfully.!" << std::endl;
+        std::cout << "sent to server message start " << std::endl;
+        std::cout << message << std::endl;
+        std::cout << " sent to server message end" << std::endl;
         return true;
     }
     return false;
@@ -63,7 +66,10 @@ bool TCP_client::receive(std::string& str)
 {
     // Ждем ответа от сервера
     bool retval = read(socket_file_descriptor, message, sizeof(message));
-    std::cout << "Data received from server: " << message << std::endl;
+    //std::cout << "Data received from server: " << message << std::endl;
+    std::cout << "received from server message start " << std::endl;
+    std::cout << message << std::endl;
+    std::cout << " received from server message end" << std::endl;
     str = std::string(message);
     return retval;
 }

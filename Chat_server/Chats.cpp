@@ -361,11 +361,14 @@ void Chats::addMessage(const Chat_t chat, const std::shared_ptr<Message> msg) {
 
 std::shared_ptr<std::queue<std::string>> Chats::getUserNames()
 {
-  std::shared_ptr<std::queue<std::string>> usernames; 
+  using queue_str = std::queue<std::string>;
+  std::shared_ptr<queue_str> usernames(std::make_shared<queue_str>(queue_str())); 
   for (auto user : users)
   {
-    usernames->push(user->getLogin());
+    std::cout << user->getLogin() << std::endl;
+    usernames->push(user->getLogin()); // тут преобразование, иначе попытка своровать const
   }
+
   return usernames;
 }
 

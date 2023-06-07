@@ -51,8 +51,8 @@ const std::string Client::getExitString() {
 
 const std::string Client::getMessageString(const Message_t message) {
   return key.itMessage + key.sep + key.timesend + key.sep +
-         message->getTimeSend() + '\n' + key.name + key.sep +
-         message->getUserName() + '\n' + key.mess + key.sep +
+         message->getTimeSend() + key.sep + key.name + key.sep +
+         message->getUserName() + key.sep + key.mess + key.sep +
          message->getMessage();
 }
 
@@ -61,13 +61,15 @@ const std::string Client::getRegistrationString(const User_t user) {
          key.sep + key.pas + key.sep + user->getPass();
 }
 
-const std::string Client::getGetUsernamesString() { return key.itGetUsernames; }
+const std::string Client::getGetUsernamesString() { return key.itGetUsernames  + key.sep; }
 
-const std::string Client::getContinueUsernamesString() { return key.itContinueUsernames; }
+const std::string Client::getContinueUsernamesString() { return key.itContinueUsernames + key.sep; }
 
-const std::string Client::getGetMessagesString() { return key.itGetMessages; }
+const std::string Client::getGetMessagesString() { return key.itGetMessages + key.sep; }
 
-const std::string Client::getContinueMessagesString() { return key.itContinueMassages; }
+const std::string Client::getContinueMessagesString() { return key.itContinueMassages + key.sep; }
+
+const std::string Client::getCompanionString(const std::string& companion) { return key.itCompName + key.sep + companion; }
 
 ReceivedData Client::interpretString(const std::string& str) {
   std::string_view str_view{str};  // для чего это??

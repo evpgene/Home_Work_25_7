@@ -28,7 +28,10 @@ public:
     const std::string getExitString();
     const std::string getMessageString(const Message_t message);
     const std::string getRegistrationString(const User_t user);
+    const std::string getCompanionString(const std::string& companion);
 
+
+    // to server
     const std::string getGetUsernamesString();
     const std::string getContinueUsernamesString();
     const std::string getGetMessagesString();

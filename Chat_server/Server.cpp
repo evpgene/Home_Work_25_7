@@ -6,7 +6,7 @@ Server::~Server() {}
 std::shared_ptr<User> Server::retrieveUser(const std::string& str) {
   bool nextIsLogin{false}, doneLogin{false}, nextIsPass{false}, donePass{false};
   std::string word;
-  std::shared_ptr<User> user = make_unique<User>(User());
+  std::shared_ptr<User> user = make_shared<User>(User());
   std::istringstream iss(str);
   while (iss >> word) {
     if (nextIsLogin) {
@@ -36,33 +36,26 @@ std::shared_ptr<User> Server::retrieveUser(const std::string& str) {
 
 std::shared_ptr<Message> Server::retrieveMessage(const std::string& msg) {
   std::string isTime, isName, isMessage;
-  bool doneTime{false}, doneName{false}, doneMessage{false};
-  std::size_t pos = msg.find(key.name);
-  pos = msg.find(key.timesend);
+  std::size_t length{0};
+  std::size_t pos_time = msg.find(key.timesend);
+  std::size_t pos_name = msg.find(key.name);
+  std::size_t pos_message = msg.find(key.mess);
+  if (pos_time == std::string::npos || pos_name ==
+                     std::string::npos || pos_message == std::string::npos)
+    return nullptr;
 
-  if (pos != std::string::npos) {
-    isTime = msg.substr(key.timesend.size() + key.sep.size());
-    doneTime = true;
-    // std::cout << "isTime: " << isTime << std::endl;  // для диагностики -
-    // можно убрать
-  };
+  pos_time += key.timesend.size() + key.sep.size();
+  length = pos_name - pos_time - key.sep.size();
+  isTime = msg.substr(pos_time, length);
 
-  if (pos != std::string::npos) {
-    isName = msg.substr(key.name.size() + key.sep.size());
-    doneName = true;
-    // std::cout << "isName: " << isName << std::endl; // для диагностики -
-    // можно убрать
-  };
+  pos_name += key.name.size() + key.sep.size();
+  length = pos_message - pos_name - key.sep.size();
+  isName = msg.substr(pos_name + key.name.size() + key.sep.size(), length);
 
-  pos = msg.find(key.mess);
-  if (pos != std::string::npos) {
-    isMessage = msg.substr(key.mess.size() + key.sep.size());
-    doneMessage = true;
-    // std::cout << "isMessage: " << isMessage << std::endl; // для
-    // диагностики - можно убрать
-  };
+  pos_message += key.mess.size() + key.sep.size();
+  isMessage = msg.substr(pos_message + key.mess.size() + key.sep.size());
 
-  return make_shared<Message>(Message(isTime, isName, isMessage));
+  return make_shared<Message>(Message(std::move(isTime), std::move(isName), std::move(isMessage)));
 }
 
 ReceivedData Server::interpretString(const std::string& str) {
@@ -91,22 +84,22 @@ ReceivedData Server::interpretString(const std::string& str) {
 
   if (first_word == key.itGetUsernames) {
     str_view.remove_prefix(key.itGetUsernames.size() + key.sep.size());
-    return ReceivedData(ReceivedType(GET_USERNAMES), str_view);
+    return ReceivedData(ReceivedType(GET_USERNAMES), "getusernames");
   };
 
   if (first_word == key.itContinueUsernames) {
     str_view.remove_prefix(key.itContinueUsernames.size() + key.sep.size());
-    return ReceivedData(ReceivedType(CONTINUE_USERNAMES), str_view);
+    return ReceivedData(ReceivedType(CONTINUE_USERNAMES), "continuegetusernames");
   };
 
   if (first_word == key.itGetMessages) {
     str_view.remove_prefix(key.itGetMessages.size() + key.sep.size());
-    return ReceivedData(ReceivedType(GET_MESSAGES), str_view);
+    return ReceivedData(ReceivedType(GET_MESSAGES), "getmessages");
   };
 
   if (first_word == key.itContinueMassages) {
     str_view.remove_prefix(key.itContinueMassages.size() + key.sep.size());
-    return ReceivedData(ReceivedType(CONTINUE_MESSAGES), str_view);
+    return ReceivedData(ReceivedType(CONTINUE_MESSAGES), "continuegetmessages");
   };
 
   if (first_word == key.itLogout) {
@@ -122,13 +115,14 @@ ReceivedData Server::interpretString(const std::string& str) {
 
   
 
-  return ReceivedData(ReceivedType(NOTHING), "");
+  return ReceivedData(ReceivedType(NOTHING), "nothing");
 };
 
-const std::string Server::getUsernamesEnd() { return key.itUsernamesEnd; }
-const std::string Server::getMessagesEnd() { return key.itMessagesEnd; }
+const std::string Server::getUsernamesEnd() { return key.itUsernamesEnd + key.sep; }
+const std::string Server::getMessagesEnd() { return key.itMessagesEnd + key.sep; }
+const std::string Server::getUsernamesString(const std::string& username) { return key.itUsernames + key.sep + username; }
 
-const std::string Server::getMessageString(const Message_t message) {
-  return message->getTimeSend() + ' ' + message->getUserName() + ' ' +
-         message->getMessage();
+const std::string Server::getMessageString(const Message& message) {
+  return message.getTimeSend() + ' ' + message.getUserName() + ' ' +
+         message.getMessage();
 }

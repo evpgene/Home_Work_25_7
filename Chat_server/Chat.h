@@ -21,7 +21,7 @@ public:
 	void printChatName() const;
 	std::string getChatName() const;
 
-	std::shared_ptr<std::queue<Message>> getLastMessages();
+	std::queue<Message> getLastMessages();
 
 	friend void SaveRestor::saveChat(std::shared_ptr<Chat> chat);
 	friend void SaveRestor::restorChats(std::vector<std::shared_ptr<Chat>> &chats);

@@ -1,4 +1,6 @@
 
+#include <queue>
+
 #include "Chats.h"
 #include "Server.h"
 #include "TCP_server.h"
@@ -25,76 +27,102 @@ int main() {
   tcp_server.listening();
   tcp_server.openConnection();
 
-  if (!firstcycle) {
-    tcp_server.send(string_to_send);
-  }
-  firstcycle = false;
-  tcp_server.receive(string_for_receive);
-
   User_t user;
   User_t companion;
   Chat_t chat;
   std::shared_ptr<std::queue<std::string>> usernames;
-  std::shared_ptr<std::queue<Message_t>> lastMessages;
+  std::queue<Message> lastMessages;
 
-  ReceivedData receivedData(server.interpretString(string_for_receive));
-  switch (receivedData._type) {
-    case REGISTRATION:
-      user = chats.userRegistration(
-          server.retrieveUser(std::string(receivedData._str_view)));
-      string_to_send = "Активный пользователь: " + user->getLogin();
-      break;
+  while (true) {
+    if (!firstcycle) {
+      tcp_server.send(string_to_send);
+    }
+    firstcycle = false;
+    tcp_server.receive(string_for_receive);
 
-    case LOGON:
-      user =
-          chats.logon(server.retrieveUser(std::string(receivedData._str_view)));
-      string_to_send = "Активный пользователь: " + user->getLogin();
-      break;
+    ReceivedData receivedData(server.interpretString(string_for_receive));
+    switch (receivedData._type) {
+      case REGISTRATION:
+        user = chats.userRegistration(
+            server.retrieveUser(std::string(receivedData._str_view)));
+        string_to_send =
+            std::string("Активный пользователь: ") + user->getLogin();
+        break;
 
-    case COMPANION:
-      companion = chats.getCompanion(std::string(receivedData._str_view));
-      if (user && companion) chat = chats.getActiveChat(user, companion);
-      string_to_send = "Активный чат: " + chat->getChatName() +
-                       " с пользователем: " + companion->getLogin();
-      break;
+      case LOGON:
+        user = chats.logon(
+            server.retrieveUser(std::string(receivedData._str_view)));
+        string_to_send = "Активный пользователь: " + user->getLogin();
+        break;
 
-    case MESSAGE:
-      chats.addMessage(
-          chat, server.retrieveMessage(std::string(receivedData._str_view)));
-      string_to_send = "Сообщение доставлено";
-      break;
+      case COMPANION:
+        companion = chats.getCompanion(std::string(receivedData._str_view));
+        if (user && companion) chat = chats.getActiveChat(user, companion);
+        string_to_send = "Активный чат: " + chat->getChatName() +
+                         " с пользователем: " + companion->getLogin();
+        std::cout << "string t send at companion step: " << string_to_send
+                  << std::endl;
+        break;
 
-    case GET_USERNAMES:
-      usernames = chats.getUserNames();
-    case CONTINUE_USERNAMES:
-      if (!usernames->empty()) {
-        string_to_send = usernames->front();
-        usernames->pop();
-      } else
-        string_to_send = server.getUsernamesEnd();
-      break;
+      case MESSAGE:
+        chats.addMessage(
+            chat, server.retrieveMessage(std::string(receivedData._str_view)));
+        string_to_send = "Сообщение доставлено";
+        break;
 
-    case GET_MESSAGES:;
-    case CONTINUE_MESSAGES:
-      if (!lastMessages->empty())
+      case GET_USERNAMES:
+        std::cout << "getusernames step" << std::endl;
+        usernames = chats.getUserNames();
+      case CONTINUE_USERNAMES:
+        std::cout << "continueusernames step" << std::endl;
+        if (!usernames->empty()) {
+          string_to_send = server.getUsernamesString(usernames->front());
+          usernames->pop();
+        } else
+          string_to_send = server.getUsernamesEnd();
+        break;
 
-      {
-        string_to_send = server.getMessageString(lastMessages->front());
-        lastMessages->pop();
-      } else
-        string_to_send = server.getMessagesEnd();
-      break;
+      case GET_MESSAGES:
+        std::cout << "get messages step" << std::endl;
+        lastMessages = chat->getLastMessages();
 
-    case LOGOUT:
-      break;
+        std::cout << "last messages from queue step get_messages start "
+                  << std::endl;
+        while (!lastMessages.empty()) {
+          std::cout << std::endl;
+          lastMessages.front().printMessage();
+          std::cout << std::endl;
+          lastMessages.pop();
+        }
+        std::cout << "last messages from queue step get_messages end "
+                  << std::endl;
 
-    case EXIT:
-      break;
+      case CONTINUE_MESSAGES:
+        std::cout << "continuemessages step" << std::endl;
+        if (!lastMessages.empty()) {
+          string_to_send = server.getMessageString(lastMessages.front());
+          lastMessages.pop();
+          std::cout << "one message pop " << std::endl;
+        } else
+          string_to_send = server.getMessagesEnd();
+        break;
 
-    default:
-      string_to_send = "Неизвестная команда";
-      break;
+      case LOGOUT:
+        string_to_send = "Logout for respond";
+        break;
+
+      case EXIT:
+        string_to_send = "Exit for respond";
+        break;
+
+      case NOTHING:
+        string_to_send = "Nothing for respond";
+        break;
+
+      default:
+        string_to_send = "Неизвестная команда";
+        break;
+    }
   }
-
   return 0;
 }
