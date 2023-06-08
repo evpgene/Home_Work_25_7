@@ -1,3 +1,87 @@
+[1mChat_client/ReceivedData.h:6:52: [31mperformance:[39m Function parameter 'str_view' should be passed by const reference. [passedByValue][0m
+  ReceivedData(ReceivedType type, std::string_view str_view)
+                                                   ^
+[1mChat_client/TCP_client.cpp:3:13: [31mwarning:[39m Member variable 'TCP_client::socket_file_descriptor' is not initialized in the constructor. [uninitMemberVar][0m
+TCP_client::TCP_client(/* args */)
+            ^
+[1mChat_client/TCP_client.cpp:3:13: [31mwarning:[39m Member variable 'TCP_client::connection' is not initialized in the constructor. [uninitMemberVar][0m
+TCP_client::TCP_client(/* args */)
+            ^
+[1mChat_client/TCP_client.cpp:3:13: [31mwarning:[39m Member variable 'TCP_client::message' is not initialized in the constructor. [uninitMemberVar][0m
+TCP_client::TCP_client(/* args */)
+            ^
+[1mChat_server/Chat.cpp:61:40: [31mstyle:[39m Parameter 'ch2' can be declared with const [constParameter][0m
+bool operator!=(const Chat &ch1, Chat &ch2)
+                                       ^
+[1mChat_server/Chats.cpp:197:9: [31mstyle:[39m Condition 'currentUserPtr' is always true [knownConditionTrueFalse][0m
+    if (currentUserPtr) {
+        ^
+[1mChat_server/Chats.cpp:237:9: [31mstyle:[39m Condition 'currentUserPtr' is always true [knownConditionTrueFalse][0m
+    if (currentUserPtr)  // послать сообщение
+        ^
+[1mChat_server/ReceivedData.h:6:52: [31mperformance:[39m Function parameter 'str_view' should be passed by const reference. [passedByValue][0m
+  ReceivedData(ReceivedType type, std::string_view str_view)
+                                                   ^
+[1mChat_server/Chats.cpp:77:56: [31mstyle:[39m Consider using std::find_if algorithm instead of a raw loop. [useStlAlgorithm][0m
+    if (_user_ptr->getLogin() == user_ptr->getLogin()) {  // если пользователь найден
+                                                       ^
+[1mChat_server/Chats.cpp:118:56: [31mstyle:[39m Consider using std::any_of algorithm instead of a raw loop. [useStlAlgorithm][0m
+    if (_user_ptr->getLogin() == user_ptr->getLogin()) {
+                                                       ^
+[1mChat_server/Chats.cpp:129:45: [31mstyle:[39m Consider using std::find_if algorithm instead of a raw loop. [useStlAlgorithm][0m
+    if (_user_ptr->getLogin() == companion) {  // если компаньон найден
+                                            ^
+[1mChat_server/Main.cpp:62:63: [31mwarning:[39m Either the condition 'companion' is redundant or there is possible null pointer dereference: companion. [nullPointerRedundantCheck][0m
+                         " с пользователем: " + companion->getLogin();
+                                                              ^
+[1mChat_server/Main.cpp:60:21: [2mnote:[0m Assuming that condition 'companion' is not redundant
+        if (user && companion) chat = chats.getActiveChat(user, companion);
+                    ^
+[1mChat_server/Main.cpp:62:63: [2mnote:[0m Null pointer dereference
+                         " с пользователем: " + companion->getLogin();
+                                                              ^
+[1mChat_server/SaveRestor.cpp:174:8: [31mstyle:[39m Redundant initialization for 'pos'. The initialized value is overwritten before it is read. [redundantInitialization][0m
+   pos = line.find(timesend);
+       ^
+[1mChat_server/SaveRestor.cpp:173:20: [2mnote:[0m pos is initialized
+   std::size_t pos = line.find(name);
+                   ^
+[1mChat_server/SaveRestor.cpp:174:8: [2mnote:[0m pos is overwritten
+   pos = line.find(timesend);
+       ^
+[1mChat_server/SaveRestor.cpp:63:96: [31mstyle:[39m The scope of the variable 'donePass' can be reduced. [variableScope][0m
+ bool nextIsID{false}, doneID{false}, nextIsLogin{false}, doneLogin{false}, nextIsPass{false}, donePass{false};
+                                                                                               ^
+[1mChat_server/SaveRestor.cpp:40:64: [31mstyle:[39m Parameter 'users' can be declared with const [constParameter][0m
+void SaveRestor::saveUsers(std::vector<std::shared_ptr<User>> &users)
+                                                               ^
+[1mChat_server/SaveRestor.cpp:63:15: [31mstyle:[39m Variable 'nextIsID' is assigned a value that is never used. [unreadVariable][0m
+ bool nextIsID{false}, doneID{false}, nextIsLogin{false}, doneLogin{false}, nextIsPass{false}, donePass{false};
+              ^
+[1mChat_server/SaveRestor.cpp:63:30: [31mstyle:[39m Variable 'doneID' is assigned a value that is never used. [unreadVariable][0m
+ bool nextIsID{false}, doneID{false}, nextIsLogin{false}, doneLogin{false}, nextIsPass{false}, donePass{false};
+                             ^
+[1mChat_server/SaveRestor.cpp:63:104: [31mstyle:[39m Variable 'donePass' is assigned a value that is never used. [unreadVariable][0m
+ bool nextIsID{false}, doneID{false}, nextIsLogin{false}, doneLogin{false}, nextIsPass{false}, donePass{false};
+                                                                                                       ^
+[1mChat_server/SaveRestor.cpp:80:13: [31mstyle:[39m Variable 'donePass' is assigned a value that is never used. [unreadVariable][0m
+   donePass = true;
+            ^
+[1mChat_server/TCP_server.cpp:3:13: [31mwarning:[39m Member variable 'TCP_server::socket_file_descriptor' is not initialized in the constructor. [uninitMemberVar][0m
+TCP_server::TCP_server(/* args */)
+            ^
+[1mChat_server/TCP_server.cpp:3:13: [31mwarning:[39m Member variable 'TCP_server::connection' is not initialized in the constructor. [uninitMemberVar][0m
+TCP_server::TCP_server(/* args */)
+            ^
+[1mChat_server/TCP_server.cpp:3:13: [31mwarning:[39m Member variable 'TCP_server::bind_status' is not initialized in the constructor. [uninitMemberVar][0m
+TCP_server::TCP_server(/* args */)
+            ^
+[1mChat_server/TCP_server.cpp:3:13: [31mwarning:[39m Member variable 'TCP_server::connection_status' is not initialized in the constructor. [uninitMemberVar][0m
+TCP_server::TCP_server(/* args */)
+            ^
+[1mChat_server/TCP_server.cpp:3:13: [31mwarning:[39m Member variable 'TCP_server::message' is not initialized in the constructor. [uninitMemberVar][0m
+TCP_server::TCP_server(/* args */)
+            ^
 [1mChat_client/Message.h:4:1: [31merror:[39m The one definition rule is violated, different classes/structs have the same name 'Message' [ctuOneDefinitionRuleViolation][0m
 class Message
 ^
@@ -16,3 +100,20 @@ class User
 [1mChat_client/User.h:11:1: [2mnote:[0m The one definition rule is violated, different classes/structs have the same name 'User'
 class User
 ^
+[1mChat_client/TCP_client.cpp:77:0: [31mstyle:[39m The function 'closeConnection' is never used. [unusedFunction][0m
+
+^
+[1mChat_server/Chats.cpp:5:0: [31mstyle:[39m The function 'mainmenu' is never used. [unusedFunction][0m
+
+^
+[1mChat_server/Chats.cpp:354:0: [31mstyle:[39m The function 'remoteCycle' is never used. [unusedFunction][0m
+
+^
+[1mChat_server/Chats.cpp:271:0: [31mstyle:[39m The function 'restordata' is never used. [unusedFunction][0m
+
+^
+[1mChat_server/Chats.cpp:279:0: [31mstyle:[39m The function 'savedata' is never used. [unusedFunction][0m
+
+^
+[1mnofile:0:0: [31minformation:[39m Cppcheck cannot find all the include files (use --check-config for details) [missingInclude][0m
+

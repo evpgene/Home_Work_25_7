@@ -33,10 +33,6 @@ int main() {
       do {
         tcp_client.send(string_to_send);
         tcp_client.receive(string_for_receive);
-        // тут допустим функция восстановления строки
-        // тут обработка принятой информации (начало цикла)
-        // тут функция подготовки строки к отправке
-        // (конец цикла)
 
         ReceivedData receivedData(client.interpretString(string_for_receive));
         switch (receivedData._type) {
@@ -46,6 +42,9 @@ int main() {
             break;
 
           case USERNAMES:
+            if (!usernames_package) {
+              usernames.clear();
+            };
             usernames.emplace_back(receivedData._str_view);
             string_to_send = client.getContinueUsernamesString();
             usernames_package = true;
@@ -149,19 +148,25 @@ int main() {
           break;
 
         case 6: {
+          if (!usernames.size()) {
+            std::cout << "Сначала запросите имена пользователей" << std::endl;
+            break;
+          }
           std::string id_input;
-          std::cout << "Выберите пользователя для чата (введите номер) "
-                    << std::endl;
+          std::cout << "Выберите пользователя для чата (введите номер) от 1 до "
+                    << usernames.size() << std::endl;
           std::cin >> id_input;
-          // проверяем корректность ввода
+          // проверяем корректность ввода - лучше бы тут конечно использовать
+          // функцию ограничения диапапзона вместо исключения, но я об этом знаю
           try {
             string_to_send = client.getCompanionString(
                 usernames.at(std::stoi(id_input) - 1));
           } catch (const std::exception &e) {
             cout << endl << e.what() << endl;
           }
-          std::cout << "string to send at usernames end step" << string_to_send
-                    << std::endl;
+          // далее раскоментировать для диагностики, если потребуется
+          // std::cout << "string to send at usernames end step" << string_to_send
+          //           << std::endl;
         } break;
 
         case 7:
@@ -173,6 +178,7 @@ int main() {
           break;
         case 9:  // Выход из программы
           string_to_send = client.getExitString();
+          return 0;
           break;
         default:
           std::cout << "Нет такой команды: " << cmd << std::endl;

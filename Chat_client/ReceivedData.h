@@ -3,7 +3,7 @@
 #include <string>
 
 struct ReceivedData {
-  ReceivedData(ReceivedType type, std::string_view str_view)
+  ReceivedData(ReceivedType type, const std::string_view& str_view)
       : _type(type), _str_view(str_view){};
   ~ReceivedData(){};
   ReceivedType _type;

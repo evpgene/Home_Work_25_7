@@ -69,6 +69,7 @@ bool TCP_server::send(const std::string& str)
     // Если передали >= 0  байт, значит пересылка прошла успешно
     if (bytes >= 0)
     {
+        //тут далее раскоментировать для диагностики, если потребуется
         //std::cout << "Data successfully sent to the client.!" << std::endl;
         std::cout << "sent to client message start " << std::endl;
         std::cout << message << std::endl;

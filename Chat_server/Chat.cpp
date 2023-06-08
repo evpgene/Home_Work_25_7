@@ -58,7 +58,7 @@ bool operator==(const Chat &ch1, const Chat &ch2)
 {
 	return ch1._chatname == ch2._chatname;
 }
-bool operator!=(const Chat &ch1, Chat &ch2)
+bool operator!=(const Chat &ch1, const Chat &ch2)
 {
 	return !(ch1 == ch2);
 }

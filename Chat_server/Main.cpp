@@ -45,6 +45,10 @@ int main() {
       case REGISTRATION:
         user = chats.userRegistration(
             server.retrieveUser(std::string(receivedData._str_view)));
+        if (!user) {
+          string_to_send = std::string("Ошибка регистрации");
+          break;
+        }
         string_to_send =
             std::string("Активный пользователь: ") + user->getLogin();
         break;
@@ -52,29 +56,51 @@ int main() {
       case LOGON:
         user = chats.logon(
             server.retrieveUser(std::string(receivedData._str_view)));
+        if (!user) {
+          string_to_send = std::string("Ошибка входа в учётную запись");
+          break;
+        }
         string_to_send = "Активный пользователь: " + user->getLogin();
-        break;
 
       case COMPANION:
+        if (!user) {
+          string_to_send = "Вы не вошли в учётную запись";
+          break;
+        }
         companion = chats.getCompanion(std::string(receivedData._str_view));
-        if (user && companion) chat = chats.getActiveChat(user, companion);
+        if (!companion) {
+          string_to_send = "Пользователь для переписки не найден";
+          break;
+        }
+        chat = chats.getActiveChat(user, companion);
+        if (!chat) {
+          string_to_send = "чат не существует";
+          break;
+        };
+
         string_to_send = "Активный чат: " + chat->getChatName() +
                          " с пользователем: " + companion->getLogin();
-        std::cout << "string t send at companion step: " << string_to_send
-                  << std::endl;
         break;
 
       case MESSAGE:
-        chats.addMessage(
-            chat, server.retrieveMessage(std::string(receivedData._str_view)));
-        string_to_send = "Сообщение доставлено";
+        if (!chat) {
+          string_to_send = "чат не существует";
+          break;
+        };
+        {
+          Message_t msg(
+              server.retrieveMessage(std::string(receivedData._str_view)));
+              if(!msg) {string_to_send = "Сообщение не доставлено или повреждено";}
+          chats.addMessage(chat, msg);
+          string_to_send = "принято";
+        }
         break;
 
       case GET_USERNAMES:
-        std::cout << "getusernames step" << std::endl;
+        std::cout << "getusernames step" << std::endl; // диагностическая информация на сервер
         usernames = chats.getUserNames();
       case CONTINUE_USERNAMES:
-        std::cout << "continueusernames step" << std::endl;
+        std::cout << "continueusernames step" << std::endl; // диагностическая информация на сервер
         if (!usernames->empty()) {
           string_to_send = server.getUsernamesString(usernames->front());
           usernames->pop();
@@ -83,43 +109,52 @@ int main() {
         break;
 
       case GET_MESSAGES:
-        std::cout << "get messages step" << std::endl;
+        std::cout << "get messages step"
+                  << std::endl;  // диагностическая информация на сервер
+
+        if (!chat) {
+          string_to_send = "чат не существует";
+          break;
+        };
         lastMessages = chat->getLastMessages();
 
-        std::cout << "last messages from queue step get_messages start "
-                  << std::endl;
-        while (!lastMessages.empty()) {
-          std::cout << std::endl;
-          lastMessages.front().printMessage();
-          std::cout << std::endl;
-          lastMessages.pop();
-        }
-        std::cout << "last messages from queue step get_messages end "
-                  << std::endl;
+        // std::cout << "last messages from queue step get_messages start "
+        //           << std::endl;  // диагностическая информация на сервер
+
+        // while (!lastMessages.empty()) {
+        //   std::cout << std::endl;
+        //   lastMessages.front().printMessage();
+        //   std::cout << std::endl;
+        //   lastMessages.pop();
+        // }
+        // std::cout << "last messages from queue step get_messages end "
+        //           << std::endl;  // диагностическая информация на сервер
 
       case CONTINUE_MESSAGES:
-        std::cout << "continuemessages step" << std::endl;
+        std::cout << "continuemessages step" << std::endl; // диагностическая информация на сервер
         if (!lastMessages.empty()) {
           string_to_send = server.getMessageString(lastMessages.front());
           lastMessages.pop();
-          std::cout << "one message pop " << std::endl;
-        } else
-          string_to_send = server.getMessagesEnd();
+          std::cout << "one message pop " << std::endl; // диагностическая информация на сервер
+      } else{
+        string_to_send = server.getMessagesEnd();}
         break;
 
       case LOGOUT:
         string_to_send = "Logout for respond";
+        user = nullptr;
+        companion = nullptr;
+        while (!lastMessages.empty()) lastMessages.pop();
         break;
 
       case EXIT:
         string_to_send = "Exit for respond";
+        return 0;
         break;
 
       case NOTHING:
         string_to_send = "Nothing for respond";
-        break;
-
-      default:
+        break;// диагностическая информация на сервер
         string_to_send = "Неизвестная команда";
         break;
     }

@@ -33,7 +33,7 @@ public:
 	friend bool operator!=(const Chat& ch1, const std::string& ch2);
 
 	friend bool operator==(const std::string& ch1, const Chat& ch2);
-	friend bool operator!=(const std::string&, const Chat& ch2);
+	friend bool operator!=(const std::string& ch1, const Chat& ch2);
 
 
 protected:

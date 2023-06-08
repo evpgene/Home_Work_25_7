@@ -50,10 +50,10 @@ std::shared_ptr<Message> Server::retrieveMessage(const std::string& msg) {
 
   pos_name += key.name.size() + key.sep.size();
   length = pos_message - pos_name - key.sep.size();
-  isName = msg.substr(pos_name + key.name.size() + key.sep.size(), length);
+  isName = msg.substr(pos_name, length);
 
   pos_message += key.mess.size() + key.sep.size();
-  isMessage = msg.substr(pos_message + key.mess.size() + key.sep.size());
+  isMessage = msg.substr(pos_message);
 
   return make_shared<Message>(Message(std::move(isTime), std::move(isName), std::move(isMessage)));
 }
@@ -123,6 +123,6 @@ const std::string Server::getMessagesEnd() { return key.itMessagesEnd + key.sep;
 const std::string Server::getUsernamesString(const std::string& username) { return key.itUsernames + key.sep + username; }
 
 const std::string Server::getMessageString(const Message& message) {
-  return message.getTimeSend() + ' ' + message.getUserName() + ' ' +
+  return key.itMessages + ' ' + message.getTimeSend() + ' ' + message.getUserName() + ' ' +
          message.getMessage();
 }

@@ -72,6 +72,7 @@ void Chats::logon() {
 }
 
 User_t Chats::logon(const User_t user_ptr) {
+  if(!user_ptr) return nullptr;
   for (const auto _user_ptr :
        users) {  // ищем пользователя с заданным логином и паролем (или хэшем)
     if (_user_ptr->getLogin() == user_ptr->getLogin()) {  // если пользователь найден
@@ -112,6 +113,7 @@ void Chats::userRegistration() {
 }
 
 User_t Chats::userRegistration(const User_t user_ptr) {
+  if(!user_ptr) return nullptr;
   // ищем пользователя с заданным логином и паролем (или хэшем)
   for (const auto _user_ptr : users) {
     // если пользователь найден
@@ -359,16 +361,13 @@ void Chats::addMessage(const Chat_t chat, const std::shared_ptr<Message> msg) {
   }
 }
 
-std::shared_ptr<std::queue<std::string>> Chats::getUserNames()
-{
+std::shared_ptr<std::queue<std::string>> Chats::getUserNames() {
   using queue_str = std::queue<std::string>;
-  std::shared_ptr<queue_str> usernames(std::make_shared<queue_str>(queue_str())); 
-  for (auto user : users)
-  {
-    std::cout << user->getLogin() << std::endl;
-    usernames->push(user->getLogin()); // тут преобразование, иначе попытка своровать const
+  std::shared_ptr<queue_str> usernames(
+      std::make_shared<queue_str>(queue_str()));
+  for (auto user : users) {
+    usernames->push(
+        user->getLogin());  // тут преобразование, иначе попытка своровать const
   }
-
   return usernames;
 }
-
