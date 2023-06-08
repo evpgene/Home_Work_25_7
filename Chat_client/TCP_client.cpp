@@ -55,10 +55,10 @@ bool TCP_client::send(const std::string& str)
     if (bytes >= 0)
     {
         //тут далее раскоментировать для диагностики, если потребуется
-        //std::cout << "Data send to the server successfully.!" << std::endl;
-        std::cout << "sent to server message start " << std::endl;
-        std::cout << message << std::endl;
-        std::cout << " sent to server message end" << std::endl;
+        // //std::cout << "Data send to the server successfully.!" << std::endl;
+        // std::cout << "sent to server message start " << std::endl;
+        // std::cout << message << std::endl;
+        // std::cout << " sent to server message end" << std::endl;
         return true;
     }
     return false;
@@ -68,10 +68,10 @@ bool TCP_client::receive(std::string& str)
     // Ждем ответа от сервера
     bool retval = read(socket_file_descriptor, message, sizeof(message));
     //тут далее раскоментировать для диагностики, если потребуется
-    //std::cout << "Data received from server: " << message << std::endl;
-    std::cout << "received from server message start " << std::endl;
-    std::cout << message << std::endl;
-    std::cout << " received from server message end" << std::endl;
+    // //std::cout << "Data received from server: " << message << std::endl;
+    // std::cout << "received from server message start " << std::endl;
+    // std::cout << message << std::endl;
+    // std::cout << " received from server message end" << std::endl;
     str = std::string(message);
     return retval;
 }

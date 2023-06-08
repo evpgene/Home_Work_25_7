@@ -61,17 +61,17 @@ int main() {
           } break;
 
           case MESSAGES:
-            std::cout << "messages step " << std::endl;
+            //std::cout << "messages step " << std::endl; // раскоментировать для диагностики
             messages.emplace_back(receivedData._str_view);
-            std::cout << "one message emplase " << std::endl;
+            //std::cout << "one message emplase " << std::endl; // раскоментировать для диагностики
             string_to_send = client.getContinueMessagesString();
             messages_package = true;
             break;
 
           case MESSAGES_END:
-          std::cout << "messages end step " << std::endl;
+          //std::cout << "messages end step " << std::endl; // раскоментировать для диагностики
             for (auto message : messages) {
-              std::cout << "message print: " << message << std::endl;
+              std::cout << message << std::endl;
             }
             messages.clear();
             messages_package = false;
@@ -114,9 +114,11 @@ int main() {
 
         case 1:  // выводим  данные текущего пользователя
           if (user) {
-            std::cout << "Пользователь: " << user->getLogin() << std::endl;
+            //std::cout << "Пользователь: " << user->getLogin() << std::endl;
+            string_to_send = "Пользователь: " + user->getLogin();
           } else {
-            std::cout << "Вы не ввели данные пользователя" << std::endl;
+            //std::cout << "Вы не ввели данные пользователя" << std::endl;
+            string_to_send = "Вы не ввели данные пользователя"; 
           }
           break;
         case 2:  // User logon
@@ -131,7 +133,8 @@ int main() {
           if (user) {
             string_to_send = client.getMessageString(client.inputMessage(user));
           } else {
-            std::cout << "Вы не ввели данные пользователя" << std::endl;
+            //std::cout << "Вы не ввели данные пользователя" << std::endl;
+            string_to_send = "Вы не ввели данные пользователя"; 
           }
           break;
         case 4:  // User registration
@@ -139,7 +142,8 @@ int main() {
           if (user) {
             string_to_send = client.getRegistrationString(user);
           } else {
-            std::cout << "Вы не ввели данные пользователя" << std::endl;
+            //std::cout << "Вы не ввели данные пользователя" << std::endl;
+            string_to_send = "Вы не ввели данные пользователя"; 
           }
           break;
 
@@ -149,7 +153,8 @@ int main() {
 
         case 6: {
           if (!usernames.size()) {
-            std::cout << "Сначала запросите имена пользователей" << std::endl;
+            //std::cout << "Сначала запросите имена пользователей" << std::endl;
+            string_to_send = "Сначала запросите имена пользователей"; 
             break;
           }
           std::string id_input;
@@ -158,6 +163,7 @@ int main() {
           std::cin >> id_input;
           // проверяем корректность ввода - лучше бы тут конечно использовать
           // функцию ограничения диапапзона вместо исключения, но я об этом знаю
+          string_to_send = "Видимо ввод был неудачный";
           try {
             string_to_send = client.getCompanionString(
                 usernames.at(std::stoi(id_input) - 1));
@@ -175,6 +181,7 @@ int main() {
 
         case 8:  // logoff
           string_to_send = client.getLogoutString();
+          user = nullptr;
           break;
         case 9:  // Выход из программы
           string_to_send = client.getExitString();

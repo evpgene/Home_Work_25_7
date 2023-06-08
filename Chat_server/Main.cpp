@@ -31,7 +31,7 @@ int main() {
   User_t companion;
   Chat_t chat;
   std::shared_ptr<std::queue<std::string>> usernames;
-  std::queue<Message> lastMessages;
+  queue_message_t lastMessages;
 
   while (true) {
     if (!firstcycle) {
@@ -61,7 +61,7 @@ int main() {
           break;
         }
         string_to_send = "Активный пользователь: " + user->getLogin();
-
+        break;
       case COMPANION:
         if (!user) {
           string_to_send = "Вы не вошли в учётную запись";
@@ -83,6 +83,10 @@ int main() {
         break;
 
       case MESSAGE:
+        if (!user) {
+          string_to_send = "Вы не вошли в учётную запись";
+          break;
+        };
         if (!chat) {
           string_to_send = "чат не существует";
           break;
@@ -132,9 +136,13 @@ int main() {
 
       case CONTINUE_MESSAGES:
         std::cout << "continuemessages step" << std::endl; // диагностическая информация на сервер
-        if (!lastMessages.empty()) {
-          string_to_send = server.getMessageString(lastMessages.front());
-          lastMessages.pop();
+        if (!lastMessages) {
+          std::cout << "something wrong, try to read nothing " << std::endl; // диагностическая информация на сервер
+          break;
+        };
+        if (!lastMessages->empty()) {
+          string_to_send = server.getMessageString(lastMessages->front());
+          lastMessages->pop();
           std::cout << "one message pop " << std::endl; // диагностическая информация на сервер
       } else{
         string_to_send = server.getMessagesEnd();}
@@ -144,7 +152,11 @@ int main() {
         string_to_send = "Logout for respond";
         user = nullptr;
         companion = nullptr;
-        while (!lastMessages.empty()) lastMessages.pop();
+        chat = nullptr;
+        if (!lastMessages) {
+        break;
+        };
+        while (!lastMessages->empty()) lastMessages->pop();
         break;
 
       case EXIT:
@@ -153,10 +165,9 @@ int main() {
         break;
 
       case NOTHING:
-        string_to_send = "Nothing for respond";
+        string_to_send = string_for_receive;
         break;// диагностическая информация на сервер
-        string_to_send = "Неизвестная команда";
-        break;
+
     }
   }
   return 0;

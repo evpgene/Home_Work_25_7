@@ -43,15 +43,14 @@ std::string Chat::getChatName() const
 	return _chatname;
 }
 
-std::queue<Message> Chat::getLastMessages() {
-        using queue_mes = std::queue<Message>;
-        queue_mes lastMessages;
-		
-        for (const auto& m : _messages) {
-			lastMessages.push(m);
-			std::cout << "one message push	" << std::endl;
-			}
-        return lastMessages;
+
+queue_message_t Chat::getLastMessages() {
+        std::queue<Message> lastMessages;
+        for (const auto& message : _messages) {
+                lastMessages.push(message);
+                std::cout << "one message push	" << std::endl;
+        }
+        return std::make_shared<std::queue<Message>>(lastMessages);
 }
 
 bool operator==(const Chat &ch1, const Chat &ch2)

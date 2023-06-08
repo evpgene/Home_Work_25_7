@@ -8,6 +8,7 @@
 using User_t = std::shared_ptr<User>;  // указатель на юзера
 using Chat_t = std::shared_ptr<Chat>;  // указатель на чат
 using Message_t = std::shared_ptr<Message>;  // указатель на сообщение
+using queue_message_t = std::shared_ptr<std::queue<Message>>;
 
 class Chat
 {
@@ -21,7 +22,7 @@ public:
 	void printChatName() const;
 	std::string getChatName() const;
 
-	std::queue<Message> getLastMessages();
+	queue_message_t getLastMessages();
 
 	friend void SaveRestor::saveChat(std::shared_ptr<Chat> chat);
 	friend void SaveRestor::restorChats(std::vector<std::shared_ptr<Chat>> &chats);

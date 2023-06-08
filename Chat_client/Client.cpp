@@ -72,7 +72,7 @@ const std::string Client::getContinueMessagesString() { return key.itContinueMas
 const std::string Client::getCompanionString(const std::string& companion) { return key.itCompName + key.sep + companion; }
 
 ReceivedData Client::interpretString(const std::string& str) {
-  std::string_view str_view{str};  // для чего это??
+  std::string_view str_view{str};
   std::string_view first_word{str_view.substr(0, str_view.find(key.sep))};
 
   if (first_word == key.itUsernames) {
@@ -95,11 +95,6 @@ ReceivedData Client::interpretString(const std::string& str) {
     return ReceivedData(ReceivedType(MESSAGES_END), str_view);
   };
 
-  // if (first_word == key.itEndOfPackage) {
-  //   str_view.remove_prefix(key.itEndOfPackage.size() + key.sep.size());
-  //   return ReceivedData(ReceivedType(PACKAGEEND), str_view);
-  // };
-  
   return ReceivedData(ReceivedType(ANY), str_view);  
 
 }
