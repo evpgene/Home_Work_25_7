@@ -7,7 +7,8 @@
 #include "User.h"
 #include "Message.h"
 #include "SaveRestor.h"
-//#include "TCP_server.h"
+
+#include "TCP_server.h"
 #include "Server.h"
 
 using User_t = std::shared_ptr<User>;  // указатель на юзера
@@ -24,6 +25,8 @@ class Chats
 	std::vector<Chat_t> chats; // массив указателей на чаты
 	User_t currentUserPtr{nullptr}; // указатель на текущего пользователя
 	Chat_t currentChatPtr{nullptr}; // указатель на текущий чат
+
+
 
 
 

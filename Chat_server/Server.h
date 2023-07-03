@@ -4,7 +4,8 @@
 #include "iostream"
 #include "ReceivedData.h"
 #include "Keywords.h"
-//
+//add new includs
+#include <mysql/mysql.h>
 
 class Server
 {
@@ -28,5 +29,11 @@ public:
     const std::string getMessagesEnd();
     const std::string getMessageString(const Message& message);
     const std::string getUsernamesString(const std::string& username);
+
+    //new functions for database
+    int createTable_users();
+    int createTable_chats();
+    int createTable_chat_user();
+    int createTable_messages();
 
 };

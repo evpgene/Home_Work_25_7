@@ -3,6 +3,9 @@
         {
             "name": "Linux",
             "includePath": [
+                "${default}",
+                "/usr/include",
+                "/usr/include/mysql/",
                 "${workspaceFolder}/**",
                 "/usr/include/mysql/**"
             ],

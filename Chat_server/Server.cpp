@@ -125,4 +125,4 @@ const std::string Server::getUsernamesString(const std::string& username) { retu
 const std::string Server::getMessageString(const Message& message) {
   return key.itMessages + ' ' + message.getTimeSend() + ' ' + message.getUserName() + ' ' +
          message.getMessage();
-}
+};
