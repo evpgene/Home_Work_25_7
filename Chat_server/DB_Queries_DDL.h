@@ -1,24 +1,33 @@
 #include <mysql/mysql.h>
 #include <iostream>
-#include <string>
-//using namespace std;
 
-
-class DB_Queries_DDL
-{
-private:
-	/* data */
-public:
-	DB_Queries_DDL(/* args */);
-	~DB_Queries_DDL();
+struct MYSQL_Config {
+  char* host{(char*)("localhost")};
+  char* user{(char*)("root")};
+  char* passwd{(char*)("root")};
+  char* db{NULL};
+  int port{NULL};
+  char* unix_socket{NULL};
+  unsigned long clientflag{0};
 };
 
+class DB_Queries_DDL {
+ private:
+  MYSQL* mysql;
+ public:
+  DB_Queries_DDL();
+  ~DB_Queries_DDL();
+  unsigned int connectToMySQLserver_open(const MYSQL_Config& config);
+  unsigned int createDataBase(void);
+  void connectToMySQLserver_close(void);
+
+};
 
 #define DROP_DATABASE \
-"DROP DATABASE IF EXISTS chat_db1"
+"DROP DATABASE IF EXISTS chat_db"
 
 #define CREATE_DATABASE \
-"CREATE DATABASE IF NOT EXISTS chat_db1"
+"CREATE DATABASE IF NOT EXISTS chat_db"
 
 // #define CREATE_USER \
 // "CREATE USER IF NOT EXISTS 'chat_db1_user'@'localhost' IDENTIFIED BY 'Root123_Root123'"
@@ -75,76 +84,14 @@ public:
 "CREATE VIEW \
 	message_view AS \
 	SELECT \
-	chats.id AS chat_id, \
-	chats.name AS chatname , \
-	users.login AS login, \
-	messages.dt AS timesend, \
-	messages.message AS message, \
-	messages.status AS status \
+	chats.id AS chat_id,\
+	users.id AS user_id,\
+	messages.id AS message_id,\
+	messages.dt AS timesend,\
+	users.login AS user_login,\
+	messages.message AS message,\
+	messages.status AS status\
 	FROM messages \
 	JOIN chat_user ON chat_user.id = messages.chat_user_id \
 	JOIN chats ON chats.id = chat_user.chat_id \
 	JOIN users ON users.id = chat_user.user_id"
-
-
-
-
-
-
-int main() {
-  MYSQL mysql;
-  MYSQL_RES* res;
-  MYSQL_ROW row;
-
-  int i = 0;
-
-  // Получаем дескриптор соединения
-  mysql_init(&mysql);
-  if (&mysql == nullptr) {
-    // Если дескриптор не получен — выводим сообщение об ошибке
-    std::cout << "Error: can't create MySQL-descriptor" << std::endl;
-  }
-
-  // Подключаемся к серверу
-  if (!mysql_real_connect(&mysql, "localhost", "root", "Root123_Root123",
-                          "chat_db", NULL, NULL, 0)) {
-    // Если нет возможности установить соединение с БД выводим сообщение об
-    // ошибке
-    std::cout << "Error: can't connect to database " << mysql_error(&mysql) << std::endl;
-  } else {
-    // Если соединение успешно установлено выводим фразу — "Success!"
-    std::cout << "Success!" << std::endl;
-  }
-
-  mysql_set_character_set(&mysql, "utf8");
-  // Смотрим изменилась ли кодировка на нужную, по умолчанию идёт latin1
-  std::cout << "connection characterset: " << mysql_character_set_name(&mysql)
-       << std::endl;
-
-
-
-	// // create user
-	// mysql_query(&mysql, CREATE_USER);
-	// // grant user
-	// mysql_query(&mysql, GRANT_USER);
-	// create database
-	mysql_query(&mysql, CREATE_DATABASE);
-
-
-  // create table "users"
-  mysql_query(&mysql, CREATE_TABLE_USERS);
-  // create table "chats"
-  mysql_query(&mysql, CREATE_TABLE_CHATS);
-  // create table "chat_user"
-  mysql_query(&mysql, CREATE_TABLE_CHAT_USER);
-  // create table "messages"
-  mysql_query(&mysql, CREATE_TABLE_MESSAGES);
-  // create view "message_view"
-  mysql_query(&mysql, CREATE_VIEW_MESSAGE_VIEW);
-
-  // Закрываем соединение с сервером базы данных
-  mysql_close(&mysql);
-  system("Pause");
-
-  return 0;
-}

@@ -981,7 +981,7 @@
     Select_Message.Result.row_count = 0;
     fprintf(stdout, "SELECT_MESSAGE Fetching results ...\n");
 
-    Message_t message = std::make_shared<Message>(Message());
+    Message_t message;
 
     while (!mysql_stmt_fetch(Select_Message.Query.stmt)) {
       std::cout << Select_Message.Result.row_count++ << std::endl;
