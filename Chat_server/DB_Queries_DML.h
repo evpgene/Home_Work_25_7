@@ -9,6 +9,9 @@
 
 #define STRING_SIZE 255
 using queue_message_t = std::shared_ptr<std::queue<Message>>;
+using insert_id = size_t; // The result is the id of inserted element. No insertions if = 0;
+using affected_rows = size_t; // The result is the number of affected rows. No affected rows if = 0;
+using no_errors = bool; // Execution OK. No errors occurred if = true;
 
 struct ChatUser {
   ChatUser(){};
@@ -32,27 +35,19 @@ class DB_Queries_DML {
     int int_data{-1};
   };
 
- public:
-  DB_Queries_DML(/* args */);
-  ~DB_Queries_DML();
-
-  void connectDB_open(void);
-  void connectDB_close(void);
-
 #define INSERT_USER "INSERT INTO users (login, pass) VALUES (?,?)"
   struct {
     struct {
       MYSQL_STMT* stmt;
       MYSQL_BIND bind[2];
       uint64_t affected_rows;
-      String_Param Login;
-      String_Param Pass;
+      String_Param login;
+      String_Param pass;
       int param_count;
     } Query;
   } Insert_User;
-  void insertUser_prepare(void);
-  size_t insertUser(const User_t user);
-  int insertUser_close(void);
+  no_errors insertUser_prepare(void);
+  no_errors insertUser_close(void);
 
 #define SELECT_USER "SELECT id, login, pass FROM users WHERE id = ?"
   struct {
@@ -65,8 +60,8 @@ class DB_Queries_DML {
     struct {
       MYSQL_BIND bind[3];
       MYSQL_RES* prepare_meta_result;
-      String_Param Login;
-      String_Param Pass;
+      String_Param login;
+      String_Param pass;
       unsigned long length[3];
       int param_count, column_count, row_count;
       short small_data;
@@ -75,9 +70,8 @@ class DB_Queries_DML {
       bool error[3];
     } Result;
   } Select_User;
-  void selectUser_prepare(void);
-  User_t selectUser(const int id);
-  void selectUser_close(void);
+no_errors selectUser_prepare(void);
+no_errors selectUser_close(void);
 
 #define INSERT_CHAT "INSERT INTO chats (name) VALUES (?)"
   struct {
@@ -89,9 +83,8 @@ class DB_Queries_DML {
       int param_count;
   } Query;
   } Insert_Chat;
-  void insertChat_prepare(void);
-  size_t insertChat(const Chat_t chat);
-  int insertChat_close(void);
+no_errors insertChat_prepare(void);
+no_errors insertChat_close(void);
 
 #define SELECT_CHAT "SELECT id, name FROM chats WHERE id = ?"
   struct {
@@ -113,9 +106,8 @@ class DB_Queries_DML {
       bool error[1];
   } Result;
   } Select_Chat;
-  void selectChat_prepare(void);
-  Chat_t selectChat(const int id);
-  void selectChat_close(void);
+  no_errors selectChat_prepare(void);
+  no_errors selectChat_close(void);
 
 #define INSERT_CHAT_USER \
   "INSERT INTO chat_user (chat_id, user_id, user_no) VALUES (?,?,?)"
@@ -129,9 +121,8 @@ class DB_Queries_DML {
       int param_count;
     } Query;
   } Insert_ChatUser;
-  void insertChatUser_prepare(void);
-  size_t insertChatUser(const int chat_id, const int user_id);
-  int insertChatUser_close(void);
+  no_errors insertChatUser_prepare(void);
+  no_errors insertChatUser_close(void);
 
 #define SELECT_CHAT_USER \
   "SELECT id FROM chat_user WHERE chat_id = ? AND user_id = ?"
@@ -155,9 +146,8 @@ class DB_Queries_DML {
       bool error[1];
     } Result;
   } Select_ChatUser;
-  void selectChatUser_prepare(void);
-  size_t selectChatUser(const int chat_id, const int user_id);
-  void selectChatUser_close(void);
+  no_errors selectChatUser_prepare(void);
+  no_errors selectChatUser_close(void);
 
 #define INSERT_MESSAGE                                       \
   "INSERT INTO messages (chat_user_id, message, dt) VALUES " \
@@ -172,9 +162,8 @@ class DB_Queries_DML {
       int param_count;
     } Query;
   } Insert_Message;
-  void insertMessage_prepare(void);
-  size_t insertMessage(const int chat_user_id, const Message_t message);
-  int insertMessage_close(void);
+  no_errors insertMessage_prepare(void);
+  no_errors insertMessage_close(void);
 
 #define SELECT_MESSAGE \
   "SELECT * FROM message_view WHERE chat_id = ? AND message_id = ?"
@@ -201,9 +190,8 @@ class DB_Queries_DML {
       bool error[7];
     } Result;
   } Select_Message;
-  void selectMessage_prepare(void);
-  Message_t selectMessage(const int chat_id, const int message_id);
-  void selectMessage_close(void);
+  no_errors selectMessage_prepare(void);
+  no_errors selectMessage_close(void);
 
 #define SELECT_MESSAGES                                                        \
   "SELECT * FROM message_view WHERE chat_id = ? AND message_id BETWEEN ? AND " \
@@ -234,11 +222,8 @@ class DB_Queries_DML {
       bool error[7];
     } Result;
   } Select_Messages;
-  void selectMessages_prepare(void);
-  queue_message_t selectMessages(const int chat_id, const int message_id_begin,
-                                 const int message_id_end,
-                                 const int message_status, const int limit);
-  void selectMessages_close(void);
+  no_errors selectMessages_prepare(void);
+  no_errors selectMessages_close(void);
 
 #define UPDATE_STATUS_DELIVERED                                               \
   "UPDATE messages SET status = 2, dt_delivered = CURRENT_TIMESTAMP() WHERE " \
@@ -254,11 +239,8 @@ class DB_Queries_DML {
       int param_count;
     } Query;
   } Update_Status_Delivered;
-  void updateStatusDelivered_prepare(void);
-  size_t updateStatusDelivered(const int chat_user_id,
-                               const int message_id_begin,
-                               const int message_id_end);
-  int updateStatusDelivered_close(void);
+  no_errors updateStatusDelivered_prepare(void);
+  no_errors updateStatusDelivered_close(void);
 
 #define UPDATE_STATUS_READ                                               \
   "UPDATE messages SET status = 3, dt_read = CURRENT_TIMESTAMP() WHERE " \
@@ -274,10 +256,36 @@ class DB_Queries_DML {
       int param_count;
     } Query;
   } Update_Status_Read;
-  void updateStatusRead_prepare(void);
+  no_errors updateStatusRead_prepare(void);
+  no_errors updateStatusRead_close(void);
+
+ public:
+  DB_Queries_DML();
+  ~DB_Queries_DML();
+
+  no_errors connectDB_open(void);
+  no_errors connectDB_close(void);
+
+  no_errors prepareAll(void);
+  no_errors closeAll(void);
+
+  insert_id insertUser(const User_t user);
+  User_t selectUser(const int id);
+  insert_id insertChat(const Chat_t chat);
+  Chat_t selectChat(const int id);
+  insert_id insertChatUser(const int chat_id, const int user_id);
+  size_t selectChatUser(const int chat_id, const int user_id);
+  insert_id insertMessage(const int chat_user_id, const Message_t message);
+  Message_t selectMessage(const int chat_id, const int message_id);
+  queue_message_t selectMessages(const int chat_id, const int message_id_begin,
+                                 const int message_id_end,
+                                 const int message_status, const int limit);
+  size_t updateStatusDelivered(const int chat_user_id,
+                              const int message_id_begin,
+                              const int message_id_end);
   size_t updateStatusRead(const int chat_user_id,
                                const int message_id_begin,
                                const int message_id_end);
-  int updateStatusRead_close(void);
+
 
 };

@@ -17,19 +17,7 @@ int main() {
   DB_Queries_DML db_queries_dml;
   db_queries_dml.connectDB_open();
 
-  db_queries_dml.insertUser_prepare();
-  db_queries_dml.insertChat_prepare();
-  db_queries_dml.insertChatUser_prepare();
-  db_queries_dml.insertMessage_prepare();
 
-  db_queries_dml.selectUser_prepare();
-  db_queries_dml.selectChat_prepare();
-  db_queries_dml.selectChatUser_prepare();
-  db_queries_dml.selectMessage_prepare();
-  db_queries_dml.selectMessages_prepare();
-
-  db_queries_dml.updateStatusDelivered_prepare();
-  db_queries_dml.updateStatusRead_prepare();
 
   User_t user(db_queries_dml.selectUser(1));
   if (user) {
@@ -84,52 +72,7 @@ int main() {
   // db_queries_dml.updateStatusDelivered(1, 1, 10);
   // db_queries_dml.updateStatusRead(1, 1, 10);
 
-  db_queries_dml.insertUser_close();
-  db_queries_dml.insertChat_close();
-  db_queries_dml.insertChatUser_close();
-  db_queries_dml.insertMessage_close();
 
-#if _DEBUG
-  std::cout << "тут выполнилось" << std::endl;
-#endif
-  db_queries_dml.selectChat_close();
-#if _DEBUG
-  std::cout << "selectChat_close() выполнилось" << std::endl;
-#endif
-  db_queries_dml.selectUser_close();
-#if _DEBUG
-  std::cout << "selectUser_close() выполнилось" << std::endl;
-#endif
-  db_queries_dml.selectChatUser_close();
-#if _DEBUG
-  std::cout << "selectChatUser_close() выполнилось" << std::endl;
-#endif
-  db_queries_dml.selectMessage_close();
-#if _DEBUG
-  std::cout << "selectMessage_close() выполнилось" << std::endl;
-#endif
-  //   db_queries_dml.insertMessage_close();
-  // #if _DEBUG
-  //   std::cout << "insertMessage_close() выполнилось" << std::endl;
-  // #endif
-
-  db_queries_dml.selectMessages_close();
-#if _DEBUG
-  std::cout << "selectMessages_close() выполнилось" << std::endl;
-#endif
-  db_queries_dml.updateStatusDelivered_close();
-#if _DEBUG
-  std::cout << "updateStatusDelivered_close() выполнилось" << std::endl;
-#endif
-  db_queries_dml.updateStatusRead_close();
-#if _DEBUG
-  std::cout << "updateStatusRead_close() выполнилось" << std::endl;
-#endif
-
-  db_queries_dml.connectDB_close();
-#if _DEBUG
-  std::cout << "connectDB_close() выполнилось" << std::endl;
-#endif
 
   db_queries_ddl.connectToMySQLserver_close();
 

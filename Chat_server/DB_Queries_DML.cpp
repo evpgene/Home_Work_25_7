@@ -4,12 +4,13 @@
 
   DB_Queries_DML::~DB_Queries_DML() {}
 
-  void DB_Queries_DML::connectDB_open(void) {
+   no_errors DB_Queries_DML::connectDB_open(void) {
     // Получаем дескриптор соединения
     mysql_init(mysql);
     if (mysql == nullptr) {
       // Если дескриптор не получен — выводим сообщение об ошибке
       std::cout << "Error: can't create MySQL-descriptor" << std::endl;
+      return false;
     }
 
     // Подключаемся к серверу
@@ -19,9 +20,11 @@
       // ошибке
       std::cout << "Error: can't connect to database " << mysql_error(mysql)
                 << std::endl;
+      return false;
     } else {
       // Если соединение успешно установлено выводим фразу — "Success!"
       std::cout << "Success!" << std::endl;
+      return true;
     }
 
     mysql_set_character_set(mysql, "utf8");
@@ -30,23 +33,24 @@
               << std::endl;
   }
 
-  void DB_Queries_DML::connectDB_close(void) {
+   no_errors DB_Queries_DML::connectDB_close(void) {
     // Закрываем соединение с сервером базы данных
     mysql_close(mysql);
+    return true;
   }
 
-  void DB_Queries_DML::insertUser_prepare(void) {
+   no_errors DB_Queries_DML::insertUser_prepare(void) {
     Insert_User.Query.stmt = mysql_stmt_init(mysql);
     if (!Insert_User.Query.stmt) {
       fprintf(stderr, " INSERT_USER mysql_stmt_init(), out of memory\n");
-      return;
+      return false;
     }
 
     if (mysql_stmt_prepare(Insert_User.Query.stmt, INSERT_USER,
                           strlen(INSERT_USER))) {
       fprintf(stderr, " mysql_stmt_prepare(), INSERT_USER failed\n");
       fprintf(stderr, " %s\n", mysql_stmt_error(Insert_User.Query.stmt));
-      return;
+      return false;
     }
     fprintf(stdout, " prepare, INSERT_USER successful\n");
 
@@ -59,7 +63,7 @@
     if (Insert_User.Query.param_count != 2) /* validate parameter count */
     {
       fprintf(stderr, " INSERT_USER invalid parameter count returned by MySQL\n");
-      return;
+      return false;
     }
 
     /* Bind the data for all parameters */
@@ -67,72 +71,72 @@
 
     /* STRING PARAM */ /* Login */
     Insert_User.Query.bind[0].buffer_type = MYSQL_TYPE_STRING;
-    Insert_User.Query.bind[0].buffer = (char *)Insert_User.Query.Login.str_data;
+    Insert_User.Query.bind[0].buffer = (char *)Insert_User.Query.login.str_data;
     Insert_User.Query.bind[0].buffer_length = STRING_SIZE;
     Insert_User.Query.bind[0].is_null = 0;
-    Insert_User.Query.bind[0].length = &Insert_User.Query.Login.str_length;
+    Insert_User.Query.bind[0].length = &Insert_User.Query.login.str_length;
 
     /* STRING PARAM */ /* pass */
     Insert_User.Query.bind[1].buffer_type = MYSQL_TYPE_STRING;
-    Insert_User.Query.bind[1].buffer = (char *)Insert_User.Query.Pass.str_data;
+    Insert_User.Query.bind[1].buffer = (char *)Insert_User.Query.pass.str_data;
     Insert_User.Query.bind[1].buffer_length = STRING_SIZE;
     Insert_User.Query.bind[1].is_null = 0;
-    Insert_User.Query.bind[1].length = &Insert_User.Query.Pass.str_length;
+    Insert_User.Query.bind[1].length = &Insert_User.Query.pass.str_length;
 
     if (mysql_stmt_bind_param(Insert_User.Query.stmt, Insert_User.Query.bind)) {
       fprintf(stderr, " INSERT_USER mysql_stmt_bind_param() failed\n");
       fprintf(stderr, " %s\n", mysql_stmt_error(Insert_User.Query.stmt));
-      return;
+      return false;
     }
+    return true;
   }
 
-  size_t DB_Queries_DML::insertUser(const User_t user) {
-    strncpy(Insert_User.Query.Login.str_data, user->getLogin().c_str(),
+  insert_id DB_Queries_DML::insertUser(const User_t user) {
+    strncpy(Insert_User.Query.login.str_data, user->getLogin().c_str(),
             STRING_SIZE);
-    Insert_User.Query.Login.str_length = strlen(Insert_User.Query.Login.str_data);
+    Insert_User.Query.login.str_length = strlen(Insert_User.Query.login.str_data);
 
-    strncpy(Insert_User.Query.Pass.str_data, user->getPass().c_str(),
+    strncpy(Insert_User.Query.pass.str_data, user->getPass().c_str(),
             STRING_SIZE);
-    Insert_User.Query.Pass.str_length = strlen(Insert_User.Query.Pass.str_data);
+    Insert_User.Query.pass.str_length = strlen(Insert_User.Query.pass.str_data);
 
     /* Execute the INSERT statement */
     if (mysql_stmt_execute(Insert_User.Query.stmt)) {
       fprintf(stderr, " INSERT_USER mysql_stmt_execute(), 1 failed\n");
       fprintf(stderr, " %s\n", mysql_stmt_error(Insert_User.Query.stmt));
-      return -1;
+      return false;
     }
 
     if (Insert_User.Query.affected_rows != 1) /* validate affected rows */
     {
       fprintf(stderr, " INSERT_USER invalid affected rows by MySQL\n");
-      return -1;
+      return false;
     } else {
       return mysql_insert_id(mysql);
     }
   }
 
-  int DB_Queries_DML::insertUser_close(void) {
-    /* Close the statement */
+   no_errors DB_Queries_DML::insertUser_close(void) {
     if (mysql_stmt_close(Insert_User.Query.stmt)) {
       fprintf(stderr, " INSERT_USER failed while closing the statement\n");
       fprintf(stderr, " %s\n", mysql_error(mysql));
-      return -1;
+      return false;
     }
-    return 0;
+    return true;
   }
 
-  void DB_Queries_DML::selectUser_prepare(void) {
+   no_errors DB_Queries_DML::selectUser_prepare(void) {
     Select_User.Query.stmt = mysql_stmt_init(mysql);
     if (!Select_User.Query.stmt) {
       fprintf(stderr, " SELECT_USER mysql_stmt_init(), out of memory\n");
-      return;
+      return false;
     }
 
     if (mysql_stmt_prepare(Select_User.Query.stmt, SELECT_USER,
                           strlen(SELECT_USER))) {
       fprintf(stderr, " mysql_stmt_prepare(), SELECT_USER failed\n");
       fprintf(stderr, " %s\n", mysql_stmt_error(Select_User.Query.stmt));
-      return;
+      return false;
     }
     fprintf(stdout, " prepare, SELECT_USER successful\n");
 
@@ -145,7 +149,7 @@
     if (Select_User.Query.param_count != 1) /* validate parameter count */
     {
       fprintf(stderr, " SELECT_USER invalid parameter count returned by MySQL\n");
-      return;
+      return false;
     }
     /* Bind the data for all parameters */
     memset(Select_User.Query.bind, 0, sizeof(Select_User.Query.bind));
@@ -159,7 +163,7 @@
     if (mysql_stmt_bind_param(Select_User.Query.stmt, Select_User.Query.bind)) {
       fprintf(stderr, " SELECT_USER mysql_stmt_bind_param() failed\n");
       fprintf(stderr, " %s\n", mysql_stmt_error(Select_User.Query.stmt));
-      return;
+      return false;
     }
 
     /* Bind the result buffers for all columns before fetching them */
@@ -174,7 +178,7 @@
 
     /* STRING COLUMN */
     Select_User.Result.bind[1].buffer_type = MYSQL_TYPE_STRING;
-    Select_User.Result.bind[1].buffer = (char *)Select_User.Result.Login.str_data;
+    Select_User.Result.bind[1].buffer = (char *)Select_User.Result.login.str_data;
     Select_User.Result.bind[1].buffer_length = STRING_SIZE;
     Select_User.Result.bind[1].is_null = &Select_User.Result.is_null[1];
     Select_User.Result.bind[1].length = &Select_User.Result.length[1];
@@ -182,7 +186,7 @@
 
     /* STRING COLUMN */
     Select_User.Result.bind[2].buffer_type = MYSQL_TYPE_STRING;
-    Select_User.Result.bind[2].buffer = (char *)Select_User.Result.Pass.str_data;
+    Select_User.Result.bind[2].buffer = (char *)Select_User.Result.pass.str_data;
     Select_User.Result.bind[2].buffer_length = STRING_SIZE;
     Select_User.Result.bind[2].is_null = &Select_User.Result.is_null[2];
     Select_User.Result.bind[2].length = &Select_User.Result.length[2];
@@ -196,7 +200,7 @@
               " SELECT_USER mysql_stmt_result_metadata(), \
             returned no meta information\n");
       fprintf(stderr, " %s\n", mysql_stmt_error(Select_User.Query.stmt));
-      return;
+      return false;
     }
 
     /* Get total columns in the query */
@@ -208,15 +212,16 @@
     if (Select_User.Result.column_count != 3) /* validate column count */
     {
       fprintf(stderr, " SELECT_USER invalid column count returned by MySQL\n");
-      return;
+      return false;
     }
 
     /* Bind the result buffers */
     if (mysql_stmt_bind_result(Select_User.Query.stmt, Select_User.Result.bind)) {
       fprintf(stderr, " SELECT_USER mysql_stmt_bind_result() failed\n");
       fprintf(stderr, " %s\n", mysql_stmt_error(Select_User.Query.stmt));
-      // return;
+      return false;
     }
+    return true;
   }
 
   User_t DB_Queries_DML::selectUser(const int id) {
@@ -249,38 +254,34 @@
       return nullptr;
     }
 
-    User_t user = make_shared<User>(User{Select_User.Result.Login.str_data,
-                                        Select_User.Result.Pass.str_data});
+    User_t user = make_shared<User>(User{Select_User.Result.login.str_data,
+                                        Select_User.Result.pass.str_data});
 
     return user;
   }
 
-  void DB_Queries_DML::selectUser_close(void) {
-    /* Free the prepared result metadata */
+   no_errors DB_Queries_DML::selectUser_close(void) {
     mysql_free_result(Select_User.Result.prepare_meta_result);
-
-    // Close statement
     if (mysql_stmt_close(Select_User.Query.stmt)) {
-      /* mysql_stmt_close() invalidates stmt, so call          */
-      /* mysql_error(mysql) rather than mysql_stmt_error(stmt) */
       fprintf(stderr, " SELECT_USER failed while closing the statement\n");
       fprintf(stderr, " %s\n", mysql_error(mysql));
-      return;
+      return false;
     }
+    return true;
   }
 
-  void DB_Queries_DML::insertChat_prepare(void) {
+   no_errors DB_Queries_DML::insertChat_prepare(void) {
     Insert_Chat.Query.stmt = mysql_stmt_init(mysql);
     if (!Insert_Chat.Query.stmt) {
       fprintf(stderr, " INSERT_CHAT mysql_stmt_init(), out of memory\n");
-      return;
+      return false;
     }
 
     if (mysql_stmt_prepare(Insert_Chat.Query.stmt, INSERT_CHAT,
                           strlen(INSERT_CHAT))) {
       fprintf(stderr, " mysql_stmt_prepare(), INSERT_CHAT failed\n");
       fprintf(stderr, " %s\n", mysql_stmt_error(Insert_Chat.Query.stmt));
-      return;
+      return false;
     }
     fprintf(stdout, " prepare, INSERT_CHAT successful\n");
 
@@ -293,13 +294,13 @@
     if (Insert_Chat.Query.param_count != 2) /* validate parameter count */
     {
       fprintf(stderr, " INSERT_CHAT invalid parameter count returned by MySQL\n");
-      return;
+      return false;
     }
 
     /* Bind the data for all parameters */
     memset(Insert_Chat.Query.bind, 0, sizeof(Insert_Chat.Query.bind));
 
-    /* Login */
+    /* login */
     Insert_Chat.Query.bind[0].buffer_type = MYSQL_TYPE_STRING;
     Insert_Chat.Query.bind[0].buffer = (char *)Insert_Chat.Query.Name.str_data;
     Insert_Chat.Query.bind[0].buffer_length = STRING_SIZE;
@@ -309,11 +310,12 @@
     if (mysql_stmt_bind_param(Insert_Chat.Query.stmt, Insert_Chat.Query.bind)) {
       fprintf(stderr, " INSERT_CHAT mysql_stmt_bind_param() failed\n");
       fprintf(stderr, " %s\n", mysql_stmt_error(Insert_Chat.Query.stmt));
-      return;
+      return false;
     }
+    return true;
   }
 
-  size_t DB_Queries_DML::insertChat(const Chat_t chat) {
+  insert_id DB_Queries_DML::insertChat(const Chat_t chat) {
     strncpy(Insert_Chat.Query.Name.str_data, chat->getChatName().c_str(),
             STRING_SIZE);
     Insert_Chat.Query.Name.str_length = strlen(Insert_Chat.Query.Name.str_data);
@@ -322,42 +324,38 @@
     if (mysql_stmt_execute(Insert_Chat.Query.stmt)) {
       fprintf(stderr, " INSERT_CHAT mysql_stmt_execute(), 1 failed\n");
       fprintf(stderr, " %s\n", mysql_stmt_error(Insert_Chat.Query.stmt));
-      return -1;
+      return 0;
     }
 
     if (Insert_Chat.Query.affected_rows != 1) /* validate affected rows */
     {
       fprintf(stderr, " INSERT_CHAT invalid affected rows by MySQL\n");
-      return -1;
-    } else {
+      return 0;
+    } 
       return mysql_insert_id(mysql);
-    }
   }
 
-  int DB_Queries_DML::insertChat_close(void) {
-    /* Close the statement */
+   no_errors DB_Queries_DML::insertChat_close(void) {
     if (mysql_stmt_close(Insert_Chat.Query.stmt)) {
-      /* mysql_stmt_close() invalidates stmt, so call          */
-      /* mysql_error(mysql) rather than mysql_stmt_error(stmt) */
       fprintf(stderr, " INSERT_CHAT failed while closing the statement\n");
       fprintf(stderr, " %s\n", mysql_error(mysql));
-      return -1;
+      return false;
     }
-    return 0;
+    return true;
   }
 
-  void DB_Queries_DML::selectChat_prepare(void) {
+   no_errors DB_Queries_DML::selectChat_prepare(void) {
     Select_Chat.Query.stmt = mysql_stmt_init(mysql);
     if (!Select_Chat.Query.stmt) {
       fprintf(stderr, " SELECT_CHAT mysql_stmt_init(), out of memory\n");
-      return;
+      return false;
     }
 
     if (mysql_stmt_prepare(Select_Chat.Query.stmt, SELECT_CHAT,
                           strlen(SELECT_CHAT))) {
       fprintf(stderr, " SELECT_CHAT mysql_stmt_prepare(), SELECT_CHAT failed\n");
       fprintf(stderr, " %s\n", mysql_stmt_error(Select_Chat.Query.stmt));
-      return;
+      return false;
     }
     fprintf(stdout, " SELECT_CHAT prepare, SELECT_CHAT successful\n");
 
@@ -370,7 +368,7 @@
     if (Select_Chat.Query.param_count != 1) /* validate parameter count */
     {
       fprintf(stderr, " SELECT_CHAT invalid parameter count returned by MySQL\n");
-      return;
+      return false;
     }
     /* Bind the data for all parameters */
     memset(Select_Chat.Query.bind, 0, sizeof(Select_Chat.Query.bind));
@@ -384,7 +382,7 @@
     if (mysql_stmt_bind_param(Select_Chat.Query.stmt, Select_Chat.Query.bind)) {
       fprintf(stderr, " SELECT_CHAT mysql_stmt_bind_param() failed\n");
       fprintf(stderr, " %s\n", mysql_stmt_error(Select_Chat.Query.stmt));
-      return;
+      return false;
     }
 
     /* Bind the result buffers for all columns before fetching them */
@@ -413,7 +411,7 @@
               " SELECT_CHAT mysql_stmt_result_metadata(), \
             returned no meta information\n");
       fprintf(stderr, " %s\n", mysql_stmt_error(Select_Chat.Query.stmt));
-      return;
+      return false;
     }
 
     /* Get total columns in the query */
@@ -425,15 +423,16 @@
     if (Select_Chat.Result.column_count != 2) /* validate column count */
     {
       fprintf(stderr, " SELECT_CHAT invalid column count returned by MySQL\n");
-      return;
+      return false;
     }
 
     /* Bind the result buffers */
     if (mysql_stmt_bind_result(Select_Chat.Query.stmt, Select_Chat.Result.bind)) {
       fprintf(stderr, " SELECT_CHAT mysql_stmt_bind_result() failed\n");
       fprintf(stderr, " %s\n", mysql_stmt_error(Select_Chat.Query.stmt));
-      // return;
+      return false;
     }
+    return true;
   }
 
   Chat_t DB_Queries_DML::selectChat(const int id) {
@@ -466,37 +465,31 @@
       return nullptr;
     }
 
-    Chat_t chat = make_shared<Chat>(Chat{Select_Chat.Result.Name.str_data});
-
-    return chat;
+    return make_shared<Chat>(Chat{Select_Chat.Result.Name.str_data});
   }
 
-  void DB_Queries_DML::selectChat_close(void) {
-    /* Free the prepared result metadata */
+   no_errors DB_Queries_DML::selectChat_close(void) {
     mysql_free_result(Select_Chat.Result.prepare_meta_result);
-
-    // Close statement
     if (mysql_stmt_close(Select_Chat.Query.stmt)) {
-      /* mysql_stmt_close() invalidates stmt, so call          */
-      /* mysql_error(mysql) rather than mysql_stmt_error(stmt) */
       fprintf(stderr, " SELECT_CHAT failed while closing the statement\n");
       fprintf(stderr, " %s\n", mysql_error(mysql));
-      return;
+      return false;
     }
+    return true;
   }
 
-  void DB_Queries_DML::insertChatUser_prepare(void) {
+   no_errors DB_Queries_DML::insertChatUser_prepare(void) {
     Insert_ChatUser.Query.stmt = mysql_stmt_init(mysql);
     if (!Insert_ChatUser.Query.stmt) {
       fprintf(stderr, " INSERT_CHAT_USER mysql_stmt_init(), out of memory\n");
-      return;
+      return false;
     }
 
     if (mysql_stmt_prepare(Insert_ChatUser.Query.stmt, INSERT_CHAT_USER,
                           strlen(INSERT_CHAT_USER))) {
       fprintf(stderr, " mysql_stmt_prepare(), INSERT_CHAT_USER failed\n");
       fprintf(stderr, " %s\n", mysql_stmt_error(Insert_ChatUser.Query.stmt));
-      return;
+      return false;
     }
     fprintf(stdout, " prepare, INSERT_CHAT_USER successful\n");
 
@@ -510,7 +503,7 @@
     {
       fprintf(stderr,
               " INSERT_CHAT_USER invalid parameter count returned by MySQL\n");
-      return;
+      return false;
     }
 
     /* Bind the data for all parameters */
@@ -534,11 +527,12 @@
                               Insert_ChatUser.Query.bind)) {
       fprintf(stderr, " INSERT_CHAT_USER mysql_stmt_bind_param() failed\n");
       fprintf(stderr, " %s\n", mysql_stmt_error(Insert_ChatUser.Query.stmt));
-      return;
+      return false;
     }
+    return true;
   }
 
-  size_t DB_Queries_DML::insertChatUser(const int chat_id, const int user_id) {
+  insert_id DB_Queries_DML::insertChatUser(const int chat_id, const int user_id) {
     Insert_ChatUser.Query.chat_id.int_data = chat_id;
     Insert_ChatUser.Query.user_id.int_data = user_id;
 
@@ -546,40 +540,38 @@
     if (mysql_stmt_execute(Insert_ChatUser.Query.stmt)) {
       fprintf(stderr, " INSERT_CHAT_USER mysql_stmt_execute(), 1 failed\n");
       fprintf(stderr, " %s\n", mysql_stmt_error(Insert_ChatUser.Query.stmt));
-      return -1;
+      return 0;
     }
 
     if (Insert_ChatUser.Query.affected_rows != 1) /* validate affected rows */
     {
       fprintf(stderr, " INSERT_CHAT_USER invalid affected rows by MySQL\n");
-      return -1;
-    } else {
-      return mysql_insert_id(mysql);
+      return 0;
     }
+    return mysql_insert_id(mysql);
   }
 
-  int DB_Queries_DML::insertChatUser_close(void) {
-    /* Close the statement */
+   no_errors DB_Queries_DML::insertChatUser_close(void) {
     if (mysql_stmt_close(Insert_ChatUser.Query.stmt)) {
       fprintf(stderr, " INSERT_CHAT_USER failed while closing the statement\n");
       fprintf(stderr, " %s\n", mysql_error(mysql));
-      return -1;
+      return false;
     }
-    return 0;
+    return true;
   }
 
-  void DB_Queries_DML::selectChatUser_prepare(void) {
+   no_errors DB_Queries_DML::selectChatUser_prepare(void) {
     Select_ChatUser.Query.stmt = mysql_stmt_init(mysql);
     if (!Select_ChatUser.Query.stmt) {
       fprintf(stderr, " SELECT_CHAT_USER mysql_stmt_init(), out of memory\n");
-      return;
+      return false;
     }
 
     if (mysql_stmt_prepare(Select_ChatUser.Query.stmt, SELECT_CHAT_USER,
                           strlen(SELECT_CHAT_USER))) {
       fprintf(stderr, " mysql_stmt_prepare(), SELECT_CHAT_USER failed\n");
       fprintf(stderr, " %s\n", mysql_stmt_error(Select_ChatUser.Query.stmt));
-      return;
+      return false;
     }
     fprintf(stdout, " prepare, SELECT_CHAT_USER successful\n");
 
@@ -593,7 +585,7 @@
     {
       fprintf(stderr,
               " SELECT_CHAT_USER invalid parameter count returned by MySQL\n");
-      return;
+      return false;
     }
     /* Bind the data for all parameters */
     memset(Select_ChatUser.Query.bind, 0, sizeof(Select_ChatUser.Query.bind));
@@ -616,7 +608,7 @@
                               Select_ChatUser.Query.bind)) {
       fprintf(stderr, " SELECT_CHAT_USER mysql_stmt_bind_param() failed\n");
       fprintf(stderr, " %s\n", mysql_stmt_error(Select_ChatUser.Query.stmt));
-      return;
+      return false;
     }
 
     /* Bind the result buffers for all columns before fetching them */
@@ -646,7 +638,7 @@
               " SELECT_CHAT_USER mysql_stmt_result_metadata(), \
             returned no meta information\n");
       fprintf(stderr, " %s\n", mysql_stmt_error(Select_ChatUser.Query.stmt));
-      return;
+      return false;
     }
 
     /* Get total columns in the query */
@@ -659,7 +651,7 @@
     {
       fprintf(stderr,
               " SELECT_CHAT_USER invalid column count returned by MySQL\n");
-      return;
+      return false;
     }
 
     /* Bind the result buffers */
@@ -667,8 +659,9 @@
                               Select_ChatUser.Result.bind)) {
       fprintf(stderr, " SELECT_CHAT_USER mysql_stmt_bind_result() failed\n");
       fprintf(stderr, " %s\n", mysql_stmt_error(Select_ChatUser.Query.stmt));
-      // return;
+      return false;
     }
+    return true;
   }
 
   size_t DB_Queries_DML::selectChatUser(const int chat_id, const int user_id) {
@@ -704,30 +697,28 @@
     return Select_ChatUser.Result.chat_user_id.int_data;
   }
 
-  void DB_Queries_DML::selectChatUser_close(void) {
-    /* Free the prepared result metadata */
+   no_errors DB_Queries_DML::selectChatUser_close(void) {
     mysql_free_result(Select_ChatUser.Result.prepare_meta_result);
-
-    // Close statement
     if (mysql_stmt_close(Select_ChatUser.Query.stmt)) {
       fprintf(stderr, " SELECT_CHAT_USER failed while closing the statement\n");
       fprintf(stderr, " %s\n", mysql_error(mysql));
-      return;
+      return false;
     }
+    return true;
   }
 
-  void DB_Queries_DML::insertMessage_prepare(void) {
+   no_errors DB_Queries_DML::insertMessage_prepare(void) {
     Insert_Message.Query.stmt = mysql_stmt_init(mysql);
     if (!Insert_Message.Query.stmt) {
       fprintf(stderr, " INSERT_MESSAGE mysql_stmt_init(), out of memory\n");
-      return;
+      return false;
     }
 
     if (mysql_stmt_prepare(Insert_Message.Query.stmt, INSERT_MESSAGE,
                           strlen(INSERT_MESSAGE))) {
       fprintf(stderr, " mysql_stmt_prepare(), INSERT_MESSAGE failed\n");
       fprintf(stderr, " %s\n", mysql_stmt_error(Insert_Message.Query.stmt));
-      return;
+      return false;
     }
     fprintf(stdout, " prepare, INSERT_MESSAGE successful\n");
 
@@ -741,7 +732,7 @@
     {
       fprintf(stderr,
               " INSERT_MESSAGE invalid parameter count returned by MySQL\n");
-      return;
+      return false;
     }
 
     /* Bind the data for all parameters */
@@ -754,7 +745,7 @@
     Insert_Message.Query.bind[0].is_null = 0;
     Insert_Message.Query.bind[0].length = 0;
 
-    /* STRING PARAM */ /* Login */
+    /* STRING PARAM */ /* login */
     Insert_Message.Query.bind[1].buffer_type = MYSQL_TYPE_STRING;
     Insert_Message.Query.bind[1].buffer =
         (char *)Insert_Message.Query.message.str_data;
@@ -767,11 +758,12 @@
                               Insert_Message.Query.bind)) {
       fprintf(stderr, " INSERT_MESSAGE mysql_stmt_bind_param() failed\n");
       fprintf(stderr, " %s\n", mysql_stmt_error(Insert_Message.Query.stmt));
-      return;
+      return false;
     }
+    return true;
   }
 
-  size_t DB_Queries_DML::insertMessage(const int chat_user_id,
+  insert_id DB_Queries_DML::insertMessage(const int chat_user_id,
                                   const Message_t message) {
     Insert_Message.Query.chat_user_id.int_data = chat_user_id;
 
@@ -784,7 +776,7 @@
     if (mysql_stmt_execute(Insert_Message.Query.stmt)) {
       fprintf(stderr, " INSERT_MESSAGE mysql_stmt_execute(), 1 failed\n");
       fprintf(stderr, " %s\n", mysql_stmt_error(Insert_Message.Query.stmt));
-      return -1;
+      return 0;
     }
 
     Insert_Message.Query.affected_rows =
@@ -799,34 +791,32 @@
 
     {
       fprintf(stderr, " INSERT_MESSAGE invalid affected rows by MySQL\n");
-      return -1;
-    } else {
-      return mysql_insert_id(mysql);
+      return 0;
     }
+    return mysql_insert_id(mysql);
   }
 
-  int DB_Queries_DML::insertMessage_close(void) {
-    /* Close the statement */
+   no_errors DB_Queries_DML::insertMessage_close(void) {
     if (mysql_stmt_close(Insert_Message.Query.stmt)) {
       fprintf(stderr, " INSERT_MESSAGE failed while closing the statement\n");
       fprintf(stderr, " %s\n", mysql_error(mysql));
-      return -1;
+      return false;
     }
-    return 0;
+    return true;
   }
 
-  void DB_Queries_DML::selectMessage_prepare(void) {
+   no_errors DB_Queries_DML::selectMessage_prepare(void) {
     Select_Message.Query.stmt = mysql_stmt_init(mysql);
     if (!Select_Message.Query.stmt) {
       fprintf(stderr, " SELECT_MESSAGE mysql_stmt_init(), out of memory\n");
-      return;
+      return false;
     }
 
     if (mysql_stmt_prepare(Select_Message.Query.stmt, SELECT_MESSAGE,
                           strlen(SELECT_MESSAGE))) {
       fprintf(stderr, " mysql_stmt_prepare(), SELECT_MESSAGE failed\n");
       fprintf(stderr, " %s\n", mysql_stmt_error(Select_Message.Query.stmt));
-      return;
+      return false;
     }
     fprintf(stdout, " prepare, SELECT_MESSAGE successful\n");
 
@@ -840,7 +830,7 @@
     {
       fprintf(stderr,
               " SELECT_MESSAGE invalid parameter count returned by MySQL\n");
-      return;
+      return false;
     }
     /* Bind the data for all parameters */
     memset(Select_Message.Query.bind, 0, sizeof(Select_Message.Query.bind));
@@ -863,7 +853,7 @@
                               Select_Message.Query.bind)) {
       fprintf(stderr, " SELECT_MESSAGE mysql_stmt_bind_param() failed\n");
       fprintf(stderr, " %s\n", mysql_stmt_error(Select_Message.Query.stmt));
-      return;
+      return false;
     }
 
     /* Bind the result buffers for all columns before fetching them */
@@ -934,7 +924,7 @@
               " SELECT_MESSAGE mysql_stmt_result_metadata(), \
             returned no meta information\n");
       fprintf(stderr, " %s\n", mysql_stmt_error(Select_Message.Query.stmt));
-      return;
+      return false;
     }
 
     /* Get total columns in the query */
@@ -946,7 +936,7 @@
     if (Select_Message.Result.column_count != 7) /* validate column count */
     {
       fprintf(stderr, " SELECT_MESSAGE invalid column count returned by MySQL\n");
-      return;
+      return false;
     }
 
     /* Bind the result buffers */
@@ -954,8 +944,9 @@
                               Select_Message.Result.bind)) {
       fprintf(stderr, " SELECT_MESSAGE mysql_stmt_bind_result() failed\n");
       fprintf(stderr, " %s\n", mysql_stmt_error(Select_Message.Query.stmt));
-      // return;
+      return false;
     }
+    return true;
   }
 
   
@@ -1004,32 +995,28 @@
     return message;
   }
 
-  void DB_Queries_DML::selectMessage_close(void) {
-    /* Free the prepared result metadata */
+   no_errors DB_Queries_DML::selectMessage_close(void) {
     mysql_free_result(Select_Message.Result.prepare_meta_result);
-
-    // Close statement
     if (mysql_stmt_close(Select_Message.Query.stmt)) {
-      /* mysql_stmt_close() invalidates stmt, so call          */
-      /* mysql_error(mysql) rather than mysql_stmt_error(stmt) */
       fprintf(stderr, " SELECT_MESSAGE failed while closing the statement\n");
       fprintf(stderr, " %s\n", mysql_error(mysql));
-      return;
+      return false;
     }
+    return true;
   }
 
-  void DB_Queries_DML::selectMessages_prepare(void) {
+   no_errors DB_Queries_DML::selectMessages_prepare(void) {
     Select_Messages.Query.stmt = mysql_stmt_init(mysql);
     if (!Select_Messages.Query.stmt) {
       fprintf(stderr, " SELECT_MESSAGES mysql_stmt_init(), out of memory\n");
-      return;
+      return false;
     }
 
     if (mysql_stmt_prepare(Select_Messages.Query.stmt, SELECT_MESSAGES,
                           strlen(SELECT_MESSAGES))) {
       fprintf(stderr, " mysql_stmt_prepare(), SELECT_MESSAGES failed\n");
       fprintf(stderr, " %s\n", mysql_stmt_error(Select_Messages.Query.stmt));
-      return;
+      return false;
     }
     fprintf(stdout, " prepare, SELECT_MESSAGES successful\n");
 
@@ -1043,7 +1030,7 @@
     {
       fprintf(stderr,
               " SELECT_MESSAGES invalid parameter count returned by MySQL\n");
-      return;
+      return false;
     }
     /* Bind the data for all parameters */
     memset(Select_Messages.Query.bind, 0, sizeof(Select_Messages.Query.bind));
@@ -1087,7 +1074,7 @@
                               Select_Messages.Query.bind)) {
       fprintf(stderr, " SELECT_MESSAGES mysql_stmt_bind_param() failed\n");
       fprintf(stderr, " %s\n", mysql_stmt_error(Select_Messages.Query.stmt));
-      return;
+      return false;
     }
 
     /* Bind the result buffers for all columns before fetching them */
@@ -1158,7 +1145,7 @@
               " SELECT_MESSAGES mysql_stmt_result_metadata(), \
             returned no meta information\n");
       fprintf(stderr, " %s\n", mysql_stmt_error(Select_Messages.Query.stmt));
-      return;
+      return false;
     }
 
     /* Get total columns in the query */
@@ -1171,7 +1158,7 @@
     {
       fprintf(stderr,
               " SELECT_MESSAGES invalid column count returned by MySQL\n");
-      return;
+      return false;
     }
 
     /* Bind the result buffers */
@@ -1179,8 +1166,9 @@
                               Select_Messages.Result.bind)) {
       fprintf(stderr, " SELECT_MESSAGES mysql_stmt_bind_result() failed\n");
       fprintf(stderr, " %s\n", mysql_stmt_error(Select_Messages.Query.stmt));
-      // return;
+      return false;
     }
+    return true;
   }
 
   queue_message_t DB_Queries_DML::selectMessages(const int chat_id,
@@ -1235,24 +1223,22 @@
     return queue;
   }
 
-  void DB_Queries_DML::selectMessages_close(void) {
-    /* Free the prepared result metadata */
+   no_errors DB_Queries_DML::selectMessages_close(void) {
     mysql_free_result(Select_Messages.Result.prepare_meta_result);
-
-    // Close statement
     if (mysql_stmt_close(Select_Messages.Query.stmt)) {
       fprintf(stderr, " SELECT_MESSAGES failed while closing the statement\n");
       fprintf(stderr, " %s\n", mysql_error(mysql));
-      return;
+      return false;
     }
+    return true;
   }
 
-  void DB_Queries_DML::updateStatusDelivered_prepare(void) {
+   no_errors DB_Queries_DML::updateStatusDelivered_prepare(void) {
     Update_Status_Delivered.Query.stmt = mysql_stmt_init(mysql);
     if (!Update_Status_Delivered.Query.stmt) {
       fprintf(stderr,
               " UPDATE_STATUS_DELIVERED mysql_stmt_init(), out of memory\n");
-      return;
+      return false;
     }
 
     if (mysql_stmt_prepare(Update_Status_Delivered.Query.stmt,
@@ -1261,7 +1247,7 @@
       fprintf(stderr, " mysql_stmt_prepare(), UPDATE_STATUS_DELIVERED failed\n");
       fprintf(stderr, " %s\n",
               mysql_stmt_error(Update_Status_Delivered.Query.stmt));
-      return;
+      return false;
     }
     fprintf(stdout, " prepare, UPDATE_STATUS_DELIVERED successful\n");
 
@@ -1277,7 +1263,7 @@
       fprintf(
           stderr,
           " UPDATE_STATUS_DELIVERED invalid parameter count returned by MySQL\n");
-      return;
+      return false;
     }
 
     /* Bind the data for all parameters */
@@ -1311,11 +1297,12 @@
               " UPDATE_STATUS_DELIVERED mysql_stmt_bind_param() failed\n");
       fprintf(stderr, " %s\n",
               mysql_stmt_error(Update_Status_Delivered.Query.stmt));
-      return;
+      return false;
     }
+    return true;
   }
 
-  size_t DB_Queries_DML::updateStatusDelivered(const int chat_user_id,
+  affected_rows DB_Queries_DML::updateStatusDelivered(const int chat_user_id,
                                           const int message_id_begin,
                                           const int message_id_end) {
     Update_Status_Delivered.Query.chat_user_id.int_data = chat_user_id;
@@ -1328,52 +1315,41 @@
               " UPDATE_STATUS_DELIVERED mysql_stmt_execute(), 1 failed\n");
       fprintf(stderr, " %s\n",
               mysql_stmt_error(Update_Status_Delivered.Query.stmt));
-      return -1;
+      return 0;
     }
 
     Update_Status_Delivered.Query.affected_rows =
         mysql_stmt_affected_rows(Update_Status_Delivered.Query.stmt);
 
-  #if _DEBUG
-    std::cout << "Affected rows: " << Update_Status_Delivered.Query.affected_rows
-              << std::endl;
-  #endif
-
-    // if (Update_Status_Delivered.Query.affected_rows != 1) /* validate affected
-    // rows */
-
-    // {
-    //   fprintf(stderr, " invalid affected rows by MySQL\n");
-    //   return -1;
-    // } else {
-    //   return mysql_insert_id(mysql);
-    // }
+#if _DEBUG
+    std::cout << "Affected rows: "
+              << Update_Status_Delivered.Query.affected_rows << std::endl;
+#endif
     return Update_Status_Delivered.Query.affected_rows;
   }
 
-  int DB_Queries_DML::updateStatusDelivered_close(void) {
-    /* Close the statement */
+   no_errors DB_Queries_DML::updateStatusDelivered_close(void) {
     if (mysql_stmt_close(Update_Status_Delivered.Query.stmt)) {
       fprintf(stderr,
               " UPDATE_STATUS_DELIVERED failed while closing the statement\n");
       fprintf(stderr, " %s\n", mysql_error(mysql));
-      return -1;
+      return false;
     }
-    return 0;
+    return true;
   }
 
-  void DB_Queries_DML::updateStatusRead_prepare(void) {
+   no_errors DB_Queries_DML::updateStatusRead_prepare(void) {
     Update_Status_Read.Query.stmt = mysql_stmt_init(mysql);
     if (!Update_Status_Read.Query.stmt) {
       fprintf(stderr, " UPDATE_STATUS_READ mysql_stmt_init(), out of memory\n");
-      return;
+      return false;
     }
 
     if (mysql_stmt_prepare(Update_Status_Read.Query.stmt, UPDATE_STATUS_READ,
                           strlen(UPDATE_STATUS_READ))) {
       fprintf(stderr, " mysql_stmt_prepare(), UPDATE_STATUS_DELIVERED failed\n");
       fprintf(stderr, " %s\n", mysql_stmt_error(Update_Status_Read.Query.stmt));
-      return;
+      return false;
     }
     fprintf(stdout, " prepare, UPDATE_STATUS_DELIVERED successful\n");
 
@@ -1387,7 +1363,7 @@
     {
       fprintf(stderr,
               " UPDATE_STATUS_READ invalid parameter count returned by MySQL\n");
-      return;
+      return false;
     }
 
     /* Bind the data for all parameters */
@@ -1419,11 +1395,12 @@
                               Update_Status_Read.Query.bind)) {
       fprintf(stderr, " UPDATE_STATUS_READ mysql_stmt_bind_param() failed\n");
       fprintf(stderr, " %s\n", mysql_stmt_error(Update_Status_Read.Query.stmt));
-      return;
+      return false;
     }
+    return true;
   }
 
-  size_t DB_Queries_DML::updateStatusRead(const int chat_user_id,
+  affected_rows DB_Queries_DML::updateStatusRead(const int chat_user_id,
                                       const int message_id_begin,
                                       const int message_id_end) {
     Update_Status_Read.Query.chat_user_id.int_data = chat_user_id;
@@ -1434,35 +1411,57 @@
     if (mysql_stmt_execute(Update_Status_Read.Query.stmt)) {
       fprintf(stderr, " UPDATE_STATUS_READ mysql_stmt_execute(), 1 failed\n");
       fprintf(stderr, " %s\n", mysql_stmt_error(Update_Status_Read.Query.stmt));
-      return -1;
+      return 0;
     }
 
     Update_Status_Read.Query.affected_rows =
         mysql_stmt_affected_rows(Update_Status_Read.Query.stmt);
 
-  #if _DEBUG
+#if _DEBUG
     std::cout << "Affected rows: " << Update_Status_Read.Query.affected_rows
               << std::endl;
-  #endif
+#endif
 
-    // if (Update_Status_Read.Query.affected_rows != 1) /* validate affected rows
-    // */
-
-    // {
-    //   fprintf(stderr, " invalid affected rows by MySQL\n");
-    //   return -1;
-    // } else {
-    //   return mysql_insert_id(mysql);
-    // }
     return Update_Status_Read.Query.affected_rows;
   }
 
-  int DB_Queries_DML::updateStatusRead_close(void) {
-    /* Close the statement */
+   no_errors DB_Queries_DML::updateStatusRead_close(void) {
     if (mysql_stmt_close(Update_Status_Read.Query.stmt)) {
       fprintf(stderr, " UPDATE_STATUS_READ failed while closing the statement\n");
       fprintf(stderr, " %s\n", mysql_error(mysql));
-      return -1;
+      return false;
     }
-    return 0;
+    return true;
+  }
+
+   no_errors DB_Queries_DML::prepareAll(void) {
+    return 
+    insertUser_prepare() &&
+    insertUser_prepare() &&
+    insertChat_prepare() &&
+    insertChatUser_prepare() &&
+    insertMessage_prepare() &&
+    selectUser_prepare() &&
+    selectChat_prepare() &&
+    selectChatUser_prepare() &&
+    selectMessage_prepare() &&
+    selectMessages_prepare() &&
+    updateStatusDelivered_prepare() &&
+    updateStatusRead_prepare();
+  }
+
+   no_errors DB_Queries_DML::closeAll(void) {
+    return
+    insertUser_close() &&
+    insertChat_close() &&
+    insertChatUser_close() &&
+    insertMessage_close() &&
+    selectChat_close() &&
+    selectUser_close() &&
+    selectChatUser_close() &&
+    selectMessage_close() &&
+    selectMessages_close() &&
+    updateStatusDelivered_close() &&
+    updateStatusRead_close() &&
+    connectDB_close();
   }
