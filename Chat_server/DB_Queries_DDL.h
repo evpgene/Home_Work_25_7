@@ -38,7 +38,7 @@ class DB_Queries_DDL {
 #define CREATE_TABLE_USERS \
 "CREATE TABLE IF NOT EXISTS users (\
 		id INT UNSIGNED NOT NULL AUTO_INCREMENT,\
-		login character varying(255) NOT NULL,\
+		login character varying(255) NOT NULL UNIQUE,\
 		pass character varying(255) NOT NULL,\
 		firstname character varying(255),\
 		lastname character varying(255),\
@@ -49,7 +49,7 @@ class DB_Queries_DDL {
 #define CREATE_TABLE_CHATS \
 "CREATE TABLE IF NOT EXISTS chats (\
 		id INT UNSIGNED NOT NULL AUTO_INCREMENT,\
-		name character varying(255),\
+		name character varying(255) NOT NULL UNIQUE,\
 		PRIMARY KEY (id)\
 	)AUTO_INCREMENT = 1"
 // create table "chat_user" request string
@@ -81,7 +81,7 @@ class DB_Queries_DDL {
 	)AUTO_INCREMENT = 1"
 // create view "message_view" request string
 #define CREATE_VIEW_MESSAGE_VIEW \
-"CREATE VIEW \
+"CREATE OR REPLACE VIEW \
 	message_view AS \
 	SELECT \
 	chats.id AS chat_id,\

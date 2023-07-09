@@ -15,11 +15,11 @@ using no_errors = bool; // Execution OK. No errors occurred if = true;
 
 struct ChatUser {
   ChatUser(){};
-  ChatUser(int in_chat_id, int in_user_id)
+  ChatUser(size_t in_chat_id, size_t in_user_id)
       : chat_id(in_chat_id), user_id(in_user_id){};
   ~ChatUser(){};
-  int chat_id{-1};
-  int user_id{-1};
+  size_t chat_id{0};
+  size_t user_id{0};
 };
 
 class DB_Queries_DML {
@@ -32,7 +32,7 @@ class DB_Queries_DML {
     unsigned long str_length{STRING_SIZE};
   };
   struct Int_Param {
-    int int_data{-1};
+    size_t int_data{0};
   };
 
 #define INSERT_USER "INSERT INTO users (login, pass) VALUES (?,?)"
@@ -49,13 +49,13 @@ class DB_Queries_DML {
   no_errors insertUser_prepare(void);
   no_errors insertUser_close(void);
 
-#define SELECT_USER "SELECT id, login, pass FROM users WHERE id = ?"
+#define SELECT_USER_BY_ID "SELECT id, login, pass FROM users WHERE id = ?"
   struct {
     struct {
       MYSQL_STMT* stmt;
       MYSQL_BIND bind[1];
       int param_count;
-      int int_data;
+      size_t int_data;
     } Query;
     struct {
       MYSQL_BIND bind[3];
@@ -65,13 +65,37 @@ class DB_Queries_DML {
       unsigned long length[3];
       int param_count, column_count, row_count;
       short small_data;
-      int int_data;
+      size_t int_data;
       bool is_null[3];
       bool error[3];
     } Result;
-  } Select_User;
-no_errors selectUser_prepare(void);
-no_errors selectUser_close(void);
+  } Select_UserById;
+no_errors selectUserById_prepare(void);
+no_errors selectUserById_close(void);
+
+#define SELECT_USER_BY_LOGIN "SELECT id, login, pass FROM users WHERE login = ?"
+  struct {
+    struct {
+      MYSQL_STMT* stmt;
+      MYSQL_BIND bind[1];
+      int param_count;
+      String_Param login;
+    } Query;
+    struct {
+      MYSQL_BIND bind[3];
+      MYSQL_RES* prepare_meta_result;
+      String_Param login;
+      String_Param pass;
+      unsigned long length[3];
+      int param_count, column_count, row_count;
+      short small_data;
+      size_t int_data;
+      bool is_null[3];
+      bool error[3];
+    } Result;
+  } Select_UserByLogin;
+no_errors selectUserByLogin_prepare(void);
+no_errors selectUserByLogin_close(void);
 
 #define INSERT_CHAT "INSERT INTO chats (name) VALUES (?)"
   struct {
@@ -92,7 +116,7 @@ no_errors insertChat_close(void);
       MYSQL_STMT* stmt;
       MYSQL_BIND bind[1];
       int param_count;
-      int int_data;
+      size_t int_data;
   } Query;
   struct {
       MYSQL_BIND bind[1];
@@ -101,7 +125,7 @@ no_errors insertChat_close(void);
       unsigned long length[1];
       int param_count, column_count, row_count;
       short small_data;
-      int int_data;
+      size_t int_data;
       bool is_null[1];
       bool error[1];
   } Result;
@@ -270,22 +294,23 @@ no_errors insertChat_close(void);
   no_errors closeAll(void);
 
   insert_id insertUser(const User_t user);
-  User_t selectUser(const int id);
+  User_t selectUserById(const size_t id);
+  User_t selectUserByLogin(const std::string login);
   insert_id insertChat(const Chat_t chat);
-  Chat_t selectChat(const int id);
-  insert_id insertChatUser(const int chat_id, const int user_id);
-  size_t selectChatUser(const int chat_id, const int user_id);
-  insert_id insertMessage(const int chat_user_id, const Message_t message);
-  Message_t selectMessage(const int chat_id, const int message_id);
-  queue_message_t selectMessages(const int chat_id, const int message_id_begin,
-                                 const int message_id_end,
-                                 const int message_status, const int limit);
-  size_t updateStatusDelivered(const int chat_user_id,
-                              const int message_id_begin,
-                              const int message_id_end);
-  size_t updateStatusRead(const int chat_user_id,
-                               const int message_id_begin,
-                               const int message_id_end);
+  Chat_t selectChat(const size_t id);
+  insert_id insertChatUser(const size_t chat_id, const size_t user_id);
+  size_t selectChatUser(const size_t chat_id, const size_t user_id);
+  insert_id insertMessage(const size_t chat_user_id, const Message_t message);
+  Message_t selectMessage(const size_t chat_id, const size_t message_id);
+  queue_message_t selectMessages(const size_t chat_id, const size_t message_id_begin,
+                                 const size_t message_id_end,
+                                 const size_t message_status, const size_t limit);
+  size_t updateStatusDelivered(const size_t chat_user_id,
+                              const size_t message_id_begin,
+                              const size_t message_id_end);
+  size_t updateStatusRead(const size_t chat_user_id,
+                               const size_t message_id_begin,
+                               const size_t message_id_end);
 
 
 };
