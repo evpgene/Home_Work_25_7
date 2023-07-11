@@ -39,25 +39,21 @@ no_errors DB_Queries_DML::connectDB_close(void) {
   return true;
 }
 
-no_errors DB_Queries_DML::insertUser_prepare(Insert_User &arg_struct) {
-  // не забыть про нулевой указатель!
-  arg_struct.stmt =
-      mysql_simple_prepare(mysql, insert_user_query, arg_struct.headline);
-  // можно задать в структуре количество параметров - проверить!
-  verify_param_count(arg_struct.stmt, arg_struct.Query.param_count, arg_struct.headline);
-  make_bind(arg_struct.stmt, arg_struct.Query.bind, arg_struct.headline);
-};
+
+
+
+
+
 
 insert_id DB_Queries_DML::insertUser(const User_t user,
                                      Insert_User &arg_struct) {
-
   no_errors no_errors{true};
   if(!user) return 0;
-    strncpy(arg_struct.Query.login.data, user->getLogin().c_str(), string_size);
-    arg_struct.Query.login.length = strlen(arg_struct.Query.login.data);
+    strncpy(arg_struct.Query_struct.login.data, user->getLogin().c_str(), string_size);
+    arg_struct.Query_struct.login.length = strlen(arg_struct.Query_struct.login.data);
 
-    strncpy(arg_struct.Query.pass.data, user->getPass().c_str(), string_size);
-    arg_struct.Query.pass.length = strlen(arg_struct.Query.pass.data);
+    strncpy(arg_struct.Query_struct.pass.data, user->getPass().c_str(), string_size);
+    arg_struct.Query_struct.pass.length = strlen(arg_struct.Query_struct.pass.data);
 
   /* Execute the INSERT statement */
   no_errors &= execute_stmt(arg_struct.stmt, arg_struct.headline);
@@ -67,384 +63,89 @@ insert_id DB_Queries_DML::insertUser(const User_t user,
   return 0;
 }
 
-no_errors DB_Queries_DML::insertUser_close(MYSQL* mysql, Insert_User &arg_struct) {
-  return close_stmt(mysql, arg_struct.stmt, arg_struct.headline);
-}
-
-no_errors DB_Queries_DML::selectUserById_prepare(Insert_User &arg_struct) {
-  Select_UserByLogin.Query.stmt = mysql_stmt_init(mysql);
-  if (!Select_UserByLogin.Query.stmt) {
-    fprintf(stderr, " SELECT_USER_BY_ID mysql_stmt_init(), out of memory\n");
-    return false;
-  }
-
-  if (mysql_stmt_prepare(Select_UserById.Query.stmt, SELECT_USER_BY_ID,
-                         strlen(SELECT_USER_BY_ID))) {
-    fprintf(stderr, " mysql_stmt_prepare(), SELECT_USER_BY_ID failed\n");
-    fprintf(stderr, " %s\n", mysql_stmt_error(Select_UserById.Query.stmt));
-    return false;
-  }
-  fprintf(stdout, " prepare, SELECT_USER_BY_ID successful\n");
-
-  /* Get the parameter count from the statement */
-  Select_UserById.Query.param_count =
-      mysql_stmt_param_count(Select_UserById.Query.stmt);
-  fprintf(stdout, " total parameters in SELECT_USER_BY_ID: %d\n",
-          Select_UserById.Query.param_count);
-
-  if (Select_UserById.Query.param_count != 1) /* validate parameter count */
-  {
-    fprintf(stderr,
-            " SELECT_USER_BY_ID invalid parameter count returned by MySQL\n");
-    return false;
-  }
-  /* Bind the data for all parameters */
-  memset(Select_UserById.Query.bind, 0, sizeof(Select_UserById.Query.bind));
-
-  /* INTEGER PARAM */
-  Select_UserById.Query.bind[0].buffer_type = MYSQL_TYPE_LONG;
-  Select_UserById.Query.bind[0].buffer =
-      (char *)&Select_UserById.Query.int_data;
-  Select_UserById.Query.bind[0].is_null = 0;
-  Select_UserById.Query.bind[0].length = 0;
-
-  if (mysql_stmt_bind_param(Select_UserById.Query.stmt,
-                            Select_UserById.Query.bind)) {
-    fprintf(stderr, " SELECT_USER_BY_ID mysql_stmt_bind_param() failed\n");
-    fprintf(stderr, " %s\n", mysql_stmt_error(Select_UserById.Query.stmt));
-    return false;
-  }
-
-  /* Bind the result buffers for all columns before fetching them */
-  memset(Select_UserById.Result.bind, 0, sizeof(Select_UserById.Result.bind));
-
-  /* INTEGER COLUMN */
-  Select_UserById.Result.bind[0].buffer_type = MYSQL_TYPE_LONG;
-  Select_UserById.Result.bind[0].buffer =
-      (char *)&Select_UserById.Result.int_data;
-  Select_UserById.Result.bind[0].is_null = &Select_UserById.Result.is_null[0];
-  Select_UserById.Result.bind[0].length = &Select_UserById.Result.length[0];
-  Select_UserById.Result.bind[0].error = &Select_UserById.Result.error[0];
-
-  /* STRING COLUMN */
-  Select_UserById.Result.bind[1].buffer_type = MYSQL_TYPE_STRING;
-  Select_UserById.Result.bind[1].buffer =
-      (char *)Select_UserById.Result.login.str_data;
-  Select_UserById.Result.bind[1].buffer_length = STRING_SIZE;
-  Select_UserById.Result.bind[1].is_null = &Select_UserById.Result.is_null[1];
-  Select_UserById.Result.bind[1].length = &Select_UserById.Result.length[1];
-  Select_UserById.Result.bind[1].error = &Select_UserById.Result.error[1];
-
-  /* STRING COLUMN */
-  Select_UserById.Result.bind[2].buffer_type = MYSQL_TYPE_STRING;
-  Select_UserById.Result.bind[2].buffer =
-      (char *)Select_UserById.Result.pass.str_data;
-  Select_UserById.Result.bind[2].buffer_length = STRING_SIZE;
-  Select_UserById.Result.bind[2].is_null = &Select_UserById.Result.is_null[2];
-  Select_UserById.Result.bind[2].length = &Select_UserById.Result.length[2];
-  Select_UserById.Result.bind[2].error = &Select_UserById.Result.error[2];
-
-  /* Fetch result set meta information */
-  Select_UserById.Result.prepare_meta_result =
-      mysql_stmt_result_metadata(Select_UserById.Query.stmt);
-  if (!Select_UserById.Result.prepare_meta_result) {
-    fprintf(stderr,
-            " SELECT_USER_BY_ID mysql_stmt_result_metadata(), \
-            returned no meta information\n");
-    fprintf(stderr, " %s\n", mysql_stmt_error(Select_UserById.Query.stmt));
-    return false;
-  }
-
-  /* Get total columns in the query */
-  Select_UserById.Result.column_count =
-      mysql_num_fields(Select_UserById.Result.prepare_meta_result);
-  fprintf(stdout, " SELECT_USER_BY_ID total columns in SELECT statement: %d\n",
-          Select_UserById.Result.column_count);
-
-  if (Select_UserById.Result.column_count != 3) /* validate column count */
-  {
-    fprintf(stderr,
-            " SELECT_USER_BY_ID invalid column count returned by MySQL\n");
-    return false;
-  }
-
-  /* Bind the result buffers */
-  if (mysql_stmt_bind_result(Select_UserById.Query.stmt,
-                             Select_UserById.Result.bind)) {
-    fprintf(stderr, " SELECT_USER_BY_ID mysql_stmt_bind_result() failed\n");
-    fprintf(stderr, " %s\n", mysql_stmt_error(Select_UserById.Query.stmt));
-    return false;
-  }
-  return true;
-}
-
 User_t DB_Queries_DML::selectUserById(const size_t id) {
-  Select_UserById.Query.int_data = id;
+  Select_UserById.Query_struct.int_data = id;
 
   // execute statement
-  if (mysql_stmt_execute(Select_UserById.Query.stmt)) {
+  if (mysql_stmt_execute(Select_UserById.Query_struct.stmt)) {
     fprintf(stderr, " SELECT_USER_BY_ID mysql_stmt_execute(), 1 failed\n");
-    fprintf(stderr, " %s\n", mysql_stmt_error(Select_UserById.Query.stmt));
+    fprintf(stderr, " %s\n", mysql_stmt_error(Select_UserById.Query_struct.stmt));
     return nullptr;
   }
 
   /* Now buffer all results to client (optional step) */
-  if (mysql_stmt_store_result(Select_UserById.Query.stmt)) {
+  if (mysql_stmt_store_result(Select_UserById.Query_struct.stmt)) {
     fprintf(stderr, " SELECT_USER_BY_ID mysql_stmt_store_result() failed\n");
-    fprintf(stderr, " %s\n", mysql_stmt_error(Select_UserById.Query.stmt));
+    fprintf(stderr, " %s\n", mysql_stmt_error(Select_UserById.Query_struct.stmt));
     return nullptr;
   }
 
   /* Fetch all rows */
-  Select_UserById.Result.row_count = 0;
+  Select_UserById.Result_struct.row_count = 0;
   fprintf(stdout, "SELECT_USER_BY_ID Fetching results ...\n");
-  while (!mysql_stmt_fetch(Select_UserById.Query.stmt)) {
-    Select_UserById.Result.row_count++;
+  while (!mysql_stmt_fetch(Select_UserById.Query_struct.stmt)) {
+    Select_UserById.Result_struct.row_count++;
   }
 
   // Check row count
-  if (Select_UserById.Result.row_count != 1) {
+  if (Select_UserById.Result_struct.row_count != 1) {
     fprintf(stderr, " SELECT_USER_BY_ID MySQL failed to return all rows\n");
     return nullptr;
   }
-  return make_shared<User>(User{Select_UserById.Result.login.str_data,
-                                Select_UserById.Result.pass.str_data});
+  return make_shared<User>(User{Select_UserById.Result_struct.login.str_data,
+                                Select_UserById.Result_struct.pass.str_data});
 }
 
-no_errors DB_Queries_DML::selectUserById_close(void) {
-  mysql_free_result(Select_UserById.Result.prepare_meta_result);
-  if (mysql_stmt_close(Select_UserById.Query.stmt)) {
-    fprintf(stderr, " SELECT_USER_BY_ID failed while closing the statement\n");
-    fprintf(stderr, " %s\n", mysql_error(mysql));
-    return false;
-  }
-  return true;
-}
-
-no_errors DB_Queries_DML::selectUserByLogin_prepare(void) {
-  Select_UserByLogin.Query.stmt = mysql_stmt_init(mysql);
-  if (!Select_UserByLogin.Query.stmt) {
-    fprintf(stderr, " SELECT_USER_BY_LOGIN mysql_stmt_init(), out of memory\n");
-    return false;
-  }
-
-  if (mysql_stmt_prepare(Select_UserByLogin.Query.stmt, SELECT_USER_BY_LOGIN,
-                         strlen(SELECT_USER_BY_LOGIN))) {
-    fprintf(stderr, " mysql_stmt_prepare(), SELECT_USER_BY_LOGIN failed\n");
-    fprintf(stderr, " %s\n", mysql_stmt_error(Select_UserByLogin.Query.stmt));
-    return false;
-  }
-  fprintf(stdout, " prepare, SELECT_USER_BY_LOGIN successful\n");
-
-  /* Get the parameter count from the statement */
-  Select_UserByLogin.Query.param_count =
-      mysql_stmt_param_count(Select_UserByLogin.Query.stmt);
-  fprintf(stdout, " total parameters in SELECT_USER_BY_LOGIN: %d\n",
-          Select_UserByLogin.Query.param_count);
-
-  if (Select_UserByLogin.Query.param_count != 1) /* validate parameter count */
-  {
-    fprintf(
-        stderr,
-        " SELECT_USER_BY_LOGIN invalid parameter count returned by MySQL\n");
-    return false;
-  }
-  /* Bind the data for all parameters */
-  memset(Select_UserByLogin.Query.bind, 0,
-         sizeof(Select_UserByLogin.Query.bind));
-
-  /* STRING PARAM */ /* Login */
-  Select_UserByLogin.Query.bind[0].buffer_type = MYSQL_TYPE_STRING;
-  Select_UserByLogin.Query.bind[0].buffer =
-      (char *)Select_UserByLogin.Query.login.str_data;
-  Select_UserByLogin.Query.bind[0].buffer_length = STRING_SIZE;
-  Select_UserByLogin.Query.bind[0].is_null = 0;
-  Select_UserByLogin.Query.bind[0].length =
-      &Select_UserByLogin.Query.login.str_length;
-
-  if (mysql_stmt_bind_param(Select_UserByLogin.Query.stmt,
-                            Select_UserByLogin.Query.bind)) {
-    fprintf(stderr, " SELECT_USER_BY_LOGIN mysql_stmt_bind_param() failed\n");
-    fprintf(stderr, " %s\n", mysql_stmt_error(Select_UserByLogin.Query.stmt));
-    return false;
-  }
-
-  /* Bind the result buffers for all columns before fetching them */
-  memset(Select_UserByLogin.Result.bind, 0,
-         sizeof(Select_UserByLogin.Result.bind));
-
-  /* INTEGER COLUMN */
-  Select_UserByLogin.Result.bind[0].buffer_type = MYSQL_TYPE_LONG;
-  Select_UserByLogin.Result.bind[0].buffer =
-      (char *)&Select_UserByLogin.Result.int_data;
-  Select_UserByLogin.Result.bind[0].is_null =
-      &Select_UserByLogin.Result.is_null[0];
-  Select_UserByLogin.Result.bind[0].length =
-      &Select_UserByLogin.Result.length[0];
-  Select_UserByLogin.Result.bind[0].error = &Select_UserByLogin.Result.error[0];
-
-  /* STRING COLUMN */
-  Select_UserByLogin.Result.bind[1].buffer_type = MYSQL_TYPE_STRING;
-  Select_UserByLogin.Result.bind[1].buffer =
-      (char *)Select_UserByLogin.Result.login.str_data;
-  Select_UserByLogin.Result.bind[1].buffer_length = STRING_SIZE;
-  Select_UserByLogin.Result.bind[1].is_null =
-      &Select_UserByLogin.Result.is_null[1];
-  Select_UserByLogin.Result.bind[1].length =
-      &Select_UserByLogin.Result.length[1];
-  Select_UserByLogin.Result.bind[1].error = &Select_UserByLogin.Result.error[1];
-
-  /* STRING COLUMN */
-  Select_UserByLogin.Result.bind[2].buffer_type = MYSQL_TYPE_STRING;
-  Select_UserByLogin.Result.bind[2].buffer =
-      (char *)Select_UserByLogin.Result.pass.str_data;
-  Select_UserByLogin.Result.bind[2].buffer_length = STRING_SIZE;
-  Select_UserByLogin.Result.bind[2].is_null =
-      &Select_UserByLogin.Result.is_null[2];
-  Select_UserByLogin.Result.bind[2].length =
-      &Select_UserByLogin.Result.length[2];
-  Select_UserByLogin.Result.bind[2].error = &Select_UserByLogin.Result.error[2];
-
-  /* Fetch result set meta information */
-  Select_UserByLogin.Result.prepare_meta_result =
-      mysql_stmt_result_metadata(Select_UserByLogin.Query.stmt);
-  if (!Select_UserByLogin.Result.prepare_meta_result) {
-    fprintf(stderr,
-            " SELECT_USER_BY_LOGIN mysql_stmt_result_metadata(), \
-            returned no meta information\n");
-    fprintf(stderr, " %s\n", mysql_stmt_error(Select_UserByLogin.Query.stmt));
-    return false;
-  }
-
-  /* Get total columns in the query */
-  Select_UserByLogin.Result.column_count =
-      mysql_num_fields(Select_UserByLogin.Result.prepare_meta_result);
-  fprintf(stdout,
-          " SELECT_USER_BY_LOGIN total columns in SELECT statement: %d\n",
-          Select_UserByLogin.Result.column_count);
-
-  if (Select_UserByLogin.Result.column_count != 3) /* validate column count */
-  {
-    fprintf(stderr,
-            " SELECT_USER_BY_LOGIN invalid column count returned by MySQL\n");
-    return false;
-  }
-
-  /* Bind the result buffers */
-  if (mysql_stmt_bind_result(Select_UserByLogin.Query.stmt,
-                             Select_UserByLogin.Result.bind)) {
-    fprintf(stderr, " SELECT_USER_BY_LOGIN mysql_stmt_bind_result() failed\n");
-    fprintf(stderr, " %s\n", mysql_stmt_error(Select_UserByLogin.Query.stmt));
-    return false;
-  }
-  return true;
-}
 
 User_t DB_Queries_DML::selectUserByLogin(const std::string login) {
-  strncpy(Select_UserByLogin.Query.login.str_data, login.c_str(), STRING_SIZE);
-  Select_UserByLogin.Query.login.str_length =
-      strlen(Select_UserByLogin.Query.login.str_data);
+  strncpy(Select_User_By_Login_struct.Query_struct.login.str_data, login.c_str(), STRING_SIZE);
+  Select_User_By_Login_struct.Query_struct.login.str_length =
+      strlen(Select_User_By_Login_struct.Query_struct.login.str_data);
 
   // execute statement
-  if (mysql_stmt_execute(Select_UserByLogin.Query.stmt)) {
+  if (mysql_stmt_execute(Select_User_By_Login_struct.Query_struct.stmt)) {
     fprintf(stderr, " SELECT_USER_BY_LOGIN mysql_stmt_execute(), 1 failed\n");
-    fprintf(stderr, " %s\n", mysql_stmt_error(Select_UserByLogin.Query.stmt));
+    fprintf(stderr, " %s\n", mysql_stmt_error(Select_User_By_Login_struct.Query_struct.stmt));
     return nullptr;
   }
 
   /* Now buffer all results to client (optional step) */
-  if (mysql_stmt_store_result(Select_UserByLogin.Query.stmt)) {
+  if (mysql_stmt_store_result(Select_User_By_Login_struct.Query_struct.stmt)) {
     fprintf(stderr, " SELECT_USER_BY_LOGIN mysql_stmt_store_result() failed\n");
-    fprintf(stderr, " %s\n", mysql_stmt_error(Select_UserByLogin.Query.stmt));
+    fprintf(stderr, " %s\n", mysql_stmt_error(Select_User_By_Login_struct.Query_struct.stmt));
     return nullptr;
   }
 
   /* Fetch all rows */
-  Select_UserByLogin.Result.row_count = 0;
+  Select_User_By_Login_struct.Result_struct.row_count = 0;
   fprintf(stdout, "SELECT_USER_BY_LOGIN Fetching results ...\n");
-  while (!mysql_stmt_fetch(Select_UserByLogin.Query.stmt)) {
-    Select_UserByLogin.Result.row_count++;
+  while (!mysql_stmt_fetch(Select_User_By_Login_struct.Query_struct.stmt)) {
+    Select_User_By_Login_struct.Result_struct.row_count++;
   }
 
   // Check row count
-  if (Select_UserByLogin.Result.row_count != 1) {
+  if (Select_User_By_Login_struct.Result_struct.row_count != 1) {
     fprintf(stderr, " SELECT_USER_BY_LOGIN MySQL failed to return all rows\n");
     return nullptr;
   }
-  return make_shared<User>(User{Select_UserByLogin.Result.login.str_data,
-                                Select_UserByLogin.Result.pass.str_data});
-}
-
-no_errors DB_Queries_DML::selectUserByLogin_close(void) {
-  mysql_free_result(Select_UserByLogin.Result.prepare_meta_result);
-  if (mysql_stmt_close(Select_UserByLogin.Query.stmt)) {
-    fprintf(stderr,
-            " SELECT_USER_BY_LOGIN failed while closing the statement\n");
-    fprintf(stderr, " %s\n", mysql_error(mysql));
-    return false;
-  }
-  return true;
-}
-
-no_errors DB_Queries_DML::insertChat_prepare(void) {
-  Insert_Chat.Query.stmt = mysql_stmt_init(mysql);
-  if (!Insert_Chat.Query.stmt) {
-    fprintf(stderr, " INSERT_CHAT mysql_stmt_init(), out of memory\n");
-    return false;
-  }
-
-  if (mysql_stmt_prepare(Insert_Chat.Query.stmt, INSERT_CHAT,
-                         strlen(INSERT_CHAT))) {
-    fprintf(stderr, " mysql_stmt_prepare(), INSERT_CHAT failed\n");
-    fprintf(stderr, " %s\n", mysql_stmt_error(Insert_Chat.Query.stmt));
-    return false;
-  }
-  fprintf(stdout, " prepare, INSERT_CHAT successful\n");
-
-  /* Get the parameter count from the statement */
-  Insert_Chat.Query.param_count =
-      mysql_stmt_param_count(Insert_Chat.Query.stmt);
-  fprintf(stdout, " total parameters in INSERT_CHAT: %d\n",
-          Insert_Chat.Query.param_count);
-
-  if (Insert_Chat.Query.param_count != 1) /* validate parameter count */
-  {
-    fprintf(stderr, " INSERT_CHAT invalid parameter count returned by MySQL\n");
-    return false;
-  }
-
-  /* Bind the data for all parameters */
-  memset(Insert_Chat.Query.bind, 0, sizeof(Insert_Chat.Query.bind));
-
-  /* login */
-  Insert_Chat.Query.bind[0].buffer_type = MYSQL_TYPE_STRING;
-  Insert_Chat.Query.bind[0].buffer = (char *)Insert_Chat.Query.Name.str_data;
-  Insert_Chat.Query.bind[0].buffer_length = STRING_SIZE;
-  Insert_Chat.Query.bind[0].is_null = 0;
-  Insert_Chat.Query.bind[0].length = &Insert_Chat.Query.Name.str_length;
-
-  if (mysql_stmt_bind_param(Insert_Chat.Query.stmt, Insert_Chat.Query.bind)) {
-    fprintf(stderr, " INSERT_CHAT mysql_stmt_bind_param() failed\n");
-    fprintf(stderr, " %s\n", mysql_stmt_error(Insert_Chat.Query.stmt));
-    return false;
-  }
-  return true;
+  return make_shared<User>(User{Select_User_By_Login_struct.Result_struct.login.str_data,
+                                Select_User_By_Login_struct.Result_struct.pass.str_data});
 }
 
 insert_id DB_Queries_DML::insertChat(const Chat_t chat) {
-  strncpy(Insert_Chat.Query.Name.str_data, chat->getChatName().c_str(),
+  strncpy(Insert_Chat.Query_struct.Name.str_data, chat->getChatName().c_str(),
           STRING_SIZE);
-  Insert_Chat.Query.Name.str_length = strlen(Insert_Chat.Query.Name.str_data);
+  Insert_Chat.Query_struct.Name.str_length = strlen(Insert_Chat.Query_struct.Name.str_data);
 
   /* Execute the INSERT statement */
-  if (mysql_stmt_execute(Insert_Chat.Query.stmt)) {
+  if (mysql_stmt_execute(Insert_Chat.Query_struct.stmt)) {
     fprintf(stderr, " INSERT_CHAT mysql_stmt_execute(), 1 failed\n");
-    fprintf(stderr, " %s\n", mysql_stmt_error(Insert_Chat.Query.stmt));
+    fprintf(stderr, " %s\n", mysql_stmt_error(Insert_Chat.Query_struct.stmt));
     return 0;
   }
-  Insert_Chat.Query.affected_rows =
-      mysql_stmt_affected_rows(Insert_Chat.Query.stmt);
-  if (Insert_Chat.Query.affected_rows != 1) /* validate affected rows */
+  Insert_Chat.Query_struct.affected_rows =
+      mysql_stmt_affected_rows(Insert_Chat.Query_struct.stmt);
+  if (Insert_Chat.Query_struct.affected_rows != 1) /* validate affected rows */
   {
     fprintf(stderr, " INSERT_CHAT invalid affected rows by MySQL\n");
     return 0;
@@ -452,217 +153,53 @@ insert_id DB_Queries_DML::insertChat(const Chat_t chat) {
   return mysql_insert_id(mysql);
 }
 
-no_errors DB_Queries_DML::insertChat_close(void) {
-  if (mysql_stmt_close(Insert_Chat.Query.stmt)) {
-    fprintf(stderr, " INSERT_CHAT failed while closing the statement\n");
-    fprintf(stderr, " %s\n", mysql_error(mysql));
-    return false;
-  }
-  return true;
-}
-
-no_errors DB_Queries_DML::selectChat_prepare(void) {
-  Select_Chat.Query.stmt = mysql_stmt_init(mysql);
-  if (!Select_Chat.Query.stmt) {
-    fprintf(stderr, " SELECT_CHAT mysql_stmt_init(), out of memory\n");
-    return false;
-  }
-
-  if (mysql_stmt_prepare(Select_Chat.Query.stmt, SELECT_CHAT,
-                         strlen(SELECT_CHAT))) {
-    fprintf(stderr, " SELECT_CHAT mysql_stmt_prepare(), SELECT_CHAT failed\n");
-    fprintf(stderr, " %s\n", mysql_stmt_error(Select_Chat.Query.stmt));
-    return false;
-  }
-  fprintf(stdout, " SELECT_CHAT prepare, SELECT_CHAT successful\n");
-
-  /* Get the parameter count from the statement */
-  Select_Chat.Query.param_count =
-      mysql_stmt_param_count(Select_Chat.Query.stmt);
-  fprintf(stdout, " SELECT_CHAT total parameters in SELECT_CHAT: %d\n",
-          Select_Chat.Query.param_count);
-
-  if (Select_Chat.Query.param_count != 1) /* validate parameter count */
-  {
-    fprintf(stderr, " SELECT_CHAT invalid parameter count returned by MySQL\n");
-    return false;
-  }
-  /* Bind the data for all parameters */
-  memset(Select_Chat.Query.bind, 0, sizeof(Select_Chat.Query.bind));
-
-  /* INTEGER PARAM */
-  Select_Chat.Query.bind[0].buffer_type = MYSQL_TYPE_LONG;
-  Select_Chat.Query.bind[0].buffer = (char *)&Select_Chat.Query.int_data;
-  Select_Chat.Query.bind[0].is_null = 0;
-  Select_Chat.Query.bind[0].length = 0;
-
-  if (mysql_stmt_bind_param(Select_Chat.Query.stmt, Select_Chat.Query.bind)) {
-    fprintf(stderr, " SELECT_CHAT mysql_stmt_bind_param() failed\n");
-    fprintf(stderr, " %s\n", mysql_stmt_error(Select_Chat.Query.stmt));
-    return false;
-  }
-
-  /* Bind the result buffers for all columns before fetching them */
-  memset(Select_Chat.Result.bind, 0, sizeof(Select_Chat.Result.bind));
-
-  /* INTEGER COLUMN */
-  Select_Chat.Result.bind[0].buffer_type = MYSQL_TYPE_LONG;
-  Select_Chat.Result.bind[0].buffer = (char *)&Select_Chat.Result.int_data;
-  Select_Chat.Result.bind[0].is_null = &Select_Chat.Result.is_null[0];
-  Select_Chat.Result.bind[0].length = &Select_Chat.Result.length[0];
-  Select_Chat.Result.bind[0].error = &Select_Chat.Result.error[0];
-
-  /* STRING COLUMN */
-  Select_Chat.Result.bind[1].buffer_type = MYSQL_TYPE_STRING;
-  Select_Chat.Result.bind[1].buffer = (char *)Select_Chat.Result.Name.str_data;
-  Select_Chat.Result.bind[1].buffer_length = STRING_SIZE;
-  Select_Chat.Result.bind[1].is_null = &Select_Chat.Result.is_null[1];
-  Select_Chat.Result.bind[1].length = &Select_Chat.Result.length[1];
-  Select_Chat.Result.bind[1].error = &Select_Chat.Result.error[1];
-
-  /* Fetch result set meta information */
-  Select_Chat.Result.prepare_meta_result =
-      mysql_stmt_result_metadata(Select_Chat.Query.stmt);
-  if (!Select_Chat.Result.prepare_meta_result) {
-    fprintf(stderr,
-            " SELECT_CHAT mysql_stmt_result_metadata(), \
-            returned no meta information\n");
-    fprintf(stderr, " %s\n", mysql_stmt_error(Select_Chat.Query.stmt));
-    return false;
-  }
-
-  /* Get total columns in the query */
-  Select_Chat.Result.column_count =
-      mysql_num_fields(Select_Chat.Result.prepare_meta_result);
-  fprintf(stdout, " SELECT_CHAT total columns in SELECT statement: %d\n",
-          Select_Chat.Result.column_count);
-
-  if (Select_Chat.Result.column_count != 2) /* validate column count */
-  {
-    fprintf(stderr, " SELECT_CHAT invalid column count returned by MySQL\n");
-    return false;
-  }
-
-  /* Bind the result buffers */
-  if (mysql_stmt_bind_result(Select_Chat.Query.stmt, Select_Chat.Result.bind)) {
-    fprintf(stderr, " SELECT_CHAT mysql_stmt_bind_result() failed\n");
-    fprintf(stderr, " %s\n", mysql_stmt_error(Select_Chat.Query.stmt));
-    return false;
-  }
-  return true;
-}
-
 Chat_t DB_Queries_DML::selectChat(const size_t id) {
-  Select_Chat.Query.int_data = id;
+  Select_Chat.Query_struct.int_data = id;
 
   // execute statement
-  if (mysql_stmt_execute(Select_Chat.Query.stmt)) {
+  if (mysql_stmt_execute(Select_Chat.Query_struct.stmt)) {
     fprintf(stderr, " SELECT_CHAT mysql_stmt_execute(), 1 failed\n");
-    fprintf(stderr, " %s\n", mysql_stmt_error(Select_Chat.Query.stmt));
+    fprintf(stderr, " %s\n", mysql_stmt_error(Select_Chat.Query_struct.stmt));
     return nullptr;
   }
 
   /* Now buffer all results to client (optional step) */
-  if (mysql_stmt_store_result(Select_Chat.Query.stmt)) {
+  if (mysql_stmt_store_result(Select_Chat.Query_struct.stmt)) {
     fprintf(stderr, " SELECT_CHAT mysql_stmt_store_result() failed\n");
-    fprintf(stderr, " %s\n", mysql_stmt_error(Select_Chat.Query.stmt));
+    fprintf(stderr, " %s\n", mysql_stmt_error(Select_Chat.Query_struct.stmt));
     return nullptr;
   }
 
   /* Fetch all rows */
-  Select_Chat.Result.row_count = 0;
+  Select_Chat.Result_struct.row_count = 0;
   fprintf(stdout, "SELECT_CHAT Fetching results ...\n");
-  while (!mysql_stmt_fetch(Select_Chat.Query.stmt)) {
-    Select_Chat.Result.row_count++;
+  while (!mysql_stmt_fetch(Select_Chat.Query_struct.stmt)) {
+    Select_Chat.Result_struct.row_count++;
   }
 
   // Check row count
-  if (Select_Chat.Result.row_count != 1) {
+  if (Select_Chat.Result_struct.row_count != 1) {
     fprintf(stderr, " SELECT_CHAT MySQL failed to return all rows\n");
     return nullptr;
   }
 
-  return make_shared<Chat>(Chat{Select_Chat.Result.Name.str_data});
-}
-
-no_errors DB_Queries_DML::selectChat_close(void) {
-  mysql_free_result(Select_Chat.Result.prepare_meta_result);
-  if (mysql_stmt_close(Select_Chat.Query.stmt)) {
-    fprintf(stderr, " SELECT_CHAT failed while closing the statement\n");
-    fprintf(stderr, " %s\n", mysql_error(mysql));
-    return false;
-  }
-  return true;
-}
-
-no_errors DB_Queries_DML::insertChatUser_prepare(void) {
-  Insert_ChatUser.Query.stmt = mysql_stmt_init(mysql);
-  if (!Insert_ChatUser.Query.stmt) {
-    fprintf(stderr, " INSERT_CHAT_USER mysql_stmt_init(), out of memory\n");
-    return false;
-  }
-
-  if (mysql_stmt_prepare(Insert_ChatUser.Query.stmt, INSERT_CHAT_USER,
-                         strlen(INSERT_CHAT_USER))) {
-    fprintf(stderr, " mysql_stmt_prepare(), INSERT_CHAT_USER failed\n");
-    fprintf(stderr, " %s\n", mysql_stmt_error(Insert_ChatUser.Query.stmt));
-    return false;
-  }
-  fprintf(stdout, " prepare, INSERT_CHAT_USER successful\n");
-
-  /* Get the parameter count from the statement */
-  Insert_ChatUser.Query.param_count =
-      mysql_stmt_param_count(Insert_ChatUser.Query.stmt);
-  fprintf(stdout, " total parameters in INSERT_CHAT_USER: %d\n",
-          Insert_ChatUser.Query.param_count);
-
-  if (Insert_ChatUser.Query.param_count != 3) /* validate parameter count */
-  {
-    fprintf(stderr,
-            " INSERT_CHAT_USER invalid parameter count returned by MySQL\n");
-    return false;
-  }
-
-  /* Bind the data for all parameters */
-  memset(Insert_ChatUser.Query.bind, 0, sizeof(Insert_ChatUser.Query.bind));
-
-  /* chat_id */
-  Insert_ChatUser.Query.bind[0].buffer_type = MYSQL_TYPE_LONG;
-  Insert_ChatUser.Query.bind[0].buffer =
-      (char *)&Insert_ChatUser.Query.chat_id.int_data;
-  Insert_ChatUser.Query.bind[0].is_null = 0;
-  Insert_ChatUser.Query.bind[0].length = 0;
-
-  /* user_id */
-  Insert_ChatUser.Query.bind[1].buffer_type = MYSQL_TYPE_LONG;
-  Insert_ChatUser.Query.bind[1].buffer =
-      (char *)&Insert_ChatUser.Query.user_id.int_data;
-  Insert_ChatUser.Query.bind[1].is_null = 0;
-  Insert_ChatUser.Query.bind[1].length = 0;
-
-  if (mysql_stmt_bind_param(Insert_ChatUser.Query.stmt,
-                            Insert_ChatUser.Query.bind)) {
-    fprintf(stderr, " INSERT_CHAT_USER mysql_stmt_bind_param() failed\n");
-    fprintf(stderr, " %s\n", mysql_stmt_error(Insert_ChatUser.Query.stmt));
-    return false;
-  }
-  return true;
+  return make_shared<Chat>(Chat{Select_Chat.Result_struct.Name.str_data});
 }
 
 insert_id DB_Queries_DML::insertChatUser(const size_t chat_id,
                                          const size_t user_id) {
-  Insert_ChatUser.Query.chat_id.int_data = chat_id;
-  Insert_ChatUser.Query.user_id.int_data = user_id;
+  Insert_ChatUser.Query_struct.chat_id.int_data = chat_id;
+  Insert_ChatUser.Query_struct.user_id.int_data = user_id;
 
   /* Execute the INSERT statement */
-  if (mysql_stmt_execute(Insert_ChatUser.Query.stmt)) {
+  if (mysql_stmt_execute(Insert_ChatUser.Query_struct.stmt)) {
     fprintf(stderr, " INSERT_CHAT_USER mysql_stmt_execute(), 1 failed\n");
-    fprintf(stderr, " %s\n", mysql_stmt_error(Insert_ChatUser.Query.stmt));
+    fprintf(stderr, " %s\n", mysql_stmt_error(Insert_ChatUser.Query_struct.stmt));
     return 0;
   }
-  Insert_ChatUser.Query.affected_rows =
-      mysql_stmt_affected_rows(Insert_ChatUser.Query.stmt);
-  if (Insert_ChatUser.Query.affected_rows != 1) /* validate affected rows */
+  Insert_ChatUser.Query_struct.affected_rows =
+      mysql_stmt_affected_rows(Insert_ChatUser.Query_struct.stmt);
+  if (Insert_ChatUser.Query_struct.affected_rows != 1) /* validate affected rows */
   {
     fprintf(stderr, " INSERT_CHAT_USER invalid affected rows by MySQL\n");
     return 0;
@@ -670,244 +207,65 @@ insert_id DB_Queries_DML::insertChatUser(const size_t chat_id,
   return mysql_insert_id(mysql);
 }
 
-no_errors DB_Queries_DML::insertChatUser_close(void) {
-  if (mysql_stmt_close(Insert_ChatUser.Query.stmt)) {
-    fprintf(stderr, " INSERT_CHAT_USER failed while closing the statement\n");
-    fprintf(stderr, " %s\n", mysql_error(mysql));
-    return false;
-  }
-  return true;
-}
-
-no_errors DB_Queries_DML::selectChatUser_prepare(void) {
-  Select_ChatUser.Query.stmt = mysql_stmt_init(mysql);
-  if (!Select_ChatUser.Query.stmt) {
-    fprintf(stderr, " SELECT_CHAT_USER mysql_stmt_init(), out of memory\n");
-    return false;
-  }
-
-  if (mysql_stmt_prepare(Select_ChatUser.Query.stmt, SELECT_CHAT_USER,
-                         strlen(SELECT_CHAT_USER))) {
-    fprintf(stderr, " mysql_stmt_prepare(), SELECT_CHAT_USER failed\n");
-    fprintf(stderr, " %s\n", mysql_stmt_error(Select_ChatUser.Query.stmt));
-    return false;
-  }
-  fprintf(stdout, " prepare, SELECT_CHAT_USER successful\n");
-
-  /* Get the parameter count from the statement */
-  Select_ChatUser.Query.param_count =
-      mysql_stmt_param_count(Select_ChatUser.Query.stmt);
-  fprintf(stdout, " total parameters in SELECT_CHAT_USER: %d\n",
-          Select_ChatUser.Query.param_count);
-
-  if (Select_ChatUser.Query.param_count != 2) /* validate parameter count */
-  {
-    fprintf(stderr,
-            " SELECT_CHAT_USER invalid parameter count returned by MySQL\n");
-    return false;
-  }
-  /* Bind the data for all parameters */
-  memset(Select_ChatUser.Query.bind, 0, sizeof(Select_ChatUser.Query.bind));
-
-  /* INTEGER PARAM */
-  Select_ChatUser.Query.bind[0].buffer_type = MYSQL_TYPE_LONG;
-  Select_ChatUser.Query.bind[0].buffer =
-      (char *)&Select_ChatUser.Query.chat_id.int_data;
-  Select_ChatUser.Query.bind[0].is_null = 0;
-  Select_ChatUser.Query.bind[0].length = 0;
-
-  /* INTEGER PARAM */
-  Select_ChatUser.Query.bind[1].buffer_type = MYSQL_TYPE_LONG;
-  Select_ChatUser.Query.bind[1].buffer =
-      (char *)&Select_ChatUser.Query.user_id.int_data;
-  Select_ChatUser.Query.bind[1].is_null = 0;
-  Select_ChatUser.Query.bind[1].length = 0;
-
-  if (mysql_stmt_bind_param(Select_ChatUser.Query.stmt,
-                            Select_ChatUser.Query.bind)) {
-    fprintf(stderr, " SELECT_CHAT_USER mysql_stmt_bind_param() failed\n");
-    fprintf(stderr, " %s\n", mysql_stmt_error(Select_ChatUser.Query.stmt));
-    return false;
-  }
-
-  /* Bind the result buffers for all columns before fetching them */
-  memset(Select_ChatUser.Result.bind, 0, sizeof(Select_ChatUser.Result.bind));
-
-  /* INTEGER COLUMN */
-  Select_ChatUser.Result.bind[0].buffer_type = MYSQL_TYPE_LONG;
-  Select_ChatUser.Result.bind[0].buffer =
-      (char *)&Select_ChatUser.Result.chat_user_id.int_data;
-  Select_ChatUser.Result.bind[0].is_null = &Select_ChatUser.Result.is_null[0];
-  Select_ChatUser.Result.bind[0].length = &Select_ChatUser.Result.length[0];
-  Select_ChatUser.Result.bind[0].error = &Select_ChatUser.Result.error[0];
-
-  // /* INTEGER COLUMN */
-  // Select_ChatUser.Result.bind[1].buffer_type = MYSQL_TYPE_LONG;
-  // Select_ChatUser.Result.bind[1].buffer = (char
-  // *)&Select_ChatUser.Result.user_id; Select_ChatUser.Result.bind[1].is_null =
-  // &Select_ChatUser.Result.is_null[1]; Select_ChatUser.Result.bind[1].length =
-  // &Select_ChatUser.Result.length[1]; Select_ChatUser.Result.bind[1].error =
-  // &Select_ChatUser.Result.error[1];
-
-  /* Fetch result set meta information */
-  Select_ChatUser.Result.prepare_meta_result =
-      mysql_stmt_result_metadata(Select_ChatUser.Query.stmt);
-  if (!Select_ChatUser.Result.prepare_meta_result) {
-    fprintf(stderr,
-            " SELECT_CHAT_USER mysql_stmt_result_metadata(), \
-            returned no meta information\n");
-    fprintf(stderr, " %s\n", mysql_stmt_error(Select_ChatUser.Query.stmt));
-    return false;
-  }
-
-  /* Get total columns in the query */
-  Select_ChatUser.Result.column_count =
-      mysql_num_fields(Select_ChatUser.Result.prepare_meta_result);
-  fprintf(stdout, " SELECT_CHAT_USER total columns in SELECT statement: %d\n",
-          Select_ChatUser.Result.column_count);
-
-  if (Select_ChatUser.Result.column_count != 1) /* validate column count */
-  {
-    fprintf(stderr,
-            " SELECT_CHAT_USER invalid column count returned by MySQL\n");
-    return false;
-  }
-
-  /* Bind the result buffers */
-  if (mysql_stmt_bind_result(Select_ChatUser.Query.stmt,
-                             Select_ChatUser.Result.bind)) {
-    fprintf(stderr, " SELECT_CHAT_USER mysql_stmt_bind_result() failed\n");
-    fprintf(stderr, " %s\n", mysql_stmt_error(Select_ChatUser.Query.stmt));
-    return false;
-  }
-  return true;
-}
-
 size_t DB_Queries_DML::selectChatUser(const size_t chat_id,
                                       const size_t user_id) {
-  Select_ChatUser.Query.chat_id.int_data = chat_id;
-  Select_ChatUser.Query.user_id.int_data = user_id;
+  Select_ChatUser.Query_struct.chat_id.int_data = chat_id;
+  Select_ChatUser.Query_struct.user_id.int_data = user_id;
   // execute statement
-  if (mysql_stmt_execute(Select_ChatUser.Query.stmt)) {
+  if (mysql_stmt_execute(Select_ChatUser.Query_struct.stmt)) {
     fprintf(stderr, " SELECT_CHAT_USER mysql_stmt_execute(), 1 failed\n");
-    fprintf(stderr, " %s\n", mysql_stmt_error(Select_ChatUser.Query.stmt));
+    fprintf(stderr, " %s\n", mysql_stmt_error(Select_ChatUser.Query_struct.stmt));
     return 0;
   }
 
   /* Now buffer all results to client (optional step) */
-  if (mysql_stmt_store_result(Select_ChatUser.Query.stmt)) {
+  if (mysql_stmt_store_result(Select_ChatUser.Query_struct.stmt)) {
     fprintf(stderr, " SELECT_CHAT_USER mysql_stmt_store_result() failed\n");
-    fprintf(stderr, " %s\n", mysql_stmt_error(Select_ChatUser.Query.stmt));
+    fprintf(stderr, " %s\n", mysql_stmt_error(Select_ChatUser.Query_struct.stmt));
     return 0;
   }
 
   /* Fetch all rows */
-  Select_ChatUser.Result.row_count = 0;
+  Select_ChatUser.Result_struct.row_count = 0;
   fprintf(stdout, "SELECT_CHAT_USER Fetching results ...\n");
-  while (!mysql_stmt_fetch(Select_ChatUser.Query.stmt)) {
-    Select_ChatUser.Result.row_count++;
+  while (!mysql_stmt_fetch(Select_ChatUser.Query_struct.stmt)) {
+    Select_ChatUser.Result_struct.row_count++;
   }
 
   // Check row count
-  if (Select_ChatUser.Result.row_count != 1) {
+  if (Select_ChatUser.Result_struct.row_count != 1) {
     fprintf(stderr, " SELECT_CHAT_USER MySQL failed to return all rows\n");
     return 0;
   }
 
-  return Select_ChatUser.Result.chat_user_id.int_data;
-}
-
-no_errors DB_Queries_DML::selectChatUser_close(void) {
-  mysql_free_result(Select_ChatUser.Result.prepare_meta_result);
-  if (mysql_stmt_close(Select_ChatUser.Query.stmt)) {
-    fprintf(stderr, " SELECT_CHAT_USER failed while closing the statement\n");
-    fprintf(stderr, " %s\n", mysql_error(mysql));
-    return false;
-  }
-  return true;
-}
-
-no_errors DB_Queries_DML::insertMessage_prepare(void) {
-  Insert_Message.Query.stmt = mysql_stmt_init(mysql);
-  if (!Insert_Message.Query.stmt) {
-    fprintf(stderr, " INSERT_MESSAGE mysql_stmt_init(), out of memory\n");
-    return false;
-  }
-
-  if (mysql_stmt_prepare(Insert_Message.Query.stmt, INSERT_MESSAGE,
-                         strlen(INSERT_MESSAGE))) {
-    fprintf(stderr, " mysql_stmt_prepare(), INSERT_MESSAGE failed\n");
-    fprintf(stderr, " %s\n", mysql_stmt_error(Insert_Message.Query.stmt));
-    return false;
-  }
-  fprintf(stdout, " prepare, INSERT_MESSAGE successful\n");
-
-  /* Get the parameter count from the statement */
-  Insert_Message.Query.param_count =
-      mysql_stmt_param_count(Insert_Message.Query.stmt);
-  fprintf(stdout, " total parameters in INSERT_MESSAGE: %d\n",
-          Insert_Message.Query.param_count);
-
-  if (Insert_Message.Query.param_count != 2) /* validate parameter count */
-  {
-    fprintf(stderr,
-            " INSERT_MESSAGE invalid parameter count returned by MySQL\n");
-    return false;
-  }
-
-  /* Bind the data for all parameters */
-  memset(Insert_Message.Query.bind, 0, sizeof(Insert_Message.Query.bind));
-
-  /* INTEGER PARAM */ /* chat_user_id */
-  Insert_Message.Query.bind[0].buffer_type = MYSQL_TYPE_LONG;
-  Insert_Message.Query.bind[0].buffer =
-      (char *)&Insert_Message.Query.chat_user_id.int_data;
-  Insert_Message.Query.bind[0].is_null = 0;
-  Insert_Message.Query.bind[0].length = 0;
-
-  /* STRING PARAM */ /* login */
-  Insert_Message.Query.bind[1].buffer_type = MYSQL_TYPE_STRING;
-  Insert_Message.Query.bind[1].buffer =
-      (char *)Insert_Message.Query.message.str_data;
-  Insert_Message.Query.bind[1].buffer_length = STRING_SIZE;
-  Insert_Message.Query.bind[1].is_null = 0;
-  Insert_Message.Query.bind[1].length =
-      &Insert_Message.Query.message.str_length;
-
-  if (mysql_stmt_bind_param(Insert_Message.Query.stmt,
-                            Insert_Message.Query.bind)) {
-    fprintf(stderr, " INSERT_MESSAGE mysql_stmt_bind_param() failed\n");
-    fprintf(stderr, " %s\n", mysql_stmt_error(Insert_Message.Query.stmt));
-    return false;
-  }
-  return true;
+  return Select_ChatUser.Result_struct.chat_user_id.int_data;
 }
 
 insert_id DB_Queries_DML::insertMessage(const size_t chat_user_id,
                                         const Message_t message) {
-  Insert_Message.Query.chat_user_id.int_data = chat_user_id;
+  Insert_Message.Query_struct.chat_user_id.int_data = chat_user_id;
 
-  strncpy(Insert_Message.Query.message.str_data, message->getMessage().c_str(),
+  strncpy(Insert_Message.Query_struct.message.str_data, message->getMessage().c_str(),
           STRING_SIZE);
-  Insert_Message.Query.message.str_length =
-      strlen(Insert_Message.Query.message.str_data);
+  Insert_Message.Query_struct.message.str_length =
+      strlen(Insert_Message.Query_struct.message.str_data);
 
   /* Execute the INSERT statement */
-  if (mysql_stmt_execute(Insert_Message.Query.stmt)) {
+  if (mysql_stmt_execute(Insert_Message.Query_struct.stmt)) {
     fprintf(stderr, " INSERT_MESSAGE mysql_stmt_execute(), 1 failed\n");
-    fprintf(stderr, " %s\n", mysql_stmt_error(Insert_Message.Query.stmt));
+    fprintf(stderr, " %s\n", mysql_stmt_error(Insert_Message.Query_struct.stmt));
     return 0;
   }
 
-  Insert_Message.Query.affected_rows =
-      mysql_stmt_affected_rows(Insert_Message.Query.stmt);
+  Insert_Message.Query_struct.affected_rows =
+      mysql_stmt_affected_rows(Insert_Message.Query_struct.stmt);
 
 #if _DEBUG
-  std::cout << "Affected rows: " << Insert_Message.Query.affected_rows
+  std::cout << "Affected rows: " << Insert_Message.Query_struct.affected_rows
             << std::endl;
 #endif
 
-  if (Insert_Message.Query.affected_rows != 1) /* validate affected rows */
+  if (Insert_Message.Query_struct.affected_rows != 1) /* validate affected rows */
 
   {
     fprintf(stderr, " INSERT_MESSAGE invalid affected rows by MySQL\n");
@@ -916,379 +274,50 @@ insert_id DB_Queries_DML::insertMessage(const size_t chat_user_id,
   return mysql_insert_id(mysql);
 }
 
-no_errors DB_Queries_DML::insertMessage_close(void) {
-  if (mysql_stmt_close(Insert_Message.Query.stmt)) {
-    fprintf(stderr, " INSERT_MESSAGE failed while closing the statement\n");
-    fprintf(stderr, " %s\n", mysql_error(mysql));
-    return false;
-  }
-  return true;
-}
-
-no_errors DB_Queries_DML::selectMessage_prepare(void) {
-  Select_Message.Query.stmt = mysql_stmt_init(mysql);
-  if (!Select_Message.Query.stmt) {
-    fprintf(stderr, " SELECT_MESSAGE mysql_stmt_init(), out of memory\n");
-    return false;
-  }
-
-  if (mysql_stmt_prepare(Select_Message.Query.stmt, SELECT_MESSAGE,
-                         strlen(SELECT_MESSAGE))) {
-    fprintf(stderr, " mysql_stmt_prepare(), SELECT_MESSAGE failed\n");
-    fprintf(stderr, " %s\n", mysql_stmt_error(Select_Message.Query.stmt));
-    return false;
-  }
-  fprintf(stdout, " prepare, SELECT_MESSAGE successful\n");
-
-  /* Get the parameter count from the statement */
-  Select_Message.Query.param_count =
-      mysql_stmt_param_count(Select_Message.Query.stmt);
-  fprintf(stdout, " total parameters in SELECT_MESSAGE: %d\n",
-          Select_Message.Query.param_count);
-
-  if (Select_Message.Query.param_count != 2) /* validate parameter count */
-  {
-    fprintf(stderr,
-            " SELECT_MESSAGE invalid parameter count returned by MySQL\n");
-    return false;
-  }
-  /* Bind the data for all parameters */
-  memset(Select_Message.Query.bind, 0, sizeof(Select_Message.Query.bind));
-
-  /* INTEGER PARAM */ /* chat_id */
-  Select_Message.Query.bind[0].buffer_type = MYSQL_TYPE_LONG;
-  Select_Message.Query.bind[0].buffer =
-      (char *)&Select_Message.Query.chat_id.int_data;
-  Select_Message.Query.bind[0].is_null = 0;
-  Select_Message.Query.bind[0].length = 0;
-
-  /* INTEGER PARAM */ /* message_id */
-  Select_Message.Query.bind[1].buffer_type = MYSQL_TYPE_LONG;
-  Select_Message.Query.bind[1].buffer =
-      (char *)&Select_Message.Query.message_id.int_data;
-  Select_Message.Query.bind[1].is_null = 0;
-  Select_Message.Query.bind[1].length = 0;
-
-  if (mysql_stmt_bind_param(Select_Message.Query.stmt,
-                            Select_Message.Query.bind)) {
-    fprintf(stderr, " SELECT_MESSAGE mysql_stmt_bind_param() failed\n");
-    fprintf(stderr, " %s\n", mysql_stmt_error(Select_Message.Query.stmt));
-    return false;
-  }
-
-  /* Bind the result buffers for all columns before fetching them */
-  memset(Select_Message.Result.bind, 0, sizeof(Select_Message.Result.bind));
-
-  /* INTEGER COLUMN */ /* chat_id */
-  Select_Message.Result.bind[0].buffer_type = MYSQL_TYPE_LONG;
-  Select_Message.Result.bind[0].buffer =
-      (char *)&Select_Message.Result.chat_id.int_data;
-  Select_Message.Result.bind[0].is_null = &Select_Message.Result.is_null[0];
-  Select_Message.Result.bind[0].length = &Select_Message.Result.length[0];
-  Select_Message.Result.bind[0].error = &Select_Message.Result.error[0];
-
-  /* INTEGER COLUMN */ /* user_id */
-  Select_Message.Result.bind[1].buffer_type = MYSQL_TYPE_LONG;
-  Select_Message.Result.bind[1].buffer =
-      (char *)&Select_Message.Result.user_id.int_data;
-  Select_Message.Result.bind[1].is_null = &Select_Message.Result.is_null[1];
-  Select_Message.Result.bind[1].length = &Select_Message.Result.length[1];
-  Select_Message.Result.bind[1].error = &Select_Message.Result.error[1];
-
-  /* INTEGER COLUMN */ /* message_id */
-  Select_Message.Result.bind[2].buffer_type = MYSQL_TYPE_LONG;
-  Select_Message.Result.bind[2].buffer =
-      (char *)&Select_Message.Result.message_id.int_data;
-  Select_Message.Result.bind[2].is_null = &Select_Message.Result.is_null[2];
-  Select_Message.Result.bind[2].length = &Select_Message.Result.length[2];
-  Select_Message.Result.bind[2].error = &Select_Message.Result.error[2];
-
-  /* DATETIME COLUMN */ /* dt */
-  Select_Message.Result.bind[3].buffer_type = MYSQL_TYPE_DATETIME;
-  Select_Message.Result.bind[3].buffer = (char *)&Select_Message.Result.dt;
-  Select_Message.Result.bind[3].is_null = &Select_Message.Result.is_null[3];
-  Select_Message.Result.bind[3].length = &Select_Message.Result.length[3];
-  Select_Message.Result.bind[3].error = &Select_Message.Result.error[3];
-
-  /* STRING COLUMN */ /* login */
-  Select_Message.Result.bind[4].buffer_type = MYSQL_TYPE_STRING;
-  Select_Message.Result.bind[4].buffer =
-      (char *)Select_Message.Result.login.str_data;
-  Select_Message.Result.bind[4].buffer_length = STRING_SIZE;
-  Select_Message.Result.bind[4].is_null = &Select_Message.Result.is_null[4];
-  Select_Message.Result.bind[4].length = &Select_Message.Result.length[4];
-  Select_Message.Result.bind[4].error = &Select_Message.Result.error[4];
-
-  /* STRING COLUMN */ /* message */
-  Select_Message.Result.bind[5].buffer_type = MYSQL_TYPE_STRING;
-  Select_Message.Result.bind[5].buffer =
-      (char *)Select_Message.Result.message.str_data;
-  Select_Message.Result.bind[5].buffer_length = STRING_SIZE;
-  Select_Message.Result.bind[5].is_null = &Select_Message.Result.is_null[5];
-  Select_Message.Result.bind[5].length = &Select_Message.Result.length[5];
-  Select_Message.Result.bind[5].error = &Select_Message.Result.error[5];
-
-  /* INTEGER COLUMN */ /* status */
-  Select_Message.Result.bind[6].buffer_type = MYSQL_TYPE_LONG;
-  Select_Message.Result.bind[6].buffer =
-      (char *)&Select_Message.Result.status.int_data;
-  Select_Message.Result.bind[6].is_null = &Select_Message.Result.is_null[6];
-  Select_Message.Result.bind[6].length = &Select_Message.Result.length[6];
-  Select_Message.Result.bind[6].error = &Select_Message.Result.error[6];
-
-  /* Fetch result set meta information */
-  Select_Message.Result.prepare_meta_result =
-      mysql_stmt_result_metadata(Select_Message.Query.stmt);
-  if (!Select_Message.Result.prepare_meta_result) {
-    fprintf(stderr,
-            " SELECT_MESSAGE mysql_stmt_result_metadata(), \
-            returned no meta information\n");
-    fprintf(stderr, " %s\n", mysql_stmt_error(Select_Message.Query.stmt));
-    return false;
-  }
-
-  /* Get total columns in the query */
-  Select_Message.Result.column_count =
-      mysql_num_fields(Select_Message.Result.prepare_meta_result);
-  fprintf(stdout, " SELECT_MESSAGE total columns in SELECT statement: %d\n",
-          Select_Message.Result.column_count);
-
-  if (Select_Message.Result.column_count != 7) /* validate column count */
-  {
-    fprintf(stderr, " SELECT_MESSAGE invalid column count returned by MySQL\n");
-    return false;
-  }
-
-  /* Bind the result buffers */
-  if (mysql_stmt_bind_result(Select_Message.Query.stmt,
-                             Select_Message.Result.bind)) {
-    fprintf(stderr, " SELECT_MESSAGE mysql_stmt_bind_result() failed\n");
-    fprintf(stderr, " %s\n", mysql_stmt_error(Select_Message.Query.stmt));
-    return false;
-  }
-  return true;
-}
-
 Message_t DB_Queries_DML::selectMessage(const size_t chat_id,
                                         const size_t message_id) {
-  Select_Message.Query.chat_id.int_data = chat_id;
-  Select_Message.Query.message_id.int_data = message_id;
+  Select_Message.Query_struct.chat_id.int_data = chat_id;
+  Select_Message.Query_struct.message_id.int_data = message_id;
 
   // execute statement
-  if (mysql_stmt_execute(Select_Message.Query.stmt)) {
+  if (mysql_stmt_execute(Select_Message.Query_struct.stmt)) {
     fprintf(stderr, " SELECT_MESSAGE mysql_stmt_execute(), 1 failed\n");
-    fprintf(stderr, " %s\n", mysql_stmt_error(Select_Message.Query.stmt));
+    fprintf(stderr, " %s\n", mysql_stmt_error(Select_Message.Query_struct.stmt));
     return nullptr;
   }
 
   /* Now buffer all results to client (optional step) */
-  if (mysql_stmt_store_result(Select_Message.Query.stmt)) {
+  if (mysql_stmt_store_result(Select_Message.Query_struct.stmt)) {
     fprintf(stderr, " SELECT_MESSAGE mysql_stmt_store_result() failed\n");
-    fprintf(stderr, " %s\n", mysql_stmt_error(Select_Message.Query.stmt));
+    fprintf(stderr, " %s\n", mysql_stmt_error(Select_Message.Query_struct.stmt));
     return nullptr;
   }
 
   /* Fetch all rows */
-  Select_Message.Result.row_count = 0;
+  Select_Message.Result_struct.row_count = 0;
   fprintf(stdout, "SELECT_MESSAGE Fetching results ...\n");
 
   Message_t message;
 
-  while (!mysql_stmt_fetch(Select_Message.Query.stmt)) {
-    std::cout << Select_Message.Result.row_count++ << std::endl;
+  while (!mysql_stmt_fetch(Select_Message.Query_struct.stmt)) {
+    std::cout << Select_Message.Result_struct.row_count++ << std::endl;
     message = make_shared<Message>(
-        Message(std::to_string(Select_Message.Result.dt.hour) + ':' +
-                    std::to_string(Select_Message.Result.dt.minute) + ':' +
-                    std::to_string(Select_Message.Result.dt.second) + ' ' +
-                    std::to_string(Select_Message.Result.dt.day) + '-' +
-                    std::to_string(Select_Message.Result.dt.month) + '-' +
-                    std::to_string(Select_Message.Result.dt.year),
-                Select_Message.Result.login.str_data,
-                Select_Message.Result.message.str_data));
+        Message(std::to_string(Select_Message.Result_struct.dt.hour) + ':' +
+                    std::to_string(Select_Message.Result_struct.dt.minute) + ':' +
+                    std::to_string(Select_Message.Result_struct.dt.second) + ' ' +
+                    std::to_string(Select_Message.Result_struct.dt.day) + '-' +
+                    std::to_string(Select_Message.Result_struct.dt.month) + '-' +
+                    std::to_string(Select_Message.Result_struct.dt.year),
+                Select_Message.Result_struct.login.str_data,
+                Select_Message.Result_struct.message.str_data));
   }
 
   // Check row count
-  if (Select_Message.Result.row_count != 1) {
+  if (Select_Message.Result_struct.row_count != 1) {
     fprintf(stderr, " SELECT_MESSAGE MySQL failed to return all rows\n");
     return nullptr;
   }
   return message;
-}
-
-no_errors DB_Queries_DML::selectMessage_close(void) {
-  mysql_free_result(Select_Message.Result.prepare_meta_result);
-  if (mysql_stmt_close(Select_Message.Query.stmt)) {
-    fprintf(stderr, " SELECT_MESSAGE failed while closing the statement\n");
-    fprintf(stderr, " %s\n", mysql_error(mysql));
-    return false;
-  }
-  return true;
-}
-
-no_errors DB_Queries_DML::selectMessages_prepare(void) {
-  Select_Messages.Query.stmt = mysql_stmt_init(mysql);
-  if (!Select_Messages.Query.stmt) {
-    fprintf(stderr, " SELECT_MESSAGES mysql_stmt_init(), out of memory\n");
-    return false;
-  }
-
-  if (mysql_stmt_prepare(Select_Messages.Query.stmt, SELECT_MESSAGES,
-                         strlen(SELECT_MESSAGES))) {
-    fprintf(stderr, " mysql_stmt_prepare(), SELECT_MESSAGES failed\n");
-    fprintf(stderr, " %s\n", mysql_stmt_error(Select_Messages.Query.stmt));
-    return false;
-  }
-  fprintf(stdout, " prepare, SELECT_MESSAGES successful\n");
-
-  /* Get the parameter count from the statement */
-  Select_Messages.Query.param_count =
-      mysql_stmt_param_count(Select_Messages.Query.stmt);
-  fprintf(stdout, " total parameters in SELECT_MESSAGES: %d\n",
-          Select_Messages.Query.param_count);
-
-  if (Select_Messages.Query.param_count != 5) /* validate parameter count */
-  {
-    fprintf(stderr,
-            " SELECT_MESSAGES invalid parameter count returned by MySQL\n");
-    return false;
-  }
-  /* Bind the data for all parameters */
-  memset(Select_Messages.Query.bind, 0, sizeof(Select_Messages.Query.bind));
-
-  /* INTEGER PARAM */ /* chat_id */
-  Select_Messages.Query.bind[0].buffer_type = MYSQL_TYPE_LONG;
-  Select_Messages.Query.bind[0].buffer =
-      (char *)&Select_Messages.Query.chat_id.int_data;
-  Select_Messages.Query.bind[0].is_null = 0;
-  Select_Messages.Query.bind[0].length = 0;
-
-  /* INTEGER PARAM */ /* message_id_begin */
-  Select_Messages.Query.bind[1].buffer_type = MYSQL_TYPE_LONG;
-  Select_Messages.Query.bind[1].buffer =
-      (char *)&Select_Messages.Query.message_id_begin.int_data;
-  Select_Messages.Query.bind[1].is_null = 0;
-  Select_Messages.Query.bind[1].length = 0;
-
-  /* INTEGER PARAM */ /* message_id_end */
-  Select_Messages.Query.bind[2].buffer_type = MYSQL_TYPE_LONG;
-  Select_Messages.Query.bind[2].buffer =
-      (char *)&Select_Messages.Query.message_id_end.int_data;
-  Select_Messages.Query.bind[2].is_null = 0;
-  Select_Messages.Query.bind[2].length = 0;
-
-  /* INTEGER PARAM */ /* status */
-  Select_Messages.Query.bind[3].buffer_type = MYSQL_TYPE_LONG;
-  Select_Messages.Query.bind[3].buffer =
-      (char *)&Select_Messages.Query.status.int_data;
-  Select_Messages.Query.bind[3].is_null = 0;
-  Select_Messages.Query.bind[3].length = 0;
-
-  /* INTEGER PARAM */ /* limit */
-  Select_Messages.Query.bind[4].buffer_type = MYSQL_TYPE_LONG;
-  Select_Messages.Query.bind[4].buffer =
-      (char *)&Select_Messages.Query.limit.int_data;
-  Select_Messages.Query.bind[4].is_null = 0;
-  Select_Messages.Query.bind[4].length = 0;
-
-  if (mysql_stmt_bind_param(Select_Messages.Query.stmt,
-                            Select_Messages.Query.bind)) {
-    fprintf(stderr, " SELECT_MESSAGES mysql_stmt_bind_param() failed\n");
-    fprintf(stderr, " %s\n", mysql_stmt_error(Select_Messages.Query.stmt));
-    return false;
-  }
-
-  /* Bind the result buffers for all columns before fetching them */
-  memset(Select_Messages.Result.bind, 0, sizeof(Select_Messages.Result.bind));
-
-  /* INTEGER COLUMN */ /* chat_id */
-  Select_Messages.Result.bind[0].buffer_type = MYSQL_TYPE_LONG;
-  Select_Messages.Result.bind[0].buffer =
-      (char *)&Select_Messages.Result.chat_id.int_data;
-  Select_Messages.Result.bind[0].is_null = &Select_Messages.Result.is_null[0];
-  Select_Messages.Result.bind[0].length = &Select_Messages.Result.length[0];
-  Select_Messages.Result.bind[0].error = &Select_Messages.Result.error[0];
-
-  /* INTEGER COLUMN */ /* user_id */
-  Select_Messages.Result.bind[1].buffer_type = MYSQL_TYPE_LONG;
-  Select_Messages.Result.bind[1].buffer =
-      (char *)&Select_Messages.Result.user_id.int_data;
-  Select_Messages.Result.bind[1].is_null = &Select_Messages.Result.is_null[1];
-  Select_Messages.Result.bind[1].length = &Select_Messages.Result.length[1];
-  Select_Messages.Result.bind[1].error = &Select_Messages.Result.error[1];
-
-  /* INTEGER COLUMN */ /* message_id */
-  Select_Messages.Result.bind[2].buffer_type = MYSQL_TYPE_LONG;
-  Select_Messages.Result.bind[2].buffer =
-      (char *)&Select_Messages.Result.message_id.int_data;
-  Select_Messages.Result.bind[2].is_null = &Select_Messages.Result.is_null[2];
-  Select_Messages.Result.bind[2].length = &Select_Messages.Result.length[2];
-  Select_Messages.Result.bind[2].error = &Select_Messages.Result.error[2];
-
-  /* DATETIME COLUMN */ /* dt */
-  Select_Messages.Result.bind[3].buffer_type = MYSQL_TYPE_DATETIME;
-  Select_Messages.Result.bind[3].buffer = (char *)&Select_Messages.Result.dt;
-  Select_Messages.Result.bind[3].is_null = &Select_Messages.Result.is_null[3];
-  Select_Messages.Result.bind[3].length = &Select_Messages.Result.length[3];
-  Select_Messages.Result.bind[3].error = &Select_Messages.Result.error[3];
-
-  /* STRING COLUMN */ /* login */
-  Select_Messages.Result.bind[4].buffer_type = MYSQL_TYPE_STRING;
-  Select_Messages.Result.bind[4].buffer =
-      (char *)Select_Messages.Result.login.str_data;
-  Select_Messages.Result.bind[4].buffer_length = STRING_SIZE;
-  Select_Messages.Result.bind[4].is_null = &Select_Messages.Result.is_null[4];
-  Select_Messages.Result.bind[4].length = &Select_Messages.Result.length[4];
-  Select_Messages.Result.bind[4].error = &Select_Messages.Result.error[4];
-
-  /* STRING COLUMN */ /* message */
-  Select_Messages.Result.bind[5].buffer_type = MYSQL_TYPE_STRING;
-  Select_Messages.Result.bind[5].buffer =
-      (char *)Select_Messages.Result.message.str_data;
-  Select_Messages.Result.bind[5].buffer_length = STRING_SIZE;
-  Select_Messages.Result.bind[5].is_null = &Select_Messages.Result.is_null[5];
-  Select_Messages.Result.bind[5].length = &Select_Messages.Result.length[5];
-  Select_Messages.Result.bind[5].error = &Select_Messages.Result.error[5];
-
-  /* INTEGER COLUMN */ /* status */
-  Select_Messages.Result.bind[6].buffer_type = MYSQL_TYPE_LONG;
-  Select_Messages.Result.bind[6].buffer =
-      (char *)&Select_Messages.Result.status.int_data;
-  Select_Messages.Result.bind[6].is_null = &Select_Messages.Result.is_null[6];
-  Select_Messages.Result.bind[6].length = &Select_Messages.Result.length[6];
-  Select_Messages.Result.bind[6].error = &Select_Messages.Result.error[6];
-
-  /* Fetch result set meta information */
-  Select_Messages.Result.prepare_meta_result =
-      mysql_stmt_result_metadata(Select_Messages.Query.stmt);
-  if (!Select_Messages.Result.prepare_meta_result) {
-    fprintf(stderr,
-            " SELECT_MESSAGES mysql_stmt_result_metadata(), \
-            returned no meta information\n");
-    fprintf(stderr, " %s\n", mysql_stmt_error(Select_Messages.Query.stmt));
-    return false;
-  }
-
-  /* Get total columns in the query */
-  Select_Messages.Result.column_count =
-      mysql_num_fields(Select_Messages.Result.prepare_meta_result);
-  fprintf(stdout, " SELECT_MESSAGES total columns in SELECT statement: %d\n",
-          Select_Messages.Result.column_count);
-
-  if (Select_Messages.Result.column_count != 7) /* validate column count */
-  {
-    fprintf(stderr,
-            " SELECT_MESSAGES invalid column count returned by MySQL\n");
-    return false;
-  }
-
-  /* Bind the result buffers */
-  if (mysql_stmt_bind_result(Select_Messages.Query.stmt,
-                             Select_Messages.Result.bind)) {
-    fprintf(stderr, " SELECT_MESSAGES mysql_stmt_bind_result() failed\n");
-    fprintf(stderr, " %s\n", mysql_stmt_error(Select_Messages.Query.stmt));
-    return false;
-  }
-  return true;
 }
 
 queue_message_t DB_Queries_DML::selectMessages(const size_t chat_id,
@@ -1296,46 +325,46 @@ queue_message_t DB_Queries_DML::selectMessages(const size_t chat_id,
                                                const size_t message_id_end,
                                                const size_t message_status,
                                                const size_t limit) {
-  Select_Messages.Query.chat_id.int_data = chat_id;
-  Select_Messages.Query.message_id_begin.int_data = message_id_begin;
-  Select_Messages.Query.message_id_end.int_data = message_id_end;
-  Select_Messages.Query.status.int_data = message_status;
-  Select_Messages.Query.limit.int_data = limit;
+  Select_Messages.Query_struct.chat_id.int_data = chat_id;
+  Select_Messages.Query_struct.message_id_begin.int_data = message_id_begin;
+  Select_Messages.Query_struct.message_id_end.int_data = message_id_end;
+  Select_Messages.Query_struct.status.int_data = message_status;
+  Select_Messages.Query_struct.limit.int_data = limit;
 
   // execute statement
-  if (mysql_stmt_execute(Select_Messages.Query.stmt)) {
+  if (mysql_stmt_execute(Select_Messages.Query_struct.stmt)) {
     fprintf(stderr, " SELECT_MESSAGES mysql_stmt_execute(), 1 failed\n");
-    fprintf(stderr, " %s\n", mysql_stmt_error(Select_Messages.Query.stmt));
+    fprintf(stderr, " %s\n", mysql_stmt_error(Select_Messages.Query_struct.stmt));
     return nullptr;
   }
 
   /* Now buffer all results to client (optional step) */
-  if (mysql_stmt_store_result(Select_Messages.Query.stmt)) {
+  if (mysql_stmt_store_result(Select_Messages.Query_struct.stmt)) {
     fprintf(stderr, " SELECT_MESSAGES mysql_stmt_store_result() failed\n");
-    fprintf(stderr, " %s\n", mysql_stmt_error(Select_Messages.Query.stmt));
+    fprintf(stderr, " %s\n", mysql_stmt_error(Select_Messages.Query_struct.stmt));
     return nullptr;
   }
 
   /* Fetch all rows */
   queue_message_t queue =
       std::make_shared<std::queue<Message>>(std::queue<Message>());
-  Select_Messages.Result.row_count = 0;
+  Select_Messages.Result_struct.row_count = 0;
   fprintf(stdout, "SELECT_MESSAGES Fetching results Select_Messages...\n");
-  while (!mysql_stmt_fetch(Select_Messages.Query.stmt)) {
-    std::cout << Select_Messages.Result.row_count++ << std::endl;
+  while (!mysql_stmt_fetch(Select_Messages.Query_struct.stmt)) {
+    std::cout << Select_Messages.Result_struct.row_count++ << std::endl;
     queue->emplace(
-        Message(std::to_string(Select_Messages.Result.dt.hour) + ':' +
-                    std::to_string(Select_Messages.Result.dt.minute) + ':' +
-                    std::to_string(Select_Messages.Result.dt.second) + ' ' +
-                    std::to_string(Select_Messages.Result.dt.day) + '-' +
-                    std::to_string(Select_Messages.Result.dt.month) + '-' +
-                    std::to_string(Select_Messages.Result.dt.year),
-                Select_Messages.Result.login.str_data,
-                Select_Messages.Result.message.str_data));
+        Message(std::to_string(Select_Messages.Result_struct.dt.hour) + ':' +
+                    std::to_string(Select_Messages.Result_struct.dt.minute) + ':' +
+                    std::to_string(Select_Messages.Result_struct.dt.second) + ' ' +
+                    std::to_string(Select_Messages.Result_struct.dt.day) + '-' +
+                    std::to_string(Select_Messages.Result_struct.dt.month) + '-' +
+                    std::to_string(Select_Messages.Result_struct.dt.year),
+                Select_Messages.Result_struct.login.str_data,
+                Select_Messages.Result_struct.message.str_data));
   };
   std::cout << "SELECT_MESSAGES cycle end " << std::endl;
   // //Check row count
-  // if (Select_Messages.Result.row_count != 1) {
+  // if (Select_Messages.Result_struct.row_count != 1) {
   //   fprintf(stderr, " MySQL failed to return all rows\n");
   //   return nullptr;
   // }
@@ -1343,233 +372,80 @@ queue_message_t DB_Queries_DML::selectMessages(const size_t chat_id,
   return queue;
 }
 
-no_errors DB_Queries_DML::selectMessages_close(void) {
-  mysql_free_result(Select_Messages.Result.prepare_meta_result);
-  if (mysql_stmt_close(Select_Messages.Query.stmt)) {
-    fprintf(stderr, " SELECT_MESSAGES failed while closing the statement\n");
-    fprintf(stderr, " %s\n", mysql_error(mysql));
-    return false;
-  }
-  return true;
-}
-
-no_errors DB_Queries_DML::updateStatusDelivered_prepare(void) {
-  Update_Status_Delivered.Query.stmt = mysql_stmt_init(mysql);
-  if (!Update_Status_Delivered.Query.stmt) {
-    fprintf(stderr,
-            " UPDATE_STATUS_DELIVERED mysql_stmt_init(), out of memory\n");
-    return false;
-  }
-
-  if (mysql_stmt_prepare(Update_Status_Delivered.Query.stmt,
-                         UPDATE_STATUS_DELIVERED,
-                         strlen(UPDATE_STATUS_DELIVERED))) {
-    fprintf(stderr, " mysql_stmt_prepare(), UPDATE_STATUS_DELIVERED failed\n");
-    fprintf(stderr, " %s\n",
-            mysql_stmt_error(Update_Status_Delivered.Query.stmt));
-    return false;
-  }
-  fprintf(stdout, " prepare, UPDATE_STATUS_DELIVERED successful\n");
-
-  /* Get the parameter count from the statement */
-  Update_Status_Delivered.Query.param_count =
-      mysql_stmt_param_count(Update_Status_Delivered.Query.stmt);
-  fprintf(stdout, " total parameters in UPDATE_STATUS_DELIVERED: %d\n",
-          Update_Status_Delivered.Query.param_count);
-
-  if (Update_Status_Delivered.Query.param_count !=
-      3) /* validate parameter count */
-  {
-    fprintf(
-        stderr,
-        " UPDATE_STATUS_DELIVERED invalid parameter count returned by MySQL\n");
-    return false;
-  }
-
-  /* Bind the data for all parameters */
-  memset(Update_Status_Delivered.Query.bind, 0,
-         sizeof(Update_Status_Delivered.Query.bind));
-
-  /* INTEGER PARAM */ /* chat_user_id */
-  Update_Status_Delivered.Query.bind[0].buffer_type = MYSQL_TYPE_LONG;
-  Update_Status_Delivered.Query.bind[0].buffer =
-      (char *)&Update_Status_Delivered.Query.chat_user_id.int_data;
-  Update_Status_Delivered.Query.bind[0].is_null = 0;
-  Update_Status_Delivered.Query.bind[0].length = 0;
-
-  /* INTEGER PARAM */ /* message_id_begin */
-  Update_Status_Delivered.Query.bind[1].buffer_type = MYSQL_TYPE_LONG;
-  Update_Status_Delivered.Query.bind[1].buffer =
-      (char *)&Update_Status_Delivered.Query.message_id_begin.int_data;
-  Update_Status_Delivered.Query.bind[1].is_null = 0;
-  Update_Status_Delivered.Query.bind[1].length = 0;
-
-  /* INTEGER PARAM */ /* message_id_end */
-  Update_Status_Delivered.Query.bind[2].buffer_type = MYSQL_TYPE_LONG;
-  Update_Status_Delivered.Query.bind[2].buffer =
-      (char *)&Update_Status_Delivered.Query.message_id_end.int_data;
-  Update_Status_Delivered.Query.bind[2].is_null = 0;
-  Update_Status_Delivered.Query.bind[2].length = 0;
-
-  if (mysql_stmt_bind_param(Update_Status_Delivered.Query.stmt,
-                            Update_Status_Delivered.Query.bind)) {
-    fprintf(stderr,
-            " UPDATE_STATUS_DELIVERED mysql_stmt_bind_param() failed\n");
-    fprintf(stderr, " %s\n",
-            mysql_stmt_error(Update_Status_Delivered.Query.stmt));
-    return false;
-  }
-  return true;
-}
-
 affected_rows DB_Queries_DML::updateStatusDelivered(
     const size_t chat_user_id, const size_t message_id_begin,
     const size_t message_id_end) {
-  Update_Status_Delivered.Query.chat_user_id.int_data = chat_user_id;
-  Update_Status_Delivered.Query.message_id_begin.int_data = message_id_begin;
-  Update_Status_Delivered.Query.message_id_end.int_data = message_id_end;
+  Update_Status_Delivered.Query_struct.chat_user_id.int_data = chat_user_id;
+  Update_Status_Delivered.Query_struct.message_id_begin.int_data = message_id_begin;
+  Update_Status_Delivered.Query_struct.message_id_end.int_data = message_id_end;
 
   /* Execute the UPDATE statement */
-  if (mysql_stmt_execute(Update_Status_Delivered.Query.stmt)) {
+  if (mysql_stmt_execute(Update_Status_Delivered.Query_struct.stmt)) {
     fprintf(stderr,
             " UPDATE_STATUS_DELIVERED mysql_stmt_execute(), 1 failed\n");
     fprintf(stderr, " %s\n",
-            mysql_stmt_error(Update_Status_Delivered.Query.stmt));
+            mysql_stmt_error(Update_Status_Delivered.Query_struct.stmt));
     return 0;
   }
 
-  Update_Status_Delivered.Query.affected_rows =
-      mysql_stmt_affected_rows(Update_Status_Delivered.Query.stmt);
+  Update_Status_Delivered.Query_struct.affected_rows =
+      mysql_stmt_affected_rows(Update_Status_Delivered.Query_struct.stmt);
 
 #if _DEBUG
-  std::cout << "Affected rows: " << Update_Status_Delivered.Query.affected_rows
+  std::cout << "Affected rows: " << Update_Status_Delivered.Query_struct.affected_rows
             << std::endl;
 #endif
-  return Update_Status_Delivered.Query.affected_rows;
-}
-
-no_errors DB_Queries_DML::updateStatusDelivered_close(void) {
-  if (mysql_stmt_close(Update_Status_Delivered.Query.stmt)) {
-    fprintf(stderr,
-            " UPDATE_STATUS_DELIVERED failed while closing the statement\n");
-    fprintf(stderr, " %s\n", mysql_error(mysql));
-    return false;
-  }
-  return true;
-}
-
-no_errors DB_Queries_DML::updateStatusRead_prepare(void) {
-  Update_Status_Read.Query.stmt = mysql_stmt_init(mysql);
-  if (!Update_Status_Read.Query.stmt) {
-    fprintf(stderr, " UPDATE_STATUS_READ mysql_stmt_init(), out of memory\n");
-    return false;
-  }
-
-  if (mysql_stmt_prepare(Update_Status_Read.Query.stmt, UPDATE_STATUS_READ,
-                         strlen(UPDATE_STATUS_READ))) {
-    fprintf(stderr, " mysql_stmt_prepare(), UPDATE_STATUS_DELIVERED failed\n");
-    fprintf(stderr, " %s\n", mysql_stmt_error(Update_Status_Read.Query.stmt));
-    return false;
-  }
-  fprintf(stdout, " prepare, UPDATE_STATUS_DELIVERED successful\n");
-
-  /* Get the parameter count from the statement */
-  Update_Status_Read.Query.param_count =
-      mysql_stmt_param_count(Update_Status_Read.Query.stmt);
-  fprintf(stdout, " total parameters in UPDATE_STATUS_DELIVERED: %d\n",
-          Update_Status_Read.Query.param_count);
-
-  if (Update_Status_Read.Query.param_count != 3) /* validate parameter count */
-  {
-    fprintf(stderr,
-            " UPDATE_STATUS_READ invalid parameter count returned by MySQL\n");
-    return false;
-  }
-
-  /* Bind the data for all parameters */
-  memset(Update_Status_Read.Query.bind, 0,
-         sizeof(Update_Status_Read.Query.bind));
-
-  /* INTEGER PARAM */ /* chat_user_id */
-  Update_Status_Read.Query.bind[0].buffer_type = MYSQL_TYPE_LONG;
-  Update_Status_Read.Query.bind[0].buffer =
-      (char *)&Update_Status_Read.Query.chat_user_id.int_data;
-  Update_Status_Read.Query.bind[0].is_null = 0;
-  Update_Status_Read.Query.bind[0].length = 0;
-
-  /* INTEGER PARAM */ /* message_id_begin */
-  Update_Status_Read.Query.bind[1].buffer_type = MYSQL_TYPE_LONG;
-  Update_Status_Read.Query.bind[1].buffer =
-      (char *)&Update_Status_Read.Query.message_id_begin.int_data;
-  Update_Status_Read.Query.bind[1].is_null = 0;
-  Update_Status_Read.Query.bind[1].length = 0;
-
-  /* INTEGER PARAM */ /* message_id_end */
-  Update_Status_Read.Query.bind[2].buffer_type = MYSQL_TYPE_LONG;
-  Update_Status_Read.Query.bind[2].buffer =
-      (char *)&Update_Status_Read.Query.message_id_end.int_data;
-  Update_Status_Read.Query.bind[2].is_null = 0;
-  Update_Status_Read.Query.bind[2].length = 0;
-
-  if (mysql_stmt_bind_param(Update_Status_Read.Query.stmt,
-                            Update_Status_Read.Query.bind)) {
-    fprintf(stderr, " UPDATE_STATUS_READ mysql_stmt_bind_param() failed\n");
-    fprintf(stderr, " %s\n", mysql_stmt_error(Update_Status_Read.Query.stmt));
-    return false;
-  }
-  return true;
+  return Update_Status_Delivered.Query_struct.affected_rows;
 }
 
 affected_rows DB_Queries_DML::updateStatusRead(const size_t chat_user_id,
                                                const size_t message_id_begin,
                                                const size_t message_id_end) {
-  Update_Status_Read.Query.chat_user_id.int_data = chat_user_id;
-  Update_Status_Read.Query.message_id_begin.int_data = message_id_begin;
-  Update_Status_Read.Query.message_id_end.int_data = message_id_end;
+  Update_Status_Read.Query_struct.chat_user_id.int_data = chat_user_id;
+  Update_Status_Read.Query_struct.message_id_begin.int_data = message_id_begin;
+  Update_Status_Read.Query_struct.message_id_end.int_data = message_id_end;
 
   /* Execute the UPDATE statement */
-  if (mysql_stmt_execute(Update_Status_Read.Query.stmt)) {
+  if (mysql_stmt_execute(Update_Status_Read.Query_struct.stmt)) {
     fprintf(stderr, " UPDATE_STATUS_READ mysql_stmt_execute(), 1 failed\n");
-    fprintf(stderr, " %s\n", mysql_stmt_error(Update_Status_Read.Query.stmt));
+    fprintf(stderr, " %s\n", mysql_stmt_error(Update_Status_Read.Query_struct.stmt));
     return 0;
   }
 
-  Update_Status_Read.Query.affected_rows =
-      mysql_stmt_affected_rows(Update_Status_Read.Query.stmt);
+  Update_Status_Read.Query_struct.affected_rows =
+      mysql_stmt_affected_rows(Update_Status_Read.Query_struct.stmt);
 
 #if _DEBUG
-  std::cout << "Affected rows: " << Update_Status_Read.Query.affected_rows
+  std::cout << "Affected rows: " << Update_Status_Read.Query_struct.affected_rows
             << std::endl;
 #endif
 
-  return Update_Status_Read.Query.affected_rows;
-}
-
-no_errors DB_Queries_DML::updateStatusRead_close(void) {
-  if (mysql_stmt_close(Update_Status_Read.Query.stmt)) {
-    fprintf(stderr, " UPDATE_STATUS_READ failed while closing the statement\n");
-    fprintf(stderr, " %s\n", mysql_error(mysql));
-    return false;
-  }
-  return true;
+  return Update_Status_Read.Query_struct.affected_rows;
 }
 
 no_errors DB_Queries_DML::prepareAll(void) {
-  return insertUser_prepare() && insertChat_prepare() &&
-         insertChatUser_prepare() && insertMessage_prepare() &&
-         selectUserById_prepare() &&
-         // selectUserByLogin_prepare() &&
-         selectChat_prepare() && selectChatUser_prepare() &&
-         selectMessage_prepare() && selectMessages_prepare() &&
-         updateStatusDelivered_prepare() && updateStatusRead_prepare();
+
+  prepare<Insert_User>(Insert_User_struct);
+  prepare<Select_User_By_Id>(Select_User_By_Id_struct);
+
+  // return insertUser_prepare() && insertChat_prepare() &&
+  //        insertChatUser_prepare() && insertMessage_prepare() &&
+  //        selectUserById_prepare() &&
+  //        // selectUserByLogin_prepare() &&
+  //        selectChat_prepare() && selectChatUser_prepare() &&
+  //        selectMessage_prepare() && selectMessages_prepare() &&
+  //        updateStatusDelivered_prepare() && updateStatusRead_prepare();
 }
 
 no_errors DB_Queries_DML::closeAll(void) {
-  return insertUser_close() && insertChat_close() && insertChatUser_close() &&
-         insertMessage_close() && selectChat_close() &&
-         selectUserById_close() &&
-         // selectUserByLogin_close() &&
-         selectChatUser_close() && selectMessage_close() &&
-         selectMessages_close() && updateStatusDelivered_close() &&
-         updateStatusRead_close() && connectDB_close();
+
+  close<Insert_User>(Insert_User_struct, mysql);
+  close<Select_User_By_Id>(Select_User_By_Id_struct, mysql);
+  // return insertUser_close() && insertChat_close() && insertChatUser_close() &&
+  //        insertMessage_close() && selectChat_close() &&
+  //        selectUserById_close() &&
+  //        // selectUserByLogin_close() &&
+  //        selectChatUser_close() && selectMessage_close() &&
+  //        selectMessages_close() && updateStatusDelivered_close() &&
+  //        updateStatusRead_close() && connectDB_close();
 }
