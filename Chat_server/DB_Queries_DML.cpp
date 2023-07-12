@@ -1,5 +1,6 @@
 #include "DB_Queries_DML.h"
 
+
 DB_Queries_DML::DB_Queries_DML() {}
 
 DB_Queries_DML::~DB_Queries_DML() {}
@@ -39,413 +40,448 @@ no_errors DB_Queries_DML::connectDB_close(void) {
   return true;
 }
 
+// V
+insert_id DB_Queries_DML::insert_User_fc(Insert_User& arg_struct,
+                                         const User_t user) {
 
-
-
-
-
-
-insert_id DB_Queries_DML::insertUser(const User_t user,
-                                     Insert_User &arg_struct) {
+  auto& query = arg_struct.Query_struct;
+  auto& result = arg_struct.Result_struct;
   no_errors no_errors{true};
-  if(!user) return 0;
-    strncpy(arg_struct.Query_struct.login.data, user->getLogin().c_str(), string_size);
-    arg_struct.Query_struct.login.length = strlen(arg_struct.Query_struct.login.data);
 
-    strncpy(arg_struct.Query_struct.pass.data, user->getPass().c_str(), string_size);
-    arg_struct.Query_struct.pass.length = strlen(arg_struct.Query_struct.pass.data);
+  if (!user) return 0;
 
-  /* Execute the INSERT statement */
-  no_errors &= execute_stmt(arg_struct.stmt, arg_struct.headline);
+  /* Prepare data for execution */
+  strncpy(query.login.data, user->getLogin().c_str(), string_size);
+  query.login.length = strlen(query.login.data);
+
+  strncpy(query.pass.data, user->getPass().c_str(), string_size);
+  query.pass.length = strlen(query.pass.data);
+
+  /* Execute statement */
+  no_errors &= execute(arg_struct);
+
+  /* Verify affected rows */
   no_errors &= verify_affected_rows(arg_struct.stmt, 1, arg_struct.headline);
-  if(no_errors)
-    return mysql_stmt_insert_id(arg_struct.stmt);
+
+  if (!no_errors) return 0;
+  return mysql_stmt_insert_id(arg_struct.stmt);
+}
+// V
+User_t DB_Queries_DML::select_User_By_Id_fc(Select_User_By_Id& arg_struct,
+                                            const size_t id) {
+
+  auto& query = arg_struct.Query_struct;
+  auto& result = arg_struct.Result_struct;
+  no_errors no_errors{true};
+
+  // Prepare data for execution
+  query.id.data = id;
+
+  /* Execute statement */
+  no_errors &= execute(arg_struct);
+
+  // Fetch all rows
+  result.row_count = 0;
+  std::cout << arg_struct.headline << " Fetching results ... " << std::endl;
+  int status;
+  while (true) {
+    status = mysql_stmt_fetch(arg_struct.stmt);
+    if (status == 1 || status == MYSQL_NO_DATA) break;
+    result.row_count++;
+  }
+  no_errors &= (status != 1);
+
+  // Check row count
+  no_errors &= verify_fetched_rows(result.row_count, 1, arg_struct.headline);
+
+  // Free result
+  no_errors &= free_result_stmt(arg_struct.stmt, arg_struct.headline);
+
+  if (!no_errors) return nullptr;
+  return make_shared<User>(User{result.login.data, result.pass.data});
+}
+
+// V
+User_t DB_Queries_DML::selectUserByLogin(Select_User_By_Login& arg_struct,
+                                         const std::string& login) {
+
+  auto& query = arg_struct.Query_struct;
+  auto& result = arg_struct.Result_struct;
+  no_errors no_errors{true};
+
+  /* Prepare data for execution */
+  strncpy(query.login.data, login.c_str(), string_size);
+  query.login.length = strlen(query.login.data);
+
+  /* Execute statement */
+  no_errors &= execute(arg_struct);
+
+  // Fetch all rows
+  result.row_count = 0;
+  std::cout << arg_struct.headline << " Fetching results ... " << std::endl;
+  int status;
+  while (true) {
+    status = mysql_stmt_fetch(arg_struct.stmt);
+    if (status == 1 || status == MYSQL_NO_DATA) break;
+    result.row_count++;
+  }
+  no_errors &= (status != 1);
+
+  // Check row count
+  no_errors &= verify_fetched_rows(result.row_count, 1, arg_struct.headline);
+
+  // Free result
+  no_errors &= free_result_stmt(arg_struct.stmt, arg_struct.headline);
+
+  if (!no_errors) return nullptr;
+  return make_shared<User>(User{result.login.data, result.pass.data});
+}
+
+// V
+insert_id DB_Queries_DML::insertChat(Insert_Chat& arg_struct,
+                                     const Chat_t chat) {
+
+  auto& query = arg_struct.Query_struct;
+  auto& result = arg_struct.Result_struct;
+  no_errors no_errors{true};
+
+  if (!chat) return 0;
+
+  /* Prepare data for execution */
+  strncpy(query.name.data, chat->getChatName().c_str(), string_size);
+  query.name.length = strlen(query.name.data);
+
+  /* Execute statement */
+  no_errors &= execute(arg_struct);
+
+  /* Verify affected rows */
+  no_errors &= verify_affected_rows(arg_struct.stmt, 1, arg_struct.headline);
+
+  if (!no_errors) return 0;
+  return mysql_stmt_insert_id(arg_struct.stmt);
+}
+
+// V
+Chat_t DB_Queries_DML::selectChatById(Select_Chat_By_Id& arg_struct,
+                                      const size_t id) {
+
+  auto& query = arg_struct.Query_struct;
+  auto& result = arg_struct.Result_struct;
+  no_errors no_errors{true};
+
+  // Prepare data for execution
+  query.id.data = id;
+
+  /* Execute statement */
+  no_errors &= execute(arg_struct);
+
+  // Fetch all rows
+  result.row_count = 0;
+  std::cout << arg_struct.headline << " Fetching results ... " << std::endl;
+  int status;
+  while (true) {
+    status = mysql_stmt_fetch(arg_struct.stmt);
+    if (status == 1 || status == MYSQL_NO_DATA) break;
+    result.row_count++;
+  }
+  no_errors &= (status != 1);
+
+  // Check row count
+  no_errors &= verify_fetched_rows(result.row_count, 1, arg_struct.headline);
+
+  // Free result
+  no_errors &= free_result_stmt(arg_struct.stmt, arg_struct.headline);
+
+  if (!no_errors) return nullptr;
+  return make_shared<Chat>(Chat{result.name.data});
+}
+// V
+Chat_t DB_Queries_DML::selectChatByName(Select_Chat_By_Name& arg_struct,
+                                        const std::string& name) {
+
+  auto& query = arg_struct.Query_struct;
+  auto& result = arg_struct.Result_struct;
+  no_errors no_errors{true};
+
+  /* Prepare data for execution */
+  strncpy(query.name.data, name.c_str(), string_size);
+  query.name.length = strlen(query.name.data);
+
+  /* Execute statement */
+  no_errors &= execute(arg_struct);
+
+  // Fetch all rows
+  result.row_count = 0;
+  std::cout << arg_struct.headline << " Fetching results ... " << std::endl;
+  int status;
+  while (true) {
+    status = mysql_stmt_fetch(arg_struct.stmt);
+    if (status == 1 || status == MYSQL_NO_DATA) break;
+    result.row_count++;
+  }
+  no_errors &= (status != 1);
+
+  // Check row count
+  no_errors &= verify_fetched_rows(result.row_count, 1, arg_struct.headline);
+
+  // Free result
+  no_errors &= free_result_stmt(arg_struct.stmt, arg_struct.headline);
+
+  if (!no_errors) return 0;
+  return make_shared<Chat>(Chat{result.name.data});
+  ;
+}
+
+// V
+insert_id DB_Queries_DML::insertChatUser(Insert_Chat_User& arg_struct,
+                                         const size_t chat_id,
+                                         const size_t user_id) {
+
+  auto& query = arg_struct.Query_struct;
+  auto& result = arg_struct.Result_struct;
+  no_errors no_errors{true};
+
+  /* Prepare data for execution */
+  query.chat_id.data = chat_id;
+  query.user_id.data = user_id;
+
+  /* Execute statement */
+  no_errors &= execute(arg_struct);
+
+  /* Verify affected rows */
+  no_errors &= verify_affected_rows(arg_struct.stmt, 1, arg_struct.headline);
+
+  // Construct return
+  if (no_errors) return mysql_stmt_insert_id(arg_struct.stmt);
   return 0;
 }
 
-User_t DB_Queries_DML::selectUserById(const size_t id) {
-  Select_UserById.Query_struct.int_data = id;
-
-  // execute statement
-  if (mysql_stmt_execute(Select_UserById.Query_struct.stmt)) {
-    fprintf(stderr, " SELECT_USER_BY_ID mysql_stmt_execute(), 1 failed\n");
-    fprintf(stderr, " %s\n", mysql_stmt_error(Select_UserById.Query_struct.stmt));
-    return nullptr;
-  }
-
-  /* Now buffer all results to client (optional step) */
-  if (mysql_stmt_store_result(Select_UserById.Query_struct.stmt)) {
-    fprintf(stderr, " SELECT_USER_BY_ID mysql_stmt_store_result() failed\n");
-    fprintf(stderr, " %s\n", mysql_stmt_error(Select_UserById.Query_struct.stmt));
-    return nullptr;
-  }
-
-  /* Fetch all rows */
-  Select_UserById.Result_struct.row_count = 0;
-  fprintf(stdout, "SELECT_USER_BY_ID Fetching results ...\n");
-  while (!mysql_stmt_fetch(Select_UserById.Query_struct.stmt)) {
-    Select_UserById.Result_struct.row_count++;
-  }
-
-  // Check row count
-  if (Select_UserById.Result_struct.row_count != 1) {
-    fprintf(stderr, " SELECT_USER_BY_ID MySQL failed to return all rows\n");
-    return nullptr;
-  }
-  return make_shared<User>(User{Select_UserById.Result_struct.login.str_data,
-                                Select_UserById.Result_struct.pass.str_data});
-}
-
-
-User_t DB_Queries_DML::selectUserByLogin(const std::string login) {
-  strncpy(Select_User_By_Login_struct.Query_struct.login.str_data, login.c_str(), STRING_SIZE);
-  Select_User_By_Login_struct.Query_struct.login.str_length =
-      strlen(Select_User_By_Login_struct.Query_struct.login.str_data);
-
-  // execute statement
-  if (mysql_stmt_execute(Select_User_By_Login_struct.Query_struct.stmt)) {
-    fprintf(stderr, " SELECT_USER_BY_LOGIN mysql_stmt_execute(), 1 failed\n");
-    fprintf(stderr, " %s\n", mysql_stmt_error(Select_User_By_Login_struct.Query_struct.stmt));
-    return nullptr;
-  }
-
-  /* Now buffer all results to client (optional step) */
-  if (mysql_stmt_store_result(Select_User_By_Login_struct.Query_struct.stmt)) {
-    fprintf(stderr, " SELECT_USER_BY_LOGIN mysql_stmt_store_result() failed\n");
-    fprintf(stderr, " %s\n", mysql_stmt_error(Select_User_By_Login_struct.Query_struct.stmt));
-    return nullptr;
-  }
-
-  /* Fetch all rows */
-  Select_User_By_Login_struct.Result_struct.row_count = 0;
-  fprintf(stdout, "SELECT_USER_BY_LOGIN Fetching results ...\n");
-  while (!mysql_stmt_fetch(Select_User_By_Login_struct.Query_struct.stmt)) {
-    Select_User_By_Login_struct.Result_struct.row_count++;
-  }
-
-  // Check row count
-  if (Select_User_By_Login_struct.Result_struct.row_count != 1) {
-    fprintf(stderr, " SELECT_USER_BY_LOGIN MySQL failed to return all rows\n");
-    return nullptr;
-  }
-  return make_shared<User>(User{Select_User_By_Login_struct.Result_struct.login.str_data,
-                                Select_User_By_Login_struct.Result_struct.pass.str_data});
-}
-
-insert_id DB_Queries_DML::insertChat(const Chat_t chat) {
-  strncpy(Insert_Chat.Query_struct.Name.str_data, chat->getChatName().c_str(),
-          STRING_SIZE);
-  Insert_Chat.Query_struct.Name.str_length = strlen(Insert_Chat.Query_struct.Name.str_data);
-
-  /* Execute the INSERT statement */
-  if (mysql_stmt_execute(Insert_Chat.Query_struct.stmt)) {
-    fprintf(stderr, " INSERT_CHAT mysql_stmt_execute(), 1 failed\n");
-    fprintf(stderr, " %s\n", mysql_stmt_error(Insert_Chat.Query_struct.stmt));
-    return 0;
-  }
-  Insert_Chat.Query_struct.affected_rows =
-      mysql_stmt_affected_rows(Insert_Chat.Query_struct.stmt);
-  if (Insert_Chat.Query_struct.affected_rows != 1) /* validate affected rows */
-  {
-    fprintf(stderr, " INSERT_CHAT invalid affected rows by MySQL\n");
-    return 0;
-  }
-  return mysql_insert_id(mysql);
-}
-
-Chat_t DB_Queries_DML::selectChat(const size_t id) {
-  Select_Chat.Query_struct.int_data = id;
-
-  // execute statement
-  if (mysql_stmt_execute(Select_Chat.Query_struct.stmt)) {
-    fprintf(stderr, " SELECT_CHAT mysql_stmt_execute(), 1 failed\n");
-    fprintf(stderr, " %s\n", mysql_stmt_error(Select_Chat.Query_struct.stmt));
-    return nullptr;
-  }
-
-  /* Now buffer all results to client (optional step) */
-  if (mysql_stmt_store_result(Select_Chat.Query_struct.stmt)) {
-    fprintf(stderr, " SELECT_CHAT mysql_stmt_store_result() failed\n");
-    fprintf(stderr, " %s\n", mysql_stmt_error(Select_Chat.Query_struct.stmt));
-    return nullptr;
-  }
-
-  /* Fetch all rows */
-  Select_Chat.Result_struct.row_count = 0;
-  fprintf(stdout, "SELECT_CHAT Fetching results ...\n");
-  while (!mysql_stmt_fetch(Select_Chat.Query_struct.stmt)) {
-    Select_Chat.Result_struct.row_count++;
-  }
-
-  // Check row count
-  if (Select_Chat.Result_struct.row_count != 1) {
-    fprintf(stderr, " SELECT_CHAT MySQL failed to return all rows\n");
-    return nullptr;
-  }
-
-  return make_shared<Chat>(Chat{Select_Chat.Result_struct.Name.str_data});
-}
-
-insert_id DB_Queries_DML::insertChatUser(const size_t chat_id,
-                                         const size_t user_id) {
-  Insert_ChatUser.Query_struct.chat_id.int_data = chat_id;
-  Insert_ChatUser.Query_struct.user_id.int_data = user_id;
-
-  /* Execute the INSERT statement */
-  if (mysql_stmt_execute(Insert_ChatUser.Query_struct.stmt)) {
-    fprintf(stderr, " INSERT_CHAT_USER mysql_stmt_execute(), 1 failed\n");
-    fprintf(stderr, " %s\n", mysql_stmt_error(Insert_ChatUser.Query_struct.stmt));
-    return 0;
-  }
-  Insert_ChatUser.Query_struct.affected_rows =
-      mysql_stmt_affected_rows(Insert_ChatUser.Query_struct.stmt);
-  if (Insert_ChatUser.Query_struct.affected_rows != 1) /* validate affected rows */
-  {
-    fprintf(stderr, " INSERT_CHAT_USER invalid affected rows by MySQL\n");
-    return 0;
-  }
-  return mysql_insert_id(mysql);
-}
-
-size_t DB_Queries_DML::selectChatUser(const size_t chat_id,
+size_t DB_Queries_DML::selectChatUser(Select_Chat_User& arg_struct,
+                                      const size_t chat_id,
                                       const size_t user_id) {
-  Select_ChatUser.Query_struct.chat_id.int_data = chat_id;
-  Select_ChatUser.Query_struct.user_id.int_data = user_id;
-  // execute statement
-  if (mysql_stmt_execute(Select_ChatUser.Query_struct.stmt)) {
-    fprintf(stderr, " SELECT_CHAT_USER mysql_stmt_execute(), 1 failed\n");
-    fprintf(stderr, " %s\n", mysql_stmt_error(Select_ChatUser.Query_struct.stmt));
-    return 0;
-  }
 
-  /* Now buffer all results to client (optional step) */
-  if (mysql_stmt_store_result(Select_ChatUser.Query_struct.stmt)) {
-    fprintf(stderr, " SELECT_CHAT_USER mysql_stmt_store_result() failed\n");
-    fprintf(stderr, " %s\n", mysql_stmt_error(Select_ChatUser.Query_struct.stmt));
-    return 0;
-  }
+  auto& query = arg_struct.Query_struct;
+  auto& result = arg_struct.Result_struct;
+  no_errors no_errors{true};
 
-  /* Fetch all rows */
-  Select_ChatUser.Result_struct.row_count = 0;
-  fprintf(stdout, "SELECT_CHAT_USER Fetching results ...\n");
-  while (!mysql_stmt_fetch(Select_ChatUser.Query_struct.stmt)) {
-    Select_ChatUser.Result_struct.row_count++;
+  /* Prepare data for execution */
+  query.chat_id.data = chat_id;
+  query.user_id.data = user_id;
+
+  /* Execute statement */
+  no_errors &= execute(arg_struct);
+
+  // Fetch all rows
+  result.row_count = 0;
+  std::cout << arg_struct.headline << " Fetching results ... " << std::endl;
+  int status;
+  while (true) {
+    status = mysql_stmt_fetch(arg_struct.stmt);
+    if (status == 1 || status == MYSQL_NO_DATA) break;
+    result.row_count++;
   }
+  no_errors &= (status != 1);
 
   // Check row count
-  if (Select_ChatUser.Result_struct.row_count != 1) {
-    fprintf(stderr, " SELECT_CHAT_USER MySQL failed to return all rows\n");
-    return 0;
-  }
+  no_errors &= verify_fetched_rows(result.row_count, 1, arg_struct.headline);
 
-  return Select_ChatUser.Result_struct.chat_user_id.int_data;
+  // Free result
+  no_errors &= free_result_stmt(arg_struct.stmt, arg_struct.headline);
+
+  if (!no_errors) return 0;
+  return result.chat_user_id.data;
 }
 
-insert_id DB_Queries_DML::insertMessage(const size_t chat_user_id,
-                                        const Message_t message) {
-  Insert_Message.Query_struct.chat_user_id.int_data = chat_user_id;
+// V
+insert_id DB_Queries_DML::insertMessage(Insert_Message& arg_struct, const size_t chat_user_id, const Message_t message) {
+  
+  auto& query = arg_struct.Query_struct;
+  auto& result = arg_struct.Result_struct;
+  no_errors no_errors{true};
 
-  strncpy(Insert_Message.Query_struct.message.str_data, message->getMessage().c_str(),
-          STRING_SIZE);
-  Insert_Message.Query_struct.message.str_length =
-      strlen(Insert_Message.Query_struct.message.str_data);
+  /* Prepare data for execution */
+  query.chat_user_id.data = chat_user_id;
+  strncpy(query.message.data, message->getMessage().c_str(), string_size);
+  query.message.length = strlen(query.message.data);
 
-  /* Execute the INSERT statement */
-  if (mysql_stmt_execute(Insert_Message.Query_struct.stmt)) {
-    fprintf(stderr, " INSERT_MESSAGE mysql_stmt_execute(), 1 failed\n");
-    fprintf(stderr, " %s\n", mysql_stmt_error(Insert_Message.Query_struct.stmt));
-    return 0;
-  }
+  /* Execute statement */
+  no_errors &= execute(arg_struct);
 
-  Insert_Message.Query_struct.affected_rows =
-      mysql_stmt_affected_rows(Insert_Message.Query_struct.stmt);
+  /* Verify affected rows */
+  no_errors &= verify_affected_rows(arg_struct.stmt, 1, arg_struct.headline);
 
-#if _DEBUG
-  std::cout << "Affected rows: " << Insert_Message.Query_struct.affected_rows
-            << std::endl;
-#endif
-
-  if (Insert_Message.Query_struct.affected_rows != 1) /* validate affected rows */
-
-  {
-    fprintf(stderr, " INSERT_MESSAGE invalid affected rows by MySQL\n");
-    return 0;
-  }
-  return mysql_insert_id(mysql);
+  if (!no_errors) return 0;
+  return mysql_stmt_insert_id(arg_struct.stmt);
 }
 
-Message_t DB_Queries_DML::selectMessage(const size_t chat_id,
-                                        const size_t message_id) {
-  Select_Message.Query_struct.chat_id.int_data = chat_id;
-  Select_Message.Query_struct.message_id.int_data = message_id;
+Message_t DB_Queries_DML::selectMessage(Select_Message& arg_struct, const size_t chat_id, const size_t message_id) {
 
-  // execute statement
-  if (mysql_stmt_execute(Select_Message.Query_struct.stmt)) {
-    fprintf(stderr, " SELECT_MESSAGE mysql_stmt_execute(), 1 failed\n");
-    fprintf(stderr, " %s\n", mysql_stmt_error(Select_Message.Query_struct.stmt));
-    return nullptr;
+  auto& query = arg_struct.Query_struct;
+  auto& result = arg_struct.Result_struct;
+  auto& timesend = arg_struct.Result_struct.timesend.data;
+  no_errors no_errors{true};
+
+  /* Prepare data for execution */
+  query.chat_id.data = chat_id;
+  query.message_id.data = message_id;
+
+  /* Execute statement */
+  no_errors &= execute(arg_struct);
+
+  // Fetch all rows
+  result.row_count = 0;
+  std::cout << arg_struct.headline << " Fetching results ... " << std::endl;
+  int status;
+  while (true) {
+    status = mysql_stmt_fetch(arg_struct.stmt);
+    if (status == 1 || status == MYSQL_NO_DATA) break;
+    result.row_count++;
   }
-
-  /* Now buffer all results to client (optional step) */
-  if (mysql_stmt_store_result(Select_Message.Query_struct.stmt)) {
-    fprintf(stderr, " SELECT_MESSAGE mysql_stmt_store_result() failed\n");
-    fprintf(stderr, " %s\n", mysql_stmt_error(Select_Message.Query_struct.stmt));
-    return nullptr;
-  }
-
-  /* Fetch all rows */
-  Select_Message.Result_struct.row_count = 0;
-  fprintf(stdout, "SELECT_MESSAGE Fetching results ...\n");
-
-  Message_t message;
-
-  while (!mysql_stmt_fetch(Select_Message.Query_struct.stmt)) {
-    std::cout << Select_Message.Result_struct.row_count++ << std::endl;
-    message = make_shared<Message>(
-        Message(std::to_string(Select_Message.Result_struct.dt.hour) + ':' +
-                    std::to_string(Select_Message.Result_struct.dt.minute) + ':' +
-                    std::to_string(Select_Message.Result_struct.dt.second) + ' ' +
-                    std::to_string(Select_Message.Result_struct.dt.day) + '-' +
-                    std::to_string(Select_Message.Result_struct.dt.month) + '-' +
-                    std::to_string(Select_Message.Result_struct.dt.year),
-                Select_Message.Result_struct.login.str_data,
-                Select_Message.Result_struct.message.str_data));
-  }
+  no_errors &= (status != 1);
 
   // Check row count
-  if (Select_Message.Result_struct.row_count != 1) {
-    fprintf(stderr, " SELECT_MESSAGE MySQL failed to return all rows\n");
-    return nullptr;
-  }
-  return message;
+  no_errors &= verify_fetched_rows(result.row_count, 1, arg_struct.headline);
+
+  // Free result
+  no_errors &= free_result_stmt(arg_struct.stmt, arg_struct.headline);
+
+  if (!no_errors) return 0;
+  return make_shared<Message>(Message(
+      std::to_string(timesend.hour) + ':' + std::to_string(timesend.minute) +
+          ':' + std::to_string(timesend.second) + ' ' +
+          std::to_string(timesend.day) + '-' + std::to_string(timesend.month) +
+          '-' + std::to_string(timesend.year),
+      result.login.data, result.message.data));
 }
 
-queue_message_t DB_Queries_DML::selectMessages(const size_t chat_id,
+queue_message_t DB_Queries_DML::select_Messages_Mult(Select_Messages_Mult& arg_struct, 
+                                               const size_t chat_id,
                                                const size_t message_id_begin,
                                                const size_t message_id_end,
                                                const size_t message_status,
                                                const size_t limit) {
-  Select_Messages.Query_struct.chat_id.int_data = chat_id;
-  Select_Messages.Query_struct.message_id_begin.int_data = message_id_begin;
-  Select_Messages.Query_struct.message_id_end.int_data = message_id_end;
-  Select_Messages.Query_struct.status.int_data = message_status;
-  Select_Messages.Query_struct.limit.int_data = limit;
 
-  // execute statement
-  if (mysql_stmt_execute(Select_Messages.Query_struct.stmt)) {
-    fprintf(stderr, " SELECT_MESSAGES mysql_stmt_execute(), 1 failed\n");
-    fprintf(stderr, " %s\n", mysql_stmt_error(Select_Messages.Query_struct.stmt));
-    return nullptr;
-  }
+  auto& query = arg_struct.Query_struct;
+  auto& result = arg_struct.Result_struct;
+  auto& timesend = arg_struct.Result_struct.timesend.data;
+  no_errors no_errors{true};
 
-  /* Now buffer all results to client (optional step) */
-  if (mysql_stmt_store_result(Select_Messages.Query_struct.stmt)) {
-    fprintf(stderr, " SELECT_MESSAGES mysql_stmt_store_result() failed\n");
-    fprintf(stderr, " %s\n", mysql_stmt_error(Select_Messages.Query_struct.stmt));
-    return nullptr;
-  }
+  /* Prepare data for execution */
+  query.chat_id.data = chat_id;
+  query.message_id_begin.data = message_id_begin;
+  query.message_id_end.data = message_id_end;
+  query.status.data = message_status;
+  query.limit.data = limit;
 
-  /* Fetch all rows */
+/* Execute statement */
+  no_errors &= execute(arg_struct);
+
+  //Prepare result storage
   queue_message_t queue =
       std::make_shared<std::queue<Message>>(std::queue<Message>());
-  Select_Messages.Result_struct.row_count = 0;
-  fprintf(stdout, "SELECT_MESSAGES Fetching results Select_Messages...\n");
-  while (!mysql_stmt_fetch(Select_Messages.Query_struct.stmt)) {
-    std::cout << Select_Messages.Result_struct.row_count++ << std::endl;
-    queue->emplace(
-        Message(std::to_string(Select_Messages.Result_struct.dt.hour) + ':' +
-                    std::to_string(Select_Messages.Result_struct.dt.minute) + ':' +
-                    std::to_string(Select_Messages.Result_struct.dt.second) + ' ' +
-                    std::to_string(Select_Messages.Result_struct.dt.day) + '-' +
-                    std::to_string(Select_Messages.Result_struct.dt.month) + '-' +
-                    std::to_string(Select_Messages.Result_struct.dt.year),
-                Select_Messages.Result_struct.login.str_data,
-                Select_Messages.Result_struct.message.str_data));
-  };
-  std::cout << "SELECT_MESSAGES cycle end " << std::endl;
-  // //Check row count
-  // if (Select_Messages.Result_struct.row_count != 1) {
-  //   fprintf(stderr, " MySQL failed to return all rows\n");
-  //   return nullptr;
-  // }
 
+  // Fetch all rows
+  result.row_count = 0;
+  std::cout << arg_struct.headline << " Fetching results ... " << std::endl;
+  int status;
+  while (true) {
+    status = mysql_stmt_fetch(arg_struct.stmt);
+    if (status == 1 || status == MYSQL_NO_DATA) break;
+    result.row_count++;
+
+    queue->emplace(Message(std::to_string(timesend.hour) + ':' +
+                               std::to_string(timesend.minute) + ':' +
+                               std::to_string(timesend.second) + ' ' +
+                               std::to_string(timesend.day) + '-' +
+                               std::to_string(timesend.month) + '-' +
+                               std::to_string(timesend.year),
+                           result.login.data, result.message.data));
+  }
+  no_errors &= (status != 1);
+
+  // Free result
+  no_errors &= free_result_stmt(arg_struct.stmt, arg_struct.headline);
+
+  if (!no_errors) return nullptr;
   return queue;
 }
 
 affected_rows DB_Queries_DML::updateStatusDelivered(
-    const size_t chat_user_id, const size_t message_id_begin,
-    const size_t message_id_end) {
-  Update_Status_Delivered.Query_struct.chat_user_id.int_data = chat_user_id;
-  Update_Status_Delivered.Query_struct.message_id_begin.int_data = message_id_begin;
-  Update_Status_Delivered.Query_struct.message_id_end.int_data = message_id_end;
+    Update_Status_Delivered& arg_struct, const size_t chat_user_id,
+    const size_t message_id_begin, const size_t message_id_end) {
+  auto& query = arg_struct.Query_struct;
+  auto& result = arg_struct.Result_struct;
+  no_errors no_errors{true};
 
-  /* Execute the UPDATE statement */
-  if (mysql_stmt_execute(Update_Status_Delivered.Query_struct.stmt)) {
-    fprintf(stderr,
-            " UPDATE_STATUS_DELIVERED mysql_stmt_execute(), 1 failed\n");
-    fprintf(stderr, " %s\n",
-            mysql_stmt_error(Update_Status_Delivered.Query_struct.stmt));
-    return 0;
-  }
+  /* Prepare data for execution */
+  query.chat_user_id.data = chat_user_id;
+  query.message_id_begin.data = message_id_begin;
+  query.message_id_end.data = message_id_end;
 
-  Update_Status_Delivered.Query_struct.affected_rows =
-      mysql_stmt_affected_rows(Update_Status_Delivered.Query_struct.stmt);
+  /* Execute statement */
+  no_errors &= execute(arg_struct);
 
-#if _DEBUG
-  std::cout << "Affected rows: " << Update_Status_Delivered.Query_struct.affected_rows
-            << std::endl;
-#endif
-  return Update_Status_Delivered.Query_struct.affected_rows;
+  if (!no_errors) return 0;
+  return mysql_stmt_affected_rows(arg_struct.stmt);
 }
 
-affected_rows DB_Queries_DML::updateStatusRead(const size_t chat_user_id,
+affected_rows DB_Queries_DML::updateStatusRead(Update_Status_Read& arg_struct,
+                                               const size_t chat_user_id,
                                                const size_t message_id_begin,
                                                const size_t message_id_end) {
-  Update_Status_Read.Query_struct.chat_user_id.int_data = chat_user_id;
-  Update_Status_Read.Query_struct.message_id_begin.int_data = message_id_begin;
-  Update_Status_Read.Query_struct.message_id_end.int_data = message_id_end;
+  auto& query = arg_struct.Query_struct;
+  auto& result = arg_struct.Result_struct;
+  no_errors no_errors{true};
 
-  /* Execute the UPDATE statement */
-  if (mysql_stmt_execute(Update_Status_Read.Query_struct.stmt)) {
-    fprintf(stderr, " UPDATE_STATUS_READ mysql_stmt_execute(), 1 failed\n");
-    fprintf(stderr, " %s\n", mysql_stmt_error(Update_Status_Read.Query_struct.stmt));
-    return 0;
-  }
+  /* Prepare data for execution */
+  query.chat_user_id.data = chat_user_id;
+  query.message_id_begin.data = message_id_begin;
+  query.message_id_end.data = message_id_end;
 
-  Update_Status_Read.Query_struct.affected_rows =
-      mysql_stmt_affected_rows(Update_Status_Read.Query_struct.stmt);
+  /* Execute statement */
+  no_errors &= execute(arg_struct);
 
-#if _DEBUG
-  std::cout << "Affected rows: " << Update_Status_Read.Query_struct.affected_rows
-            << std::endl;
-#endif
-
-  return Update_Status_Read.Query_struct.affected_rows;
+  if (!no_errors) return 0;
+  return mysql_stmt_affected_rows(arg_struct.stmt);
 }
 
 no_errors DB_Queries_DML::prepareAll(void) {
+  no_errors no_errors{true};
+  no_errors &= prepare<Insert_User>(Insert_User_struct, mysql);
+  no_errors &= prepare<Select_User_By_Id>(Select_User_By_Id_struct, mysql);
+  no_errors &= prepare<Select_User_By_Login>(Select_User_By_Login_struct, mysql);
+  no_errors &= prepare<Insert_Chat>(Insert_Chat_struct, mysql);
+  no_errors &= prepare<Select_Chat_By_Name>(Select_Chat_By_Name_struct, mysql);
+  no_errors &= prepare<Select_Chat_By_Id>(Select_Chat_By_Id_struct, mysql);
+  no_errors &= prepare<Insert_Chat_User>(Insert_Chat_User_struct, mysql);
+  no_errors &= prepare<Select_Chat_User>(Select_Chat_User_struct, mysql);
+  no_errors &= prepare<Insert_Message>(Insert_Message_struct, mysql);
+  no_errors &= prepare<Select_Message>(Select_Message_struct, mysql);
+  no_errors &= prepare<Select_Messages_Mult>(Select_Messages_Mult_struct, mysql);
+  no_errors &= prepare<Update_Status_Delivered>(Update_Status_Delivered_struct, mysql);
+  no_errors &= prepare<Update_Status_Read>(Update_Status_Read_struct, mysql);
 
-  prepare<Insert_User>(Insert_User_struct);
-  prepare<Select_User_By_Id>(Select_User_By_Id_struct);
+  return no_errors;
 
-  // return insertUser_prepare() && insertChat_prepare() &&
-  //        insertChatUser_prepare() && insertMessage_prepare() &&
-  //        selectUserById_prepare() &&
-  //        // selectUserByLogin_prepare() &&
-  //        selectChat_prepare() && selectChatUser_prepare() &&
-  //        selectMessage_prepare() && selectMessages_prepare() &&
-  //        updateStatusDelivered_prepare() && updateStatusRead_prepare();
 }
 
 no_errors DB_Queries_DML::closeAll(void) {
 
-  close<Insert_User>(Insert_User_struct, mysql);
-  close<Select_User_By_Id>(Select_User_By_Id_struct, mysql);
-  // return insertUser_close() && insertChat_close() && insertChatUser_close() &&
-  //        insertMessage_close() && selectChat_close() &&
-  //        selectUserById_close() &&
-  //        // selectUserByLogin_close() &&
-  //        selectChatUser_close() && selectMessage_close() &&
-  //        selectMessages_close() && updateStatusDelivered_close() &&
-  //        updateStatusRead_close() && connectDB_close();
+  no_errors no_errors{true};
+  no_errors &= close<Insert_User>(Insert_User_struct, mysql);
+  no_errors &= close<Select_User_By_Id>(Select_User_By_Id_struct, mysql);
+  no_errors &= close<Select_User_By_Login>(Select_User_By_Login_struct, mysql);
+  no_errors &= close<Insert_Chat>(Insert_Chat_struct, mysql);
+  no_errors &= close<Select_Chat_By_Name>(Select_Chat_By_Name_struct, mysql);
+  no_errors &= close<Select_Chat_By_Id>(Select_Chat_By_Id_struct, mysql);
+  no_errors &= close<Insert_Chat_User>(Insert_Chat_User_struct, mysql);
+  no_errors &= close<Select_Chat_User>(Select_Chat_User_struct, mysql);
+  no_errors &= close<Insert_Message>(Insert_Message_struct, mysql);
+  no_errors &= close<Select_Message>(Select_Message_struct, mysql);
+  no_errors &= close<Select_Messages_Mult>(Select_Messages_Mult_struct, mysql);
+  no_errors &= close<Update_Status_Delivered>(Update_Status_Delivered_struct, mysql);
+  no_errors &= close<Update_Status_Read>(Update_Status_Read_struct, mysql);
+  
+  no_errors &= connectDB_close();
+  return no_errors;
 }
