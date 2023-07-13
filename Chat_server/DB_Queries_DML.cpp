@@ -1,6 +1,5 @@
 #include "DB_Queries_DML.h"
 
-
 DB_Queries_DML::DB_Queries_DML() {}
 
 DB_Queries_DML::~DB_Queries_DML() {}
@@ -41,9 +40,8 @@ no_errors DB_Queries_DML::connectDB_close(void) {
 }
 
 // V
-insert_id DB_Queries_DML::insert_User_fc(Insert_User& arg_struct,
-                                         const User_t user) {
-
+insert_id DB_Queries_DML::insert_User_fc(const User_t user) {
+  Insert_User& arg_struct = Insert_User_struct;
   auto& query = arg_struct.Query_struct;
   auto& result = arg_struct.Result_struct;
   no_errors no_errors{true};
@@ -67,9 +65,8 @@ insert_id DB_Queries_DML::insert_User_fc(Insert_User& arg_struct,
   return mysql_stmt_insert_id(arg_struct.stmt);
 }
 // V
-User_t DB_Queries_DML::select_User_By_Id_fc(Select_User_By_Id& arg_struct,
-                                            const size_t id) {
-
+User_t DB_Queries_DML::select_User_By_Id_fc(const size_t id) {
+  Select_User_By_Id& arg_struct = Select_User_By_Id_struct;
   auto& query = arg_struct.Query_struct;
   auto& result = arg_struct.Result_struct;
   no_errors no_errors{true};
@@ -102,9 +99,8 @@ User_t DB_Queries_DML::select_User_By_Id_fc(Select_User_By_Id& arg_struct,
 }
 
 // V
-User_t DB_Queries_DML::selectUserByLogin(Select_User_By_Login& arg_struct,
-                                         const std::string& login) {
-
+User_t DB_Queries_DML::selectUserByLogin(const std::string& login) {
+  Select_User_By_Login& arg_struct = Select_User_By_Login_struct;
   auto& query = arg_struct.Query_struct;
   auto& result = arg_struct.Result_struct;
   no_errors no_errors{true};
@@ -138,9 +134,8 @@ User_t DB_Queries_DML::selectUserByLogin(Select_User_By_Login& arg_struct,
 }
 
 // V
-insert_id DB_Queries_DML::insertChat(Insert_Chat& arg_struct,
-                                     const Chat_t chat) {
-
+insert_id DB_Queries_DML::insertChat(const Chat_t chat) {
+  Insert_Chat& arg_struct = Insert_Chat_struct;
   auto& query = arg_struct.Query_struct;
   auto& result = arg_struct.Result_struct;
   no_errors no_errors{true};
@@ -162,9 +157,8 @@ insert_id DB_Queries_DML::insertChat(Insert_Chat& arg_struct,
 }
 
 // V
-Chat_t DB_Queries_DML::selectChatById(Select_Chat_By_Id& arg_struct,
-                                      const size_t id) {
-
+Chat_t DB_Queries_DML::selectChatById(const size_t id) {
+  Select_Chat_By_Id& arg_struct = Select_Chat_By_Id_struct;
   auto& query = arg_struct.Query_struct;
   auto& result = arg_struct.Result_struct;
   no_errors no_errors{true};
@@ -196,9 +190,8 @@ Chat_t DB_Queries_DML::selectChatById(Select_Chat_By_Id& arg_struct,
   return make_shared<Chat>(Chat{result.name.data});
 }
 // V
-Chat_t DB_Queries_DML::selectChatByName(Select_Chat_By_Name& arg_struct,
-                                        const std::string& name) {
-
+Chat_t DB_Queries_DML::selectChatByName(const std::string& name) {
+  Select_Chat_By_Name& arg_struct = Select_Chat_By_Name_struct;
   auto& query = arg_struct.Query_struct;
   auto& result = arg_struct.Result_struct;
   no_errors no_errors{true};
@@ -233,10 +226,9 @@ Chat_t DB_Queries_DML::selectChatByName(Select_Chat_By_Name& arg_struct,
 }
 
 // V
-insert_id DB_Queries_DML::insertChatUser(Insert_Chat_User& arg_struct,
-                                         const size_t chat_id,
+insert_id DB_Queries_DML::insertChatUser(const size_t chat_id,
                                          const size_t user_id) {
-
+  Insert_Chat_User& arg_struct = Insert_Chat_User_struct;
   auto& query = arg_struct.Query_struct;
   auto& result = arg_struct.Result_struct;
   no_errors no_errors{true};
@@ -256,10 +248,9 @@ insert_id DB_Queries_DML::insertChatUser(Insert_Chat_User& arg_struct,
   return 0;
 }
 
-size_t DB_Queries_DML::selectChatUser(Select_Chat_User& arg_struct,
-                                      const size_t chat_id,
+size_t DB_Queries_DML::selectChatUser(const size_t chat_id,
                                       const size_t user_id) {
-
+  Select_Chat_User& arg_struct = Select_Chat_User_struct;
   auto& query = arg_struct.Query_struct;
   auto& result = arg_struct.Result_struct;
   no_errors no_errors{true};
@@ -293,8 +284,9 @@ size_t DB_Queries_DML::selectChatUser(Select_Chat_User& arg_struct,
 }
 
 // V
-insert_id DB_Queries_DML::insertMessage(Insert_Message& arg_struct, const size_t chat_user_id, const Message_t message) {
-  
+insert_id DB_Queries_DML::insertMessage(const size_t chat_user_id,
+                                        const Message_t message) {
+  Insert_Message& arg_struct = Insert_Message_struct;
   auto& query = arg_struct.Query_struct;
   auto& result = arg_struct.Result_struct;
   no_errors no_errors{true};
@@ -314,8 +306,9 @@ insert_id DB_Queries_DML::insertMessage(Insert_Message& arg_struct, const size_t
   return mysql_stmt_insert_id(arg_struct.stmt);
 }
 
-Message_t DB_Queries_DML::selectMessage(Select_Message& arg_struct, const size_t chat_id, const size_t message_id) {
-
+Message_t DB_Queries_DML::selectMessage(const size_t chat_id,
+                                        const size_t message_id) {
+  Select_Message& arg_struct = Select_Message_struct;
   auto& query = arg_struct.Query_struct;
   auto& result = arg_struct.Result_struct;
   auto& timesend = arg_struct.Result_struct.timesend.data;
@@ -354,13 +347,11 @@ Message_t DB_Queries_DML::selectMessage(Select_Message& arg_struct, const size_t
       result.login.data, result.message.data));
 }
 
-queue_message_t DB_Queries_DML::select_Messages_Mult(Select_Messages_Mult& arg_struct, 
-                                               const size_t chat_id,
-                                               const size_t message_id_begin,
-                                               const size_t message_id_end,
-                                               const size_t message_status,
-                                               const size_t limit) {
-
+queue_message_t DB_Queries_DML::select_Messages_Mult(
+    const size_t chat_id, const size_t message_id_begin,
+    const size_t message_id_end, const size_t message_status,
+    const size_t limit) {
+  Select_Messages_Mult& arg_struct = Select_Messages_Mult_struct;
   auto& query = arg_struct.Query_struct;
   auto& result = arg_struct.Result_struct;
   auto& timesend = arg_struct.Result_struct.timesend.data;
@@ -373,10 +364,10 @@ queue_message_t DB_Queries_DML::select_Messages_Mult(Select_Messages_Mult& arg_s
   query.status.data = message_status;
   query.limit.data = limit;
 
-/* Execute statement */
+  /* Execute statement */
   no_errors &= execute(arg_struct);
 
-  //Prepare result storage
+  // Prepare result storage
   queue_message_t queue =
       std::make_shared<std::queue<Message>>(std::queue<Message>());
 
@@ -407,8 +398,9 @@ queue_message_t DB_Queries_DML::select_Messages_Mult(Select_Messages_Mult& arg_s
 }
 
 affected_rows DB_Queries_DML::updateStatusDelivered(
-    Update_Status_Delivered& arg_struct, const size_t chat_user_id,
-    const size_t message_id_begin, const size_t message_id_end) {
+    const size_t chat_user_id, const size_t message_id_begin,
+    const size_t message_id_end) {
+  Update_Status_Delivered& arg_struct = Update_Status_Delivered_struct;
   auto& query = arg_struct.Query_struct;
   auto& result = arg_struct.Result_struct;
   no_errors no_errors{true};
@@ -422,13 +414,13 @@ affected_rows DB_Queries_DML::updateStatusDelivered(
   no_errors &= execute(arg_struct);
 
   if (!no_errors) return 0;
-  return mysql_stmt_affected_rows(arg_struct.stmt);
+  return affected_rows(arg_struct.stmt, arg_struct.headline);
 }
 
-affected_rows DB_Queries_DML::updateStatusRead(Update_Status_Read& arg_struct,
-                                               const size_t chat_user_id,
+affected_rows DB_Queries_DML::updateStatusRead(const size_t chat_user_id,
                                                const size_t message_id_begin,
                                                const size_t message_id_end) {
+  Update_Status_Read& arg_struct = Update_Status_Read_struct;
   auto& query = arg_struct.Query_struct;
   auto& result = arg_struct.Result_struct;
   no_errors no_errors{true};
@@ -442,14 +434,15 @@ affected_rows DB_Queries_DML::updateStatusRead(Update_Status_Read& arg_struct,
   no_errors &= execute(arg_struct);
 
   if (!no_errors) return 0;
-  return mysql_stmt_affected_rows(arg_struct.stmt);
+  return affected_rows(arg_struct.stmt, arg_struct.headline);
 }
 
 no_errors DB_Queries_DML::prepareAll(void) {
   no_errors no_errors{true};
   no_errors &= prepare<Insert_User>(Insert_User_struct, mysql);
   no_errors &= prepare<Select_User_By_Id>(Select_User_By_Id_struct, mysql);
-  no_errors &= prepare<Select_User_By_Login>(Select_User_By_Login_struct, mysql);
+  no_errors &=
+      prepare<Select_User_By_Login>(Select_User_By_Login_struct, mysql);
   no_errors &= prepare<Insert_Chat>(Insert_Chat_struct, mysql);
   no_errors &= prepare<Select_Chat_By_Name>(Select_Chat_By_Name_struct, mysql);
   no_errors &= prepare<Select_Chat_By_Id>(Select_Chat_By_Id_struct, mysql);
@@ -457,16 +450,16 @@ no_errors DB_Queries_DML::prepareAll(void) {
   no_errors &= prepare<Select_Chat_User>(Select_Chat_User_struct, mysql);
   no_errors &= prepare<Insert_Message>(Insert_Message_struct, mysql);
   no_errors &= prepare<Select_Message>(Select_Message_struct, mysql);
-  no_errors &= prepare<Select_Messages_Mult>(Select_Messages_Mult_struct, mysql);
-  no_errors &= prepare<Update_Status_Delivered>(Update_Status_Delivered_struct, mysql);
+  no_errors &=
+      prepare<Select_Messages_Mult>(Select_Messages_Mult_struct, mysql);
+  no_errors &=
+      prepare<Update_Status_Delivered>(Update_Status_Delivered_struct, mysql);
   no_errors &= prepare<Update_Status_Read>(Update_Status_Read_struct, mysql);
 
   return no_errors;
-
 }
 
 no_errors DB_Queries_DML::closeAll(void) {
-
   no_errors no_errors{true};
   no_errors &= close<Insert_User>(Insert_User_struct, mysql);
   no_errors &= close<Select_User_By_Id>(Select_User_By_Id_struct, mysql);
@@ -479,9 +472,10 @@ no_errors DB_Queries_DML::closeAll(void) {
   no_errors &= close<Insert_Message>(Insert_Message_struct, mysql);
   no_errors &= close<Select_Message>(Select_Message_struct, mysql);
   no_errors &= close<Select_Messages_Mult>(Select_Messages_Mult_struct, mysql);
-  no_errors &= close<Update_Status_Delivered>(Update_Status_Delivered_struct, mysql);
+  no_errors &=
+      close<Update_Status_Delivered>(Update_Status_Delivered_struct, mysql);
   no_errors &= close<Update_Status_Read>(Update_Status_Read_struct, mysql);
-  
+
   no_errors &= connectDB_close();
   return no_errors;
 }

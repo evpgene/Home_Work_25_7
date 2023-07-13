@@ -68,9 +68,9 @@ struct ParamString {
   struct Insert_User {
     MYSQL_STMT* stmt{nullptr};
     MYSQL_RES* result_metadata{nullptr};
-    const std::string headline{"insert_user_query"};
+    const std::string headline{"insert_user_query "};
     const std::string query{"INSERT INTO users (login, pass) VALUES (?,?)"};
-    struct {
+    struct query{
       const int param_count{2};
       MYSQL_BIND bind[2];  // Two parameters
       ParamString login = ParamString(bind[0]); // First parameter
@@ -83,14 +83,14 @@ struct ParamString {
   struct Select_User_By_Id{
     MYSQL_STMT* stmt{nullptr};
     MYSQL_RES* result_metadata{nullptr};
-    const std::string headline{"insert_user_query"};
+    const std::string headline{"insert_user_query "};
     const std::string  query{"SELECT id, login, pass FROM users WHERE id = ?"};
-    struct {
+    struct query{
       const int param_count{1}; // Number of prepared parameters expected
       MYSQL_BIND bind[1];
       ParamUint id = ParamUint(bind[0]);
     } Query_struct;
-    struct {
+    struct result{
       const int param_count{3}; // Number of result filds expected
       MYSQL_BIND bind[3];
       ParamUint id = ParamUint(bind[0]); // First parameter
@@ -107,14 +107,14 @@ struct ParamString {
   struct Select_User_By_Login{
     MYSQL_STMT* stmt{nullptr};
     MYSQL_RES* result_metadata{nullptr};
-    const std::string headline{"select_user_by_login_query"};
+    const std::string headline{"select_user_by_login_query "};
     const std::string  query{"SELECT id, login, pass FROM users WHERE login = ?"};
-    struct {
+    struct query{
       const int param_count{1}; // Number of prepared parameters expected
       MYSQL_BIND bind[1];
       ParamString login = ParamString(bind[0]); // First parameter
     } Query_struct;
-    struct {
+    struct result{
       const int param_count{3}; // Number of result filds expected
       MYSQL_BIND bind[3];
       ParamUint id = ParamUint(bind[0]); // First parameter
@@ -132,9 +132,9 @@ struct ParamString {
   struct Insert_Chat {
     MYSQL_STMT* stmt{nullptr};
     MYSQL_RES* result_metadata{nullptr};
-    const std::string headline{"insert_chat_query"};
+    const std::string headline{"insert_chat_query "};
     const std::string query{"INSERT INTO chats (name) VALUES (?)"};
-    struct {
+    struct query{
       const int param_count{1}; // Number of prepared parameters expected
       MYSQL_BIND bind[1];  // One parameter
       ParamString name = ParamString(bind[0]); // First parameter
@@ -150,14 +150,14 @@ struct ParamString {
   struct Select_Chat_By_Name {
     MYSQL_STMT* stmt{nullptr};
     MYSQL_RES* result_metadata{nullptr};
-    const std::string headline{"select_chat_by_name_query"};
+    const std::string headline{"select_chat_by_name_query "};
     const std::string  query{"SELECT id, name FROM chats WHERE name = ?"};
-    struct {
+    struct query{
       const int param_count{1}; // Number of prepared parameters expected
       MYSQL_BIND bind[1]; 
       ParamString name= ParamString(bind[0]); // First parameter
     } Query_struct;
-    struct {
+    struct result{
       const int param_count{2}; // Number of result filds expected
       MYSQL_BIND bind[2];
       ParamUint id = ParamUint(bind[0]); // First parameter
@@ -173,14 +173,14 @@ struct ParamString {
   struct Select_Chat_By_Id {
     MYSQL_STMT* stmt{nullptr};
     MYSQL_RES* result_metadata{nullptr};
-    const std::string headline{"select_chat_by_id_query"};
+    const std::string headline{"select_chat_by_id_query "};
     const std::string  query{"SELECT id, name FROM chats WHERE id = ?"};
-    struct {
+    struct query{
       const int param_count{1}; // Number of prepared parameters expected
       MYSQL_BIND bind[1]; 
       ParamUint id = ParamUint(bind[0]); // First parameter
     } Query_struct;
-    struct {
+    struct result{
       const int param_count{2}; // Number of result filds expected
       MYSQL_BIND bind[2];
       ParamUint id = ParamUint(bind[0]); // First parameter
@@ -197,9 +197,9 @@ struct ParamString {
   struct Insert_Chat_User {
     MYSQL_STMT* stmt{nullptr};
     MYSQL_RES* result_metadata{nullptr};
-    const std::string headline{"insert_chat_user_query"};
+    const std::string headline{"insert_chat_user_query "};
     const std::string query{"INSERT INTO chat_user (chat_id, user_id, user_no) VALUES (?,?,?)"};
-    struct {
+    struct query{
       const int param_count{3}; // Number of prepared parameters expected
       MYSQL_BIND bind[3];  // One parameter
       ParamUint chat_id = ParamUint(bind[0]); // First parameter
@@ -215,15 +215,15 @@ struct ParamString {
   struct Select_Chat_User {
     MYSQL_STMT* stmt{nullptr};
     MYSQL_RES* result_metadata{nullptr};
-    const std::string headline{"select_chat_user_query"};
+    const std::string headline{"select_chat_user_query "};
     const std::string  query{"SELECT id FROM chat_user WHERE chat_id = ? AND user_id = ?"};
-    struct {
+    struct query{
       const int param_count{2}; // Number of prepared parameters expected
       MYSQL_BIND bind[2]; 
       ParamUint chat_id = ParamUint(bind[0]); // First parameter
       ParamUint user_id = ParamUint(bind[1]); // Second parameter
     } Query_struct;
-    struct {
+    struct result{
       const int param_count{1}; // Number of result filds expected
       MYSQL_BIND bind[1];
       ParamUint chat_user_id = ParamUint(bind[0]); // First parameter
@@ -238,10 +238,10 @@ struct ParamString {
   struct Insert_Message {
     MYSQL_STMT* stmt{nullptr};
     MYSQL_RES* result_metadata{nullptr};
-    const std::string headline{"insert_message_query"};
+    const std::string headline{"insert_message_query "};
     const std::string query{"INSERT INTO messages (chat_user_id, message, dt) VALUES (?,?,CURRENT_TIMESTAMP())"};
-    struct {
-      const int param_count{1}; // Number of prepared parameters expected
+    struct query{
+      const int param_count{2}; // Number of prepared parameters expected
       MYSQL_BIND bind[2];  // One parameter
       ParamUint chat_user_id = ParamUint(bind[0]); // First parameter
       ParamString message = ParamString(bind[1]); // Second parameter
@@ -259,18 +259,18 @@ struct ParamString {
   struct Select_Message {
     MYSQL_STMT* stmt{nullptr};
     MYSQL_RES* result_metadata{nullptr};
-    const std::string headline{"select_messages_query"};
+    const std::string headline{"select_messages_query "};
     const std::string  query{"SELECT * FROM message_view WHERE chat_id = ? AND message_id = ?"};
-    struct {
-      const int param_count{5}; // Number of prepared parameters expected
-      MYSQL_BIND bind[5]; 
+    struct query{
+      const int param_count{2}; // Number of prepared parameters expected
+      MYSQL_BIND bind[2]; 
       ParamUint chat_id = ParamUint(bind[0]); // First parameter
       ParamUint message_id = ParamUint(bind[1]); // Second parameter
       // ParamUint message_id_end = ParamUint(bind[2]); // Third parameter
       // ParamUint status = ParamUint(bind[3]); // 4 parameter
       // ParamUint limit = ParamUint(bind[4]); // 5 parameter
     } Query_struct;
-    struct {
+    struct result{
       const int param_count{7}; // Number of result filds expected
       MYSQL_BIND bind[7];
       ParamUint chat_id = ParamUint(bind[0]); // First parameter
@@ -291,9 +291,9 @@ struct ParamString {
   struct Select_Messages_Mult {
     MYSQL_STMT* stmt{nullptr};
     MYSQL_RES* result_metadata{nullptr};
-    const std::string headline{"select_messages_query"};
+    const std::string headline{"select_messages_mult_query "};
     const std::string  query{"SELECT * FROM message_view WHERE chat_id = ? AND message_id BETWEEN ? AND ? AND status = ? LIMIT ?"};
-    struct {
+    struct query{
       const int param_count{5}; // Number of prepared parameters expected
       MYSQL_BIND bind[5]; 
       ParamUint chat_id = ParamUint(bind[0]); // First parameter
@@ -302,7 +302,7 @@ struct ParamString {
       ParamUint status = ParamUint(bind[3]); // 4 parameter
       ParamUint limit = ParamUint(bind[4]); // 5 parameter
     } Query_struct;
-        struct {
+    struct result{
       const int param_count{7}; // Number of result filds expected
       MYSQL_BIND bind[7];
       ParamUint chat_id = ParamUint(bind[0]); // First parameter
@@ -323,9 +323,9 @@ struct ParamString {
   struct Update_Status_Delivered {
     MYSQL_STMT* stmt{nullptr};
     MYSQL_RES* result_metadata{nullptr};
-    const std::string headline{"update_status_delivered_query"};
+    const std::string headline{"update_status_delivered_query "};
     const std::string  query{"UPDATE messages SET status = 2, dt_delivered = CURRENT_TIMESTAMP() WHERE chat_user_id = ? AND id BETWEEN ? AND ? AND status != 2 AND status != 3"};
-    struct {
+    struct query{
       const int param_count{3}; // Number of prepared parameters expected
       MYSQL_BIND bind[3]; 
       ParamUint chat_user_id = ParamUint(bind[0]); // First parameter
@@ -341,9 +341,9 @@ struct ParamString {
   struct Update_Status_Read {
     MYSQL_STMT* stmt{nullptr};
     MYSQL_RES* result_metadata{nullptr};
-    const std::string headline{"update_status_read_query"};
+    const std::string headline{"update_status_read_query "};
     const std::string  query{"UPDATE messages SET status = 2, dt_delivered = CURRENT_TIMESTAMP() WHERE chat_user_id = ? AND id BETWEEN ? AND ? AND status != 2 AND status != 3"};
-    struct {
+    struct query{
       const int param_count{3}; // Number of prepared parameters expected
       MYSQL_BIND bind[3]; 
       ParamUint chat_user_id = ParamUint(bind[0]); // First parameter

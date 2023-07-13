@@ -6,39 +6,45 @@ using queue_user_t = std::shared_ptr<std::queue<User>>;
 int main() {
 //   // system("chcp 1251");
 
-//   // Chats chats;
+  // Chats chats;
 
-//   DB_Queries_DDL db_queries_ddl;
-//   MYSQL_Config mysqlconfig;
-//   mysqlconfig.passwd = (char*)("Root123_Root123");
-//   std::cout << "создался объект" << std::endl;
-//   db_queries_ddl.connectToMySQLserver_open(mysqlconfig);
-//   db_queries_ddl.createDataBase();
+  std::cout << "выполнение" << std::endl;
 
-//   DB_Queries_DML db_queries_dml;
-//   db_queries_dml.connectDB_open();
-//   db_queries_dml.prepareAll();
+  DB_Queries_DDL db_queries_ddl;
+  MYSQL_Config mysqlconfig;
+  mysqlconfig.passwd = (char*)("Root123_Root123");
+  std::cout << "создался объект" << std::endl;
+  db_queries_ddl.connectToMySQLserver_open(mysqlconfig);
+  db_queries_ddl.createDataBase();
+
+  DB_Queries_DML db_queries_dml;
+  db_queries_dml.connectDB_open();
+
+    std::cout << "подготовка" << std::endl;
+  db_queries_dml.prepareAll();
   
+    std::cout << "создание пользователя" << std::endl;
+  queue_user_t users;
+  std::string tmp_login("login_");
+  std::string tmp_pass("pass_");
 
-//   queue_user_t users;
-//   std::string tmp_login("login_");
-//   std::string tmp_pass("pass_");
+    std::cout << "ввод пользователей" << std::endl;
+  for (size_t i = 0; i < 10; i++) {
+    // users->emplace(
+    //     User(tmp_login + std::to_string(i), tmp_pass + std::to_string(i)));
 
-
-//   for (size_t i = 0; i < 10; i++)
-//   {
-
-//     //users->emplace(User(tmp_login + std::to_string(i), tmp_pass + std::to_string(i)));
-//     // db_queries_dml.insert_User_fc(make_shared<User>(User(tmp_login + std::to_string(i), tmp_pass + std::to_string(i))))
-//     std::cout << "id= : "
-//               << db_queries_dml.insert_User_fc(
-//                      make_shared<User>(User(tmp_login + std::to_string(i),
-//                                             tmp_pass + std::to_string(i))))
-//               << std::endl;
-//   };
-//   // User_t user1(db_queries_dml.selectUserByLogin("login_1"));
-//   //  if(user1){
-//   //   user1->printUser();}
+    // db_queries_dml.insert_User_fc(/* Insert_User_struct, */ make_shared<User>(
+    //     User(tmp_login + std::to_string(i), tmp_pass + std::to_string(i))));
+    
+    std::cout << "id= : "
+              << db_queries_dml.insert_User_fc(
+                     make_shared<User>(User(tmp_login + std::to_string(i),
+                                            tmp_pass + std::to_string(i))))
+              << std::endl;
+  };
+  User_t user1(db_queries_dml.selectUserByLogin("login_1"));
+   if(user1){
+    user1->printUser();}
 
 
   
