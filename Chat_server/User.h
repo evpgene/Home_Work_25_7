@@ -11,11 +11,13 @@ class User
 {
 public:
 	User();
-	User(const std::string& login, const std::string& pass);
-	User(std::string&& login, std::string&& pass);  
+	User(const std::size_t id, const std::string& login, const std::string& pass);
+	User(std::size_t id, std::string&& login, std::string&& pass);  
 	~User();
+	void setId(const std::size_t);
 	void setLogin(const std::string&);
 	void setPass(const std::string&);
+	std::size_t getId() const;
 	std::string getLogin() const;
 	std::string getPass() const;
 	void printUser() const;
@@ -33,6 +35,7 @@ friend bool operator==(const std::string& u1, const User& u2);
 friend bool operator!=(const std::string& u1, const User& u2);
 
 private:
+	std::size_t _id;
 	std::string _login;
 	std::string _pass;
 };

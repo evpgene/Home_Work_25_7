@@ -23,26 +23,29 @@ using affected_rows =
 using no_errors = bool;  // Execution OK. No errors occurred if = true;
 using is_errors = bool;  // Execution Not OK. Errors occurred if = true;
 
+
 const int silent_level{1};
-const int verify_affected_rows_silent_level{1};
-const int verify_param_count_silent_level{1};
-const int verify_field_count_silent_level{1};
-const int make_bind_params_silent_level{1};
-const int make_bind_results_silent_level{1};
-const int mysql_stmt_free_result_silent_level{1};
-const int close_stmt_silent_level{1};
-const int execute_stmt_silent_level{1};
-const int affected_rows_silent_level{1};
+const int verify_affected_rows_sl{1}; // sl - silent level
+const int verify_param_count_sl{1}; // sl - silent level
+const int verify_field_count_sl{1}; // sl - silent level
+const int make_bind_params_sl{1}; // sl - silent level
+const int make_bind_results_sl{1}; // sl - silent level
+const int mysql_stmt_free_result_sl{1}; // sl - silent level
+const int close_stmt_sl{1}; // sl - silent level
+const int execute_stmt_sl{1}; // sl - silent level
+const int affected_rows_sl{1}; // sl - silent level
 
 class DB_Queries_DML {
  private:
   MYSQL* mysql = new MYSQL;
   // MYSQL_RES* res; // скорее нужно убрать, чем оставить
   // MYSQL_ROW row; // скорее нужно убрать, чем оставить
+  std::size_t lastInsertMessageId{0}; // ??? проверить как использовать
 
   Insert_User Insert_User_struct;
   Select_User_By_Id Select_User_By_Id_struct;
   Select_User_By_Login Select_User_By_Login_struct;
+  Select_Users_All Select_Users_All_struct;
   Insert_Chat Insert_Chat_struct;
   Select_Chat_By_Id Select_Chat_By_Id_struct;
   Select_Chat_By_Name Select_Chat_By_Name_struct;
@@ -66,30 +69,31 @@ class DB_Queries_DML {
 
   insert_id insert_User_fc(const User_t user);
   User_t select_User_By_Id_fc(const size_t id);
-  User_t selectUserByLogin(const std::string& login);
-  insert_id insertChat(const Chat_t chat);
-  Chat_t selectChatById(const size_t id);
-  Chat_t selectChatByName(const std::string& name);
-  insert_id insertChatUser(const size_t chat_id, const size_t user_id);
-  size_t selectChatUser(const size_t chat_id, const size_t user_id);
-  insert_id insertMessage(const size_t chat_user_id, const Message_t message);
-  Message_t selectMessage(const size_t chat_id, const size_t message_id);
-  queue_message_t select_Messages_Mult(const size_t chat_id,
+  User_t select_User_By_Login_fc(const std::string& login);
+  queue_user_t select_Users_All_fc(void);
+  insert_id insert_Chat_fc(const std::string chatname);
+  Chat_t select_Chat_By_Id_fc(const size_t id);
+  Chat_t select_Chat_By_Name_fc(const std::string& name);
+  insert_id insert_Chat_User_fc(const size_t chat_id, const size_t user_id);
+  size_t select_Chat_User_fc(const size_t chat_id, const size_t user_id);
+  insert_id insert_Message_fc(const size_t chat_user_id, std::string message);
+  Message_t select_Message_fc(const size_t chat_id, const size_t message_id);
+  queue_message_t select_Messages_Mult_fc(const size_t chat_id,
                                        const size_t message_id_begin,
                                        const size_t message_id_end,
                                        const size_t message_status,
                                        const size_t limit);
-  size_t updateStatusDelivered(const size_t chat_user_id,
+  size_t update_Status_Delivered_fc(const size_t chat_user_id,
                                const size_t message_id_begin,
                                const size_t message_id_end);
-  size_t updateStatusRead(const size_t chat_user_id,
+  size_t update_Status_Read_fc(const size_t chat_user_id,
                           const size_t message_id_begin,
                           const size_t message_id_end);
 
   /* return the total affected rows */
   size_t affected_rows(MYSQL_STMT* stmt, std::string headline) {
     uint64_t affected_rows = mysql_stmt_affected_rows(stmt);
-    if (silent_level >= affected_rows_silent_level) {
+    if (silent_level >= affected_rows_sl) {
       std::cout << headline << " affected rows: " << affected_rows << std::endl;
       if (affected_rows == -1) {
         std::cout << headline << " mysql_stmt_affected_rows() failed "
@@ -109,7 +113,7 @@ class DB_Queries_DML {
       return false;
     }
     if (affected_rows != exp_count) {
-      if (silent_level >= verify_affected_rows_silent_level) {
+      if (silent_level >= verify_affected_rows_sl) {
         std::cout << headline << " total affected rows: " << affected_rows
                   << " expected: " << exp_count << std::endl;
       }
@@ -135,7 +139,7 @@ class DB_Queries_DML {
                                std::string headline) {
     size_t param_count = mysql_stmt_param_count(stmt);
     if (param_count != exp_count) {
-      if (silent_level >= verify_param_count_silent_level) {
+      if (silent_level >= verify_param_count_sl) {
         std::cout << headline << " total parameters in stmt: " << param_count
                   << " expected: " << exp_count << std::endl;
       }
@@ -149,7 +153,7 @@ class DB_Queries_DML {
                                std::string headline) {
     uint field_count = mysql_num_fields(result);
     if (field_count != exp_count) {
-      if (silent_level >= verify_field_count_silent_level) {
+      if (silent_level >= verify_field_count_sl) {
         std::cout << headline << " total fields in res: " << field_count
                   << " expected: " << exp_count << std::endl;
       }
@@ -177,7 +181,7 @@ class DB_Queries_DML {
   no_errors bind_parameters(MYSQL_STMT* stmt, MYSQL_BIND* bnd_params,
                             std::string headline) {
     if (mysql_stmt_bind_param(stmt, bnd_params)) {
-      if (silent_level >= make_bind_params_silent_level) {
+      if (silent_level >= make_bind_params_sl) {
         std::cout << headline
                   << " mysql_stmt_bind_param() failed: " << std::endl;
         std::cout << headline << mysql_stmt_error(stmt) << std::endl;
@@ -190,7 +194,7 @@ class DB_Queries_DML {
   // Step 3 - executes the prepared query associated with the statement handler
   no_errors execute_stmt(MYSQL_STMT* stmt, std::string headline) {
     if (mysql_stmt_execute(stmt)) {
-      if (silent_level >= execute_stmt_silent_level) {
+      if (silent_level >= execute_stmt_sl) {
         std::cout << headline << " mysql_stmt_execute() failed: " << std::endl;
         std::cout << headline << mysql_stmt_error(stmt) << std::endl;
       }
@@ -203,7 +207,7 @@ class DB_Queries_DML {
   no_errors bind_results(MYSQL_STMT* stmt, MYSQL_BIND* bnd_results,
                          std::string headline) {
     if (mysql_stmt_bind_result(stmt, bnd_results)) {
-      if (silent_level >= make_bind_results_silent_level) {
+      if (silent_level >= make_bind_results_sl) {
         std::cout << headline
                   << " mysql_stmt_bind_result() failed: " << std::endl;
         std::cout << headline << mysql_stmt_error(stmt) << std::endl;
@@ -216,7 +220,7 @@ class DB_Queries_DML {
   // Step ~7
   no_errors free_result_stmt(MYSQL_STMT* stmt, std::string headline) {
     if (mysql_stmt_free_result(stmt)) {
-      if (silent_level >= mysql_stmt_free_result_silent_level) {
+      if (silent_level >= mysql_stmt_free_result_sl) {
         std::cout << headline
                   << " mysql_stmt_free_result() failed: " << std::endl;
         std::cout << headline << mysql_stmt_error(stmt) << std::endl;
@@ -231,7 +235,7 @@ class DB_Queries_DML {
   no_errors close_stmt(MYSQL* mysql, MYSQL_STMT* stmt,
                        MYSQL_RES* result_metadata, std::string headline) {
     if (mysql_stmt_close(stmt)) {
-      if (silent_level >= close_stmt_silent_level) {
+      if (silent_level >= close_stmt_sl) {
         std::cout << headline
                   << " ailed while closing the statement: " << std::endl;
         std::cout << headline << mysql_error(mysql) << std::endl;

@@ -1,5 +1,10 @@
 Chat_client/chat_client
 Chat_server/chat_server
-ERR.TXT
+Chat_server/*.o
 cppcheck.cmd
 ERR.TXT
+Chat_server/Chat.o
+Chat_server/Chats.o
+Chat_server/DB_Queries_DML.o
+Chat_server/Main.o
+Chat_server/User.o

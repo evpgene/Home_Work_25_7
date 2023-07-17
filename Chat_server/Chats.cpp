@@ -1,258 +1,200 @@
 #include "Chats.h"
 
-
-
 void Chats::mainmenu() {
-  bool commonUserExist{false};  // Пользователь общий уже есть
-  for (const auto user_ptr : users) {
-    if (user_ptr) {
-      if (*user_ptr == std::string("Общий")) {
-        commonUserExist = true;
-        break;
-      }
-    }
-  }
-
-  if (!commonUserExist) {
-    // сщздаём чат общий и делаем его активным
-    currentChatPtr = make_shared<Chat>(Chat(std::string(
-        "Общий")));  // тут проверить, может сразу его в список чатов?
-
+  // если пользователь общий не найден
+  if (!(db_queries_dml.select_User_By_Login_fc("Общий") != nullptr)) {
+    size_t user_id;
+    size_t chat_id;
     // создаём пользователя для общего чата
-    users.emplace_back(make_shared<User>(User(
-        std::string("Общий"), "")));  // конструируем "на месте", так сказать
-  }
+    if ((user_id = db_queries_dml.insert_User_fc(
+             std::make_shared<User>(User(user_id, "Общий", "Общий"))))) {
+      currentUserPtr = db_queries_dml.select_User_By_Id_fc(user_id);
+    };
+    // создаём чат общий и делаем его активным
+    currentChatPtr = createChatByUsers(currentUserPtr, currentUserPtr);
+  };
   localCycle();
-}
+};
+
 void Chats::userinfo() {
+  // распечатываем активного пользоваателя
   if (currentUserPtr) {
-    std::cout << "Активный пользователь: ";
-    currentUserPtr->printUser();
-    std::cout << endl;
+      std::cout << "Активный пользователь: ";
+      currentUserPtr->printUser();
+      std::cout << endl;
   }
-
+  // распечатываем активный чат
   if (currentChatPtr) {
-    std::cout << "Активный чат: ";
-    currentChatPtr->printChatName();
-    std::cout << endl;
+      std::cout << "Активный чат: ";
+      currentChatPtr->printChatName();
+      std::cout << endl;
   }
-
-  // распечатываем имена всех зарегистрированных пользователей
-  if (users.size() > 0) {
-    std::cout << "Зарегистрированные пользователи: " << std::endl;  // users
-    for (const auto user_ptr : users) user_ptr->printUser();        // print();
-    std::cout << endl;
-  } else {
-    std::cout << "Нет зарегистрированных пользователей! " << std::endl;
-  }
+  // распечатываем пречень всех зарегистрированных пользователей
+  printAllUsers();
 }
 
+// logon для терминала
 void Chats::logon() {
   std::string tmp_login, tmp_pass;
-  std::cout << "Введите ваше имя" << std::endl;  // login
+  std::cout << "Введите ваш логин " << std::endl;  // login
   std::cin >> tmp_login;
-  std::cout << "Введите ваш пароль: " << std::endl;
+  std::cout << "Введите ваш пароль " << std::endl;
   std::cin >> tmp_pass;
-  User tmp_user(tmp_login, tmp_pass);
+  // пусть нуль будет id для временных пользователей
+  User_t tmp_user(std::make_shared<User>(0, tmp_login, tmp_pass));
 
   // ищем пользователя с заданным логином и паролем (или хэшем)
-  for (const auto user_ptr : users) {
-    if (user_ptr) {
-      if (*user_ptr == tmp_user)  // если пользователь найден
-      {
-        currentUserPtr = user_ptr;
-        std::cout << "Вы вошли как: ";
-        currentUserPtr->printUser();
-        std::cout << std::endl;
-        return;
-      }
-    }
+  currentUserPtr = db_queries_dml.select_User_By_Login_fc(tmp_login);
+  if (*tmp_user == *currentUserPtr) {
+      std::cout << "Вы вошли как: ";
+      currentUserPtr->printUser();
+      std::cout << std::endl;
+      return;
   }
   std::cout << "Такого пользователя нет. " << std::endl;
 }
 
+// logon для сетевого интерфейса
 User_t Chats::logon(const User_t user_ptr) {
-  if(!user_ptr) return nullptr;
-  for (const auto _user_ptr :
-       users) {  // ищем пользователя с заданным логином и паролем (или хэшем)
-    if (_user_ptr->getLogin() == user_ptr->getLogin()) {  // если пользователь найден
-      currentUserPtr = _user_ptr; // проверить необходимость этой строки
-      return currentUserPtr;
-    }
-  }
-  return nullptr;
+  if (!user_ptr) return nullptr;
+  return currentUserPtr = db_queries_dml.select_User_By_Login_fc(user_ptr->getLogin());
 }
 
-void Chats::userRegistration() {
+// регистрация пользователя для терминала
+no_errors Chats::userRegistration() {
   std::string tmp_login, tmp_pass;
-  std::cout << "Введите ваше имя" << std::endl;  // login
+  std::cout << "Введите ваш логин" << std::endl;
   std::cin >> tmp_login;
-  std::cout << "Введите ваш пароль: " << std::endl;
+  std::cout << "Введите ваш пароль " << std::endl;
   std::cin >> tmp_pass;
-
-  for (const auto user_ptr : users) {
-    if (user_ptr) {
-      if (*user_ptr == tmp_login) {
-        std::cout << "Такой пользователь уже существует: " << std::endl;
-        return;
-      }
-    }
+  // пусть нуль будет id для временных пользователей
+  User_t tmp_user(std::make_shared<User>(0, tmp_login, tmp_pass));
+  if (*tmp_user ==
+      *db_queries_dml.select_User_By_Login_fc(tmp_user->getLogin())) {
+      std::cout << "Такой пользователь уже существует. " << std::endl;
+      return false;
   }
-
-  // далее запишу несколько строк по другому:
-  // currentUserPtr = make_shared<User>(User(tmp_login, tmp_pass)); // делаем
-  // нового пользователя активным users.push_back(currentUserPtr); // добавляем
-  // пользователя в массив пользователей
-
-  currentUserPtr = users.emplace_back(
-      make_shared<User>(User(std::move(tmp_login), std::move(tmp_pass))));
-
-  std::cout << "Вы вошли как: " << std::endl;
-  currentUserPtr->printUser();
-  std::cout << std::endl;
+  if (db_queries_dml.insert_User_fc(tmp_user)) {
+      std::cout << "Регистрация прошла успешно. " << std::endl;
+      return true;
+  }
+  return false;
 }
 
 User_t Chats::userRegistration(const User_t user_ptr) {
-  if(!user_ptr) return nullptr;
+  if (!user_ptr) return nullptr;
   // ищем пользователя с заданным логином и паролем (или хэшем)
-  for (const auto _user_ptr : users) {
-    // если пользователь найден
-    if (_user_ptr->getLogin() == user_ptr->getLogin()) {
-      return nullptr;
-    }
-  }
-  currentUserPtr = users.emplace_back(make_shared<User>(
-      User(std::move(user_ptr->getLogin()), std::move(user_ptr->getPass()))));
-  return currentUserPtr;
-}
-
-User_t Chats::getCompanion(const std::string& companion) {
-  for (const auto _user_ptr : users) {  // ищем компаньона с заданным именем
-    if (_user_ptr->getLogin() == companion) {  // если компаньон найден
-      return _user_ptr;
-    }
-  }
-  return nullptr;
-}
-
-Chat_t Chats::getActiveChat(const User_t user, const User_t companion) {
-  if (user && companion) {
-    // имя чата первая комбинация
-    std::string chatName{user->getLogin() + companion->getLogin()};
-    // имя чата вторая комбинация
-    std::string chatName_2{companion->getLogin() + user->getLogin()};
-
-    if (companion->getLogin() == std::string("Общий")) {
-      chatName = "Общий";
-      chatName_2 = "Общий";
-    }
-    // проверяем, существует ли чат с заданными именами
-    for (const auto chat_ptr : chats) {
-      if (chat_ptr) {
-        if (chat_ptr->getChatName() == chatName ||
-            chat_ptr->getChatName() == chatName_2) {
-          return chat_ptr;
-        }
+   User_t tmp_user = db_queries_dml.select_User_By_Login_fc(user_ptr->getLogin());
+  if(*user_ptr == *tmp_user) {
+        return nullptr;
       }
-    }
-    return chats.emplace_back(make_shared<Chat>(Chat(chatName)));
+  return tmp_user;
+}
+
+User_t Chats::getUserByLogin(const std::string &login) {
+  return db_queries_dml.select_User_By_Login_fc(login);
+}
+
+// возвращает имя чата. В случае неудачи возвращает пустую строку.
+std::string Chats::getChatnameByUsers(const User_t user,
+                                      const User_t companion) {
+  // проверяем, в порядке ли исходные данные
+  if (!(user && companion)) {
+        return std::string();
   }
-  return nullptr;
+  // формируем имя чата
+  if (companion->getLogin() == std::string("Общий")) {
+        return std::string("Общий");
+  }
+  if (user->getLogin() <= companion->getLogin()) {
+        return std::string(user->getLogin() + companion->getLogin());
+  } else {
+        return std::string(companion->getLogin() + user->getLogin());
+  }
+}
+
+Chat_t Chats::getChatByUsers(const User_t user, const User_t companion) {
+  // проверяем, в порядке ли исходные данные
+  if (!(user && companion)) {
+        return nullptr;
+  }
+  // формируем имя чата и проверяем,
+  // существует ли чат с заданным именeм
+  return db_queries_dml.select_Chat_By_Name_fc(
+      getChatnameByUsers(user, companion));
+}
+
+Chat_t Chats::createChatByUsers(const User_t user, const User_t companion) {
+  // проверяем, в порядке ли исходные данные
+  if (!(user && companion)) {
+        return nullptr;
+  }
+  if(!(user->getId() && companion->getId())) {
+        return nullptr;
+  }
+
+  no_errors no_errors{true};
+  // по идее эти операции надо проводить транзакцией!!!
+  size_t chat_id = db_queries_dml.insert_Chat_fc(getChatnameByUsers(user, companion));
+  no_errors &= bool(db_queries_dml.insert_Chat_User_fc(chat_id,user->getId()));
+  if(user != companion)
+    no_errors &= bool(db_queries_dml.insert_Chat_User_fc(chat_id,companion->getId()));
+  // либо тут должно быть удалить созданный чат если есть ошибки!!!
+
+  return Chat_t(db_queries_dml.select_Chat_By_Id_fc(chat_id)); 
 }
 
 void Chats::write() {
   // Выводим имя активного пользователя
-  if (currentUserPtr) {
-    std::cout << "Активный пользователь: ";
-    currentUserPtr->printUser();
-
-    // выводим имена всех пользователей
-    std::cout << "Зарегистрированные пользователи: " << std::endl;
-    int i{1};
-    for (const auto user_ptr : users) {
-      std::cout << i++ << ": ";
-      user_ptr->printUser();
-    }
+  if (!currentUserPtr) {
+    std::cout << "Вы не зарегистрированы! " << std::endl;
+    return;
+  }
+  std::cout << "Активный пользователь: ";
+  currentUserPtr->printUser();
+  std::cout << std::endl;
+  printAllUsers();
+  std::cout << std::endl;
 
     std::string id_input;
     std::cout << "Выберите пользователя для чата (введите номер) " << std::endl;
     std::cin >> id_input;
-    shared_ptr<User> tmp_companion;
+    User_t tmp_companion;
+
     // проверяем корректность ввода
     try {
-      tmp_companion = users.at(std::stoi(id_input) - 1);
+    tmp_companion =
+        db_queries_dml.select_User_By_Id_fc(std::stol(id_input));
     } catch (const std::exception &e) {
-      cout << endl << e.what() << endl;
+    cout << endl << e.what() << endl;
     }
 
+    // вывод найденного пользователя для отслеживания поведения программы -
+    // можно удалить
     if (tmp_companion) {
-      // вывод найденного пользователя для отслеживания поведения программы -
-      // можно удалить
       std::cout << "Пользователь найден: ";
       tmp_companion->printUser();
     } else {
       std::cout << "Нет такого пользователя! " << std::endl;
     }
-    std::string chatName;  // имя чата первая комбинация
-    std::string chatName_2;  // имя чата вторая комбинация
 
-    if (currentUserPtr) {
-      if (tmp_companion) {
-        if (*tmp_companion ==
-            std::string("Общий"))  // имя пользователя - Общий и имя чата задаём
-                                   // тоже Общий.
-        {
-          chatName = "Общий";
-        } else {
-          // формирования имени чата первая часть
-          chatName = currentUserPtr->getLogin();
-          chatName += tmp_companion->getLogin();
-        }
-      }
-
-      // формирования имени чата вторая часть
-      chatName_2 = tmp_companion->getLogin();
-      chatName_2 += currentUserPtr->getLogin();
+    // выбираем чат по именам пользователей
+    currentChatPtr = getChatByUsers(currentUserPtr, tmp_companion);
+    // если чата нет - создаём его
+    if (!(currentChatPtr)) {
+      //  создаём чат - добавляем его по имени и тут же считывааем по id.
+      currentChatPtr =
+          db_queries_dml.select_Chat_By_Id_fc(db_queries_dml.insert_Chat_fc(
+              getChatnameByUsers(currentUserPtr, tmp_companion)));
     }
 
-    currentChatPtr = nullptr;
-    for (const auto chat_ptr :
-         chats)  // проверяем, существует ли чат с заданными именами
-    {
-      if (chat_ptr) {
-        if (*chat_ptr == chatName || *chat_ptr == chatName_2) {
-          currentChatPtr = chat_ptr;
-          break;
-        }
-      }
-    }
+    printAllMessages(currentChatPtr);
 
-    if (!(currentChatPtr))  // если такого чата нет - создаём чат и добавляем
-                            // указатели на него в список чатов каждого
-                            // пользователя
-    {
-      currentChatPtr = chats.emplace_back(make_shared<Chat>(Chat(chatName)));
+    size_t message_id{0};
+    if (bool(message_id = sendMessage(currentChatPtr, currentUserPtr,
+                                      acquaireMessage()))) {
+      setLastSendMessageId(message_id);
     }
-
-    currentChatPtr->printMessages();
-
-    if (currentUserPtr)  // послать сообщение
-    {
-      std::string tmp_Messge;
-      std::cout << "Введите ваше сообщение: ";
-      cin.ignore();
-      std::getline(std::cin, tmp_Messge);
-      time_t now =
-          time(0);  // текущие дата/время основываясь на текущей системе
-      char dt[26];
-      ctime_r(&now, dt);
-      dt[24] = ' ';  // убираем перенос строки
-      currentChatPtr->addMessage(std::move(Message(
-          std::string(dt), currentUserPtr->getLogin(), std::move(tmp_Messge))));
-    }
-  } else {
-    std::cout << "Вы не зарегистрированы! " << std::endl;
-  }
 }
 
 void Chats::logoff() {
@@ -354,18 +296,17 @@ void Chats::localCycle() {
 }
 
 void Chats::remoteCycle() {
-
-//тут добавил новые объявления/////////////////////////////
-	Server server;
-	TCP_server tcp_server;
-	std::string string_to_send{"Привет от сервера!"};
-	std::string string_for_receive;
-	User_t user;
-	User_t companion;
-	Chat_t chat;
-	std::shared_ptr<std::queue<std::string>> usernames;
-	queue_message_t lastMessages;
-//тут добавил новые объявления конец/////////////////////////////
+  // тут добавил новые объявления/////////////////////////////
+  Server server;
+  TCP_server tcp_server;
+  std::string string_to_send{"Привет от сервера!"};
+  std::string string_for_receive;
+  User_t user;
+  User_t companion;
+  Chat_t chat;
+  std::shared_ptr<std::queue<std::string>> usernames;
+  queue_message_t lastMessages;
+  // тут добавил новые объявления конец/////////////////////////////
 
   tcp_server.configureConnection();
   tcp_server.listening();
@@ -394,8 +335,7 @@ void Chats::remoteCycle() {
         break;
 
       case LOGON:
-        user = logon(
-            server.retrieveUser(std::string(receivedData._str_view)));
+        user = logon(server.retrieveUser(std::string(receivedData._str_view)));
         if (!user) {
           string_to_send = std::string("Ошибка входа в учётную запись");
           break;
@@ -407,12 +347,12 @@ void Chats::remoteCycle() {
           string_to_send = "Вы не вошли в учётную запись";
           break;
         }
-        companion = getCompanion(std::string(receivedData._str_view));
+        companion = getUserByLogin(std::string(receivedData._str_view));
         if (!companion) {
           string_to_send = "Пользователь для переписки не найден";
           break;
         }
-        chat = getActiveChat(user, companion);
+        chat = getChatByUsers(user, companion);
         if (!chat) {
           string_to_send = "чат не существует";
           break;
@@ -517,15 +457,29 @@ void Chats::remoteCycle() {
         break;  // диагностическая информация на сервер
     }
   }
-
-
-
 }
 
 void Chats::addMessage(const Chat_t chat, const std::shared_ptr<Message> msg) {
   if (chat && msg) {
     chat->addMessage(std::move(*msg));
   }
+}
+// распечатывает перечень всех пользователей,
+// в случае удачи возвращает true.
+no_errors Chats::printAllUsers(void) {
+  queue_user_t all_users(db_queries_dml.select_Users_All_fc());
+  if (!all_users) {
+    std::cout << "Нет зарегистрированных пользователей! " << std::endl;
+    return no_errors(false);
+  }
+  // выводим имена всех пользователей
+  std::cout << "Зарегистрированные пользователи: " << std::endl;
+  if (!all_users->empty()) {
+    all_users->front().printUser();
+    std::cout << endl;
+    all_users->pop();
+  }
+  return no_errors(true);
 }
 
 std::shared_ptr<std::queue<std::string>> Chats::getUserNames() {
@@ -537,4 +491,47 @@ std::shared_ptr<std::queue<std::string>> Chats::getUserNames() {
         user->getLogin());  // тут преобразование, иначе попытка своровать const
   }
   return usernames;
+}
+
+no_errors Chats::printAllMessages(const Chat_t chat) {
+  if (!chat) return no_errors(false);
+
+  queue_message_t messages = db_queries_dml.select_Messages_Mult_fc(
+      chat->getId(), 1, sizeof(unsigned long int), 1,
+      sizeof(unsigned long int));
+  if (!messages) {
+    std::cout << "Нет сообщений! " << std::endl;
+    return no_errors(false);
+  }
+  // выводим все сообщения
+  std::cout << "Зарегистрированные пользователи: " << std::endl;
+  if (!messages->empty()) {
+    messages->front().printMessage();
+    std::cout << endl;
+    messages->pop();
+  }
+  return no_errors(true);
+}
+
+insert_id Chats::sendMessage(const Chat_t chat, const User_t user,
+                             std::string message_text) {
+  // проверяем исходные дынные
+  if (!(chat && user)) return 0;
+  if (!(chat->getId() && user->getId())) return 0;
+  std::size_t chat_user_id =
+      db_queries_dml.select_Chat_User_fc(chat->getId(), user->getId());
+  std::size_t message_id =
+      db_queries_dml.insert_Message_fc(chat_user_id, message_text);
+  return insert_id(message_id);
+}
+// сохраняет id последнего отправленного сообщения
+void Chats::setLastSendMessageId(size_t id) { lastSendMessageId = id; }
+
+// запрашивает ввод с консоли и возвращает текст сообщения
+std::string Chats::acquaireMessage(void) {
+  std::string message_text;
+  std::cout << "Введите ваше сообщение: ";
+  cin.ignore();
+  std::getline(std::cin, message_text);
+  return std::string(message_text);
 }

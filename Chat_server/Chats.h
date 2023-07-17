@@ -11,9 +11,15 @@
 #include "TCP_server.h"
 #include "Server.h"
 
+#include "DB_Queries_DDL.h"
+#include "DB_Queries_DML.h"
+
 using User_t = std::shared_ptr<User>;  // указатель на юзера
 using Chat_t = std::shared_ptr<Chat>;  // указатель на чат
 using Message_t = std::shared_ptr<Message>;  // указатель на сообщение
+using no_errors = bool;  // Execution OK. No errors occurred if = true;
+using is_errors = bool;  // Execution Not OK. Errors occurred if = true;
+
 
 class Chats
 {
@@ -25,7 +31,8 @@ class Chats
 	std::vector<Chat_t> chats; // массив указателей на чаты
 	User_t currentUserPtr{nullptr}; // указатель на текущего пользователя
 	Chat_t currentChatPtr{nullptr}; // указатель на текущий чат
-
+	DB_Queries_DML db_queries_dml; // DML запросы к MySQL
+	size_t lastSendMessageId{0};
 
 
 
@@ -57,7 +64,7 @@ public:
 	void logon();
 	// тут можно сделать возвращаемое значение истина в случае успеха
 	User_t  userRegistration(const User_t user);
-	void userRegistration();
+	no_errors userRegistration();
 	// Написать пользователю
 	void write();
 	// logoff
@@ -65,16 +72,22 @@ public:
 	// Выход из программы
 	void exit();
 
-	void localCycle();
+	void localCycle(void);
 	void remoteCycle();
 
 
-	User_t getCompanion(const std::string& companion);
-	Chat_t getActiveChat(const User_t user, const User_t companion);
+	User_t getUserByLogin(const std::string& companion);
+	
+	std::string getChatnameByUsers(const User_t user, const User_t companion);
+	Chat_t getChatByUsers(const User_t user, const User_t companion);
+	Chat_t createChatByUsers(const User_t user, const User_t companion);
 	void addMessage(const Chat_t chat, const std::shared_ptr<Message> msg);
+	no_errors printAllUsers(void);
 	std::shared_ptr<std::queue<std::string>> getUserNames();
 	const std::string getMessageString(const Message_t message);
-	
-	
+	no_errors printAllMessages(const Chat_t chat);
+	insert_id sendMessage(const Chat_t chat, const User_t user, std::string message_text);
+	void setLastSendMessageId(size_t id);
+	std::string acquaireMessage(void);
 
 };

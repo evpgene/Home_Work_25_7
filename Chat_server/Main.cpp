@@ -36,13 +36,14 @@ int main() {
     // db_queries_dml.insert_User_fc(/* Insert_User_struct, */ make_shared<User>(
     //     User(tmp_login + std::to_string(i), tmp_pass + std::to_string(i))));
     
-    std::cout << "id= : "
-              << db_queries_dml.insert_User_fc(
-                     make_shared<User>(User(tmp_login + std::to_string(i),
-                                            tmp_pass + std::to_string(i))))
-              << std::endl;
+  //   std::cout << "id= : "
+  //             << db_queries_dml.insert_User_fc(
+  //                    make_shared<User>(User(tmp_login + std::to_string(i),
+  //                                           tmp_pass + std::to_string(i))))
+  //             << std::endl;
+  // 
   };
-  User_t user1(db_queries_dml.selectUserByLogin("login_1"));
+  User_t user1(db_queries_dml.select_User_By_Login_fc("login_1"));
    if(user1){
     user1->printUser();}
 
@@ -85,7 +86,7 @@ int main() {
 // std::cout << "control point 3 " << std::endl;
 // #endif
 
-//   Message_t message = db_queries_dml.selectMessage(1, 1);
+//   Message_t message = db_queries_dml.select_Message_fc(1, 1);
 
 //   if (message) {
 //     message->printMessage();
@@ -102,7 +103,7 @@ int main() {
 // std::cout << "control point 4 " << std::endl;
 // #endif
 
-//   size_t chatuser = db_queries_dml.selectChatUser(1, 1);
+//   size_t chatuser = db_queries_dml.select_Chat_User_fc(1, 1);
 //   if (chatuser) {
 //     std::cout << "ChatUser ID = " << chatuser << std::endl;
 //   } else {
@@ -113,7 +114,7 @@ int main() {
 //   // message_arr[0] = std::make_shared<Message>(Message("","", "ну прювет
 //   // волк"));
 
-//   // db_queries.insertMessage(1, message_arr[0]);
+//   // db_queries.insert_Message_fc(1, message_arr[0]);
 
 
 
@@ -122,7 +123,7 @@ int main() {
 // std::cout << "control point 5 " << std::endl;
 // #endif
 
-//   queue_message_t queue = db_queries_dml.select_Messages_Mult(1, 1, 5, 3, 100);
+//   queue_message_t queue = db_queries_dml.select_Messages_Mult_fc(1, 1, 5, 3, 100);
 //   if (queue) {
 //     while (!queue->empty()) {
 //       // Message message(queue->front());
@@ -133,8 +134,8 @@ int main() {
 //     std::cout << "No selected messages. Null returned. " << std::endl;
 //   }
 
-//   // db_queries_dml.updateStatusDelivered(1, 1, 10);
-//   // db_queries_dml.updateStatusRead(1, 1, 10);
+//   // db_queries_dml.update_Status_Delivered_fc(1, 1, 10);
+//   // db_queries_dml.update_Status_Read_fc(1, 1, 10);
 
 
 // #if _DEBUG

@@ -123,6 +123,28 @@ struct Select_User_By_Login {
   } Result_struct;
 };
 
+
+struct Select_Users_All {
+  MYSQL_STMT* stmt{nullptr};
+  MYSQL_RES* result_metadata{nullptr};
+  const std::string headline{"select_user_all_query "};
+  const std::string query{"SELECT id, login, pass FROM users WHERE 1 = ?"};
+  struct query {
+    const int param_count{0};  // Number of prepared parameters expected
+    MYSQL_BIND bind[1];
+    ParamUint dummy = ParamUint(bind[0]);
+  } Query_struct;
+  struct result {
+    const int param_count{3};  // Number of result filds expected
+    MYSQL_BIND bind[3];
+    ParamUint id = ParamUint(bind[0]);         // First parameter
+    ParamString login = ParamString(bind[1]);  // Second parameter
+    ParamString pass = ParamString(bind[2]);   // Third parameter
+    int column_count;
+    int row_count;
+  } Result_struct;
+};
+
 // V
 struct Insert_Chat {
   MYSQL_STMT* stmt{nullptr};

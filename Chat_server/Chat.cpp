@@ -5,8 +5,14 @@ Chat::Chat()
 {
 }
 
+Chat::Chat(const std::size_t id, const std::string &chatname) : _id(id), _chatname(chatname)
+{
+}
+
+// этот конструктор временно для совместимости с SaveRestor - его нужно удалить
 Chat::Chat(const std::string &chatname) : _chatname(chatname)
 {
+
 }
 
 Chat::~Chat()
@@ -37,6 +43,8 @@ void Chat::printChatName() const
 {
 	std::cout << " " << _chatname << std::endl;
 }
+
+std::size_t Chat::getId() const { return std::size_t(_id); }
 
 std::string Chat::getChatName() const
 {
