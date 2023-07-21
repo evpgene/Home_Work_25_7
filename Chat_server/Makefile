@@ -18,7 +18,7 @@ Message.o: Message.h Message.cpp
 Chat.o: Chat.h Chat.cpp
 	$(COMPILE) Chat.o Chat.cpp $(FLAGS)
 
-Chats.o: Chats.h Chats.cpp
+Chats.o: Chats.h Chats_functions.cpp Chats.cpp
 	$(COMPILE) Chats.o Chats.cpp $(FLAGS)
 
 TCP_server.o: TCP_server.h TCP_server.cpp

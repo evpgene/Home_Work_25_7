@@ -7,7 +7,7 @@ struct MYSQL_Config {
   char* user{(char*)("root")};
   char* passwd{(char*)("root")};
   char* db{NULL};
-  int port{NULL};
+  int port{0};
   char* unix_socket{NULL};
   unsigned long clientflag{0};
 };

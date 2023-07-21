@@ -35,7 +35,7 @@ friend bool operator==(const std::string& u1, const User& u2);
 friend bool operator!=(const std::string& u1, const User& u2);
 
 private:
-	std::size_t _id;
+	std::size_t _id{0};
 	std::string _login;
 	std::string _pass;
 };

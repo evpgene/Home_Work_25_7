@@ -3,10 +3,10 @@
 Server::Server() {}
 Server::~Server() {}
 
-std::shared_ptr<User> Server::retrieveUser(const std::string& str) {
+User_t Server::retrieveUser(const std::string& str) {
   bool nextIsLogin{false}, doneLogin{false}, nextIsPass{false}, donePass{false};
   std::string word;
-  std::shared_ptr<User> user = make_shared<User>(User());
+  User_t user = make_shared<User>(User());
   std::istringstream iss(str);
   while (iss >> word) {
     if (nextIsLogin) {
@@ -34,7 +34,7 @@ std::shared_ptr<User> Server::retrieveUser(const std::string& str) {
   return nullptr;
 }
 
-std::shared_ptr<Message> Server::retrieveMessage(const std::string& msg) {
+Message_t Server::retrieveMessage(const std::string& msg) {
   std::string isTime, isName, isMessage;
   std::size_t length{0};
   std::size_t pos_time = msg.find(key.timesend);
@@ -123,6 +123,6 @@ const std::string Server::getMessagesEnd() { return key.itMessagesEnd + key.sep;
 const std::string Server::getUsernamesString(const std::string& username) { return key.itUsernames + key.sep + username; }
 
 const std::string Server::getMessageString(const Message& message) {
-  return key.itMessages + ' ' + message.getTimeSend() + ' ' + message.getUserName() + ' ' +
-         message.getMessage();
+  return key.itMessages + ' ' + message.getTimeSend() + ' ' + message.getUserLogin() + ' ' +
+         message.getMessageText();
 };

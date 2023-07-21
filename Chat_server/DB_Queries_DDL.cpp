@@ -26,7 +26,7 @@ unsigned int DB_Queries_DDL::connectToMySQLserver_open(const MYSQL_Config& confi
     std::cout << "Connect to database successfull" << std::endl;
   }
 
-  mysql_set_character_set(mysql, "utf8");
+  mysql_set_character_set(mysql, "utf8mb4");
   // Смотрим изменилась ли кодировка на нужную, по умолчанию идёт latin1
   std::cout << "connection characterset: " << mysql_character_set_name(mysql)
             << std::endl;

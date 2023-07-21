@@ -43,11 +43,11 @@ std::string Message::getTimeSend() const
 {
 	return _timeSend;
 }
-std::string Message::getUserName() const
+std::string Message::getUserLogin() const
 {
 	return _userName;
 }
-std::string Message::getMessage() const
+std::string Message::getMessageText() const
 {
 	return _message;
 }

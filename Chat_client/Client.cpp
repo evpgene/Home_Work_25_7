@@ -52,8 +52,8 @@ const std::string Client::getExitString() {
 const std::string Client::getMessageString(const Message_t message) {
   return key.itMessage + key.sep + key.timesend + key.sep +
          message->getTimeSend() + key.sep + key.name + key.sep +
-         message->getUserName() + key.sep + key.mess + key.sep +
-         message->getMessage();
+         message->getUserLogin() + key.sep + key.mess + key.sep +
+         message->getMessageText();
 }
 
 const std::string Client::getRegistrationString(const User_t user) {

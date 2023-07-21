@@ -14,8 +14,8 @@ public:
 	void printMessage() const;
 
 	std::string getTimeSend() const;
-	std::string getUserName() const;
-	std::string getMessage() const;
+	std::string getUserLogin() const;
+	std::string getMessageText() const;
 
 	// friend std::string SaveRestor::saveMessage(Message& message);
 
