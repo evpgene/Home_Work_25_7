@@ -429,11 +429,12 @@ queue_message_t DB_Queries_DML::select_Messages_Mult_fc(
   // query.status.data = message_status;
   // query.limit.data = limit;
 
-    query.chat_id.data = 3;
+    query.chat_user_id_1.data = 5;
+    query.chat_user_id_2.data = 6;
   query.message_id_begin.data = 1;
-  query.message_id_end.data = 100;
+  query.message_id_end.data = 1;
   query.status.data = 1;
-  query.limit.data = 100;
+  query.limit.data = 2;
 
   /* Execute statement */
   no_errors &= execute<Select_Messages_Mult&>(arg_struct);

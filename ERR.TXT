@@ -1,6 +1,3 @@
-[1mChat_client/ReceivedData.h:6:52: [31mperformance:[39m Function parameter 'str_view' should be passed by const reference. [passedByValue][0m
-  ReceivedData(ReceivedType type, std::string_view str_view)
-                                                   ^
 [1mChat_client/TCP_client.cpp:3:13: [31mwarning:[39m Member variable 'TCP_client::socket_file_descriptor' is not initialized in the constructor. [uninitMemberVar][0m
 TCP_client::TCP_client(/* args */)
             ^
@@ -10,36 +7,291 @@ TCP_client::TCP_client(/* args */)
 [1mChat_client/TCP_client.cpp:3:13: [31mwarning:[39m Member variable 'TCP_client::message' is not initialized in the constructor. [uninitMemberVar][0m
 TCP_client::TCP_client(/* args */)
             ^
-[1mChat_server/Chat.cpp:61:40: [31mstyle:[39m Parameter 'ch2' can be declared with const [constParameter][0m
-bool operator!=(const Chat &ch1, Chat &ch2)
-                                       ^
-[1mChat_server/Chats.cpp:197:9: [31mstyle:[39m Condition 'currentUserPtr' is always true [knownConditionTrueFalse][0m
+[1mChat_server/Chats.cpp:199:9: [31mstyle:[39m Condition 'currentUserPtr' is always true [knownConditionTrueFalse][0m
     if (currentUserPtr) {
         ^
-[1mChat_server/Chats.cpp:237:9: [31mstyle:[39m Condition 'currentUserPtr' is always true [knownConditionTrueFalse][0m
+[1mChat_server/Chats.cpp:239:9: [31mstyle:[39m Condition 'currentUserPtr' is always true [knownConditionTrueFalse][0m
     if (currentUserPtr)  // послать сообщение
         ^
-[1mChat_server/ReceivedData.h:6:52: [31mperformance:[39m Function parameter 'str_view' should be passed by const reference. [passedByValue][0m
-  ReceivedData(ReceivedType type, std::string_view str_view)
-                                                   ^
-[1mChat_server/Chats.cpp:77:56: [31mstyle:[39m Consider using std::find_if algorithm instead of a raw loop. [useStlAlgorithm][0m
+[1mChat_server/Chats.cpp:78:56: [31mstyle:[39m Consider using std::find_if algorithm instead of a raw loop. [useStlAlgorithm][0m
     if (_user_ptr->getLogin() == user_ptr->getLogin()) {  // если пользователь найден
                                                        ^
-[1mChat_server/Chats.cpp:118:56: [31mstyle:[39m Consider using std::any_of algorithm instead of a raw loop. [useStlAlgorithm][0m
+[1mChat_server/Chats.cpp:120:56: [31mstyle:[39m Consider using std::any_of algorithm instead of a raw loop. [useStlAlgorithm][0m
     if (_user_ptr->getLogin() == user_ptr->getLogin()) {
                                                        ^
-[1mChat_server/Chats.cpp:129:45: [31mstyle:[39m Consider using std::find_if algorithm instead of a raw loop. [useStlAlgorithm][0m
+[1mChat_server/Chats.cpp:131:45: [31mstyle:[39m Consider using std::find_if algorithm instead of a raw loop. [useStlAlgorithm][0m
     if (_user_ptr->getLogin() == companion) {  // если компаньон найден
                                             ^
-[1mChat_server/Main.cpp:62:63: [31mwarning:[39m Either the condition 'companion' is redundant or there is possible null pointer dereference: companion. [nullPointerRedundantCheck][0m
-                         " с пользователем: " + companion->getLogin();
-                                                              ^
-[1mChat_server/Main.cpp:60:21: [2mnote:[0m Assuming that condition 'companion' is not redundant
-        if (user && companion) chat = chats.getActiveChat(user, companion);
-                    ^
-[1mChat_server/Main.cpp:62:63: [2mnote:[0m Null pointer dereference
-                         " с пользователем: " + companion->getLogin();
-                                                              ^
+[1mChat_server/DB_Queries_DDL.cpp:3:17: [31mwarning:[39m Member variable 'DB_Queries_DDL::mysql' is not initialized in the constructor. [uninitMemberVar][0m
+DB_Queries_DDL::DB_Queries_DDL() {}
+                ^
+[1mChat_server/DB_Queries_DDL.cpp:8:23: [31mstyle:[39m Variable 'ret_val' is assigned a value that is never used. [unreadVariable][0m
+  unsigned int ret_val{0};
+                      ^
+[1mChat_server/DB_Queries_DML_structures.h:33:3: [31mwarning:[39m Member variable 'ParamString::data' is not initialized in the constructor. [uninitMemberVar][0m
+  ParamString(MYSQL_BIND& bind) {
+  ^
+[1mChat_server/DB_Queries_DML.cpp:3:17: [31mwarning:[39m Member variable 'DB_Queries_DML::Insert_User_struct' is not initialized in the constructor. [uninitMemberVar][0m
+DB_Queries_DML::DB_Queries_DML() {}
+                ^
+[1mChat_server/DB_Queries_DML.cpp:3:17: [31mwarning:[39m Member variable 'DB_Queries_DML::Select_User_By_Id_struct' is not initialized in the constructor. [uninitMemberVar][0m
+DB_Queries_DML::DB_Queries_DML() {}
+                ^
+[1mChat_server/DB_Queries_DML.cpp:3:17: [31mwarning:[39m Member variable 'DB_Queries_DML::Select_User_By_Login_struct' is not initialized in the constructor. [uninitMemberVar][0m
+DB_Queries_DML::DB_Queries_DML() {}
+                ^
+[1mChat_server/DB_Queries_DML.cpp:3:17: [31mwarning:[39m Member variable 'DB_Queries_DML::Insert_Chat_struct' is not initialized in the constructor. [uninitMemberVar][0m
+DB_Queries_DML::DB_Queries_DML() {}
+                ^
+[1mChat_server/DB_Queries_DML.cpp:3:17: [31mwarning:[39m Member variable 'DB_Queries_DML::Select_Chat_By_Id_struct' is not initialized in the constructor. [uninitMemberVar][0m
+DB_Queries_DML::DB_Queries_DML() {}
+                ^
+[1mChat_server/DB_Queries_DML.cpp:3:17: [31mwarning:[39m Member variable 'DB_Queries_DML::Select_Chat_By_Name_struct' is not initialized in the constructor. [uninitMemberVar][0m
+DB_Queries_DML::DB_Queries_DML() {}
+                ^
+[1mChat_server/DB_Queries_DML.cpp:3:17: [31mwarning:[39m Member variable 'DB_Queries_DML::Insert_Chat_User_struct' is not initialized in the constructor. [uninitMemberVar][0m
+DB_Queries_DML::DB_Queries_DML() {}
+                ^
+[1mChat_server/DB_Queries_DML.cpp:3:17: [31mwarning:[39m Member variable 'DB_Queries_DML::Select_Chat_User_struct' is not initialized in the constructor. [uninitMemberVar][0m
+DB_Queries_DML::DB_Queries_DML() {}
+                ^
+[1mChat_server/DB_Queries_DML.cpp:3:17: [31mwarning:[39m Member variable 'DB_Queries_DML::Insert_Message_struct' is not initialized in the constructor. [uninitMemberVar][0m
+DB_Queries_DML::DB_Queries_DML() {}
+                ^
+[1mChat_server/DB_Queries_DML.cpp:3:17: [31mwarning:[39m Member variable 'DB_Queries_DML::Select_Message_struct' is not initialized in the constructor. [uninitMemberVar][0m
+DB_Queries_DML::DB_Queries_DML() {}
+                ^
+[1mChat_server/DB_Queries_DML.cpp:3:17: [31mwarning:[39m Member variable 'DB_Queries_DML::Select_Messages_Mult_struct' is not initialized in the constructor. [uninitMemberVar][0m
+DB_Queries_DML::DB_Queries_DML() {}
+                ^
+[1mChat_server/DB_Queries_DML.cpp:3:17: [31mwarning:[39m Member variable 'DB_Queries_DML::Update_Status_Delivered_struct' is not initialized in the constructor. [uninitMemberVar][0m
+DB_Queries_DML::DB_Queries_DML() {}
+                ^
+[1mChat_server/DB_Queries_DML.cpp:3:17: [31mwarning:[39m Member variable 'DB_Queries_DML::Update_Status_Read_struct' is not initialized in the constructor. [uninitMemberVar][0m
+DB_Queries_DML::DB_Queries_DML() {}
+                ^
+[1mChat_server/DB_Queries_DML_structures.h:13:3: [31mstyle:[39m Struct 'ParamUint' has a constructor with 1 argument that is not explicit. [noExplicitConstructor][0m
+  ParamUint(MYSQL_BIND& bind) {
+  ^
+[1mChat_server/DB_Queries_DML_structures.h:33:3: [31mstyle:[39m Struct 'ParamString' has a constructor with 1 argument that is not explicit. [noExplicitConstructor][0m
+  ParamString(MYSQL_BIND& bind) {
+  ^
+[1mChat_server/DB_Queries_DML_structures.h:52:3: [31mstyle:[39m Struct 'ParamDatetime' has a constructor with 1 argument that is not explicit. [noExplicitConstructor][0m
+  ParamDatetime(MYSQL_BIND& bind) {
+  ^
+[1mChat_server/DB_Queries_DML.h:106:23: [31mstyle:[39m Condition 'unsigned long==-1' is always false [knownConditionTrueFalse][0m
+    if (affected_rows == -1) {
+                      ^
+[1mChat_server/DB_Queries_DML.h:112:24: [31mstyle:[39m The comparison 'silent_level >= verify_affected_rows_silent_level' is always true because 'silent_level' and 'verify_affected_rows_silent_level' represent the same value. [knownConditionTrueFalse][0m
+      if (silent_level >= verify_affected_rows_silent_level) {
+                       ^
+[1mChat_server/DB_Queries_DML.h:26:24: [2mnote:[0m 'silent_level' is assigned value '1' here.
+const int silent_level{1};
+                       ^
+[1mChat_server/DB_Queries_DML.h:27:45: [2mnote:[0m 'verify_affected_rows_silent_level' is assigned value '1' here.
+const int verify_affected_rows_silent_level{1};
+                                            ^
+[1mChat_server/DB_Queries_DML.h:112:24: [2mnote:[0m The comparison 'silent_level >= verify_affected_rows_silent_level' is always true because 'silent_level' and 'verify_affected_rows_silent_level' represent the same value.
+      if (silent_level >= verify_affected_rows_silent_level) {
+                       ^
+[1mChat_server/DB_Queries_DML.h:138:24: [31mstyle:[39m The comparison 'silent_level >= verify_param_count_silent_level' is always true because 'silent_level' and 'verify_param_count_silent_level' represent the same value. [knownConditionTrueFalse][0m
+      if (silent_level >= verify_param_count_silent_level) {
+                       ^
+[1mChat_server/DB_Queries_DML.h:26:24: [2mnote:[0m 'silent_level' is assigned value '1' here.
+const int silent_level{1};
+                       ^
+[1mChat_server/DB_Queries_DML.h:28:43: [2mnote:[0m 'verify_param_count_silent_level' is assigned value '1' here.
+const int verify_param_count_silent_level{1};
+                                          ^
+[1mChat_server/DB_Queries_DML.h:138:24: [2mnote:[0m The comparison 'silent_level >= verify_param_count_silent_level' is always true because 'silent_level' and 'verify_param_count_silent_level' represent the same value.
+      if (silent_level >= verify_param_count_silent_level) {
+                       ^
+[1mChat_server/DB_Queries_DML.h:152:24: [31mstyle:[39m The comparison 'silent_level >= verify_field_count_silent_level' is always true because 'silent_level' and 'verify_field_count_silent_level' represent the same value. [knownConditionTrueFalse][0m
+      if (silent_level >= verify_field_count_silent_level) {
+                       ^
+[1mChat_server/DB_Queries_DML.h:26:24: [2mnote:[0m 'silent_level' is assigned value '1' here.
+const int silent_level{1};
+                       ^
+[1mChat_server/DB_Queries_DML.h:29:43: [2mnote:[0m 'verify_field_count_silent_level' is assigned value '1' here.
+const int verify_field_count_silent_level{1};
+                                          ^
+[1mChat_server/DB_Queries_DML.h:152:24: [2mnote:[0m The comparison 'silent_level >= verify_field_count_silent_level' is always true because 'silent_level' and 'verify_field_count_silent_level' represent the same value.
+      if (silent_level >= verify_field_count_silent_level) {
+                       ^
+[1mChat_server/DB_Queries_DML.h:180:24: [31mstyle:[39m The comparison 'silent_level >= make_bind_params_silent_level' is always true because 'silent_level' and 'make_bind_params_silent_level' represent the same value. [knownConditionTrueFalse][0m
+      if (silent_level >= make_bind_params_silent_level) {
+                       ^
+[1mChat_server/DB_Queries_DML.h:26:24: [2mnote:[0m 'silent_level' is assigned value '1' here.
+const int silent_level{1};
+                       ^
+[1mChat_server/DB_Queries_DML.h:30:41: [2mnote:[0m 'make_bind_params_silent_level' is assigned value '1' here.
+const int make_bind_params_silent_level{1};
+                                        ^
+[1mChat_server/DB_Queries_DML.h:180:24: [2mnote:[0m The comparison 'silent_level >= make_bind_params_silent_level' is always true because 'silent_level' and 'make_bind_params_silent_level' represent the same value.
+      if (silent_level >= make_bind_params_silent_level) {
+                       ^
+[1mChat_server/DB_Queries_DML.h:193:24: [31mstyle:[39m The comparison 'silent_level >= execute_stmt_silent_level' is always true because 'silent_level' and 'execute_stmt_silent_level' represent the same value. [knownConditionTrueFalse][0m
+      if (silent_level >= execute_stmt_silent_level) {
+                       ^
+[1mChat_server/DB_Queries_DML.h:26:24: [2mnote:[0m 'silent_level' is assigned value '1' here.
+const int silent_level{1};
+                       ^
+[1mChat_server/DB_Queries_DML.h:34:37: [2mnote:[0m 'execute_stmt_silent_level' is assigned value '1' here.
+const int execute_stmt_silent_level{1};
+                                    ^
+[1mChat_server/DB_Queries_DML.h:193:24: [2mnote:[0m The comparison 'silent_level >= execute_stmt_silent_level' is always true because 'silent_level' and 'execute_stmt_silent_level' represent the same value.
+      if (silent_level >= execute_stmt_silent_level) {
+                       ^
+[1mChat_server/DB_Queries_DML.h:206:24: [31mstyle:[39m The comparison 'silent_level >= make_bind_results_silent_level' is always true because 'silent_level' and 'make_bind_results_silent_level' represent the same value. [knownConditionTrueFalse][0m
+      if (silent_level >= make_bind_results_silent_level) {
+                       ^
+[1mChat_server/DB_Queries_DML.h:26:24: [2mnote:[0m 'silent_level' is assigned value '1' here.
+const int silent_level{1};
+                       ^
+[1mChat_server/DB_Queries_DML.h:31:42: [2mnote:[0m 'make_bind_results_silent_level' is assigned value '1' here.
+const int make_bind_results_silent_level{1};
+                                         ^
+[1mChat_server/DB_Queries_DML.h:206:24: [2mnote:[0m The comparison 'silent_level >= make_bind_results_silent_level' is always true because 'silent_level' and 'make_bind_results_silent_level' represent the same value.
+      if (silent_level >= make_bind_results_silent_level) {
+                       ^
+[1mChat_server/DB_Queries_DML.h:219:24: [31mstyle:[39m The comparison 'silent_level >= mysql_stmt_free_result_silent_level' is always true because 'silent_level' and 'mysql_stmt_free_result_silent_level' represent the same value. [knownConditionTrueFalse][0m
+      if (silent_level >= mysql_stmt_free_result_silent_level) {
+                       ^
+[1mChat_server/DB_Queries_DML.h:26:24: [2mnote:[0m 'silent_level' is assigned value '1' here.
+const int silent_level{1};
+                       ^
+[1mChat_server/DB_Queries_DML.h:32:47: [2mnote:[0m 'mysql_stmt_free_result_silent_level' is assigned value '1' here.
+const int mysql_stmt_free_result_silent_level{1};
+                                              ^
+[1mChat_server/DB_Queries_DML.h:219:24: [2mnote:[0m The comparison 'silent_level >= mysql_stmt_free_result_silent_level' is always true because 'silent_level' and 'mysql_stmt_free_result_silent_level' represent the same value.
+      if (silent_level >= mysql_stmt_free_result_silent_level) {
+                       ^
+[1mChat_server/DB_Queries_DML.h:234:24: [31mstyle:[39m The comparison 'silent_level >= close_stmt_silent_level' is always true because 'silent_level' and 'close_stmt_silent_level' represent the same value. [knownConditionTrueFalse][0m
+      if (silent_level >= close_stmt_silent_level) {
+                       ^
+[1mChat_server/DB_Queries_DML.h:26:24: [2mnote:[0m 'silent_level' is assigned value '1' here.
+const int silent_level{1};
+                       ^
+[1mChat_server/DB_Queries_DML.h:33:35: [2mnote:[0m 'close_stmt_silent_level' is assigned value '1' here.
+const int close_stmt_silent_level{1};
+                                  ^
+[1mChat_server/DB_Queries_DML.h:234:24: [2mnote:[0m The comparison 'silent_level >= close_stmt_silent_level' is always true because 'silent_level' and 'close_stmt_silent_level' represent the same value.
+      if (silent_level >= close_stmt_silent_level) {
+                       ^
+[1mChat_server/DB_Queries_DML.h:240:7: [31mstyle:[39m Statements following return, break, continue, goto or throw will never be executed. [unreachableCode][0m
+      if (result_metadata) mysql_free_result(result_metadata);
+      ^
+[1mChat_server/DB_Queries_DML.h:279:11: [31mstyle:[39m The scope of the variable 'result' can be reduced. [variableScope][0m
+    auto& result = arg_struct.Result_struct;
+          ^
+[1mChat_server/DB_Queries_DML.h:104:46: [31mperformance:[39m Function parameter 'headline' should be passed by const reference. [passedByValue][0m
+                                 std::string headline) {
+                                             ^
+[1mChat_server/DB_Queries_DML.h:123:45: [31mperformance:[39m Function parameter 'headline' should be passed by const reference. [passedByValue][0m
+                                std::string headline) {
+                                            ^
+[1mChat_server/DB_Queries_DML.h:135:44: [31mperformance:[39m Function parameter 'headline' should be passed by const reference. [passedByValue][0m
+                               std::string headline) {
+                                           ^
+[1mChat_server/DB_Queries_DML.h:149:44: [31mperformance:[39m Function parameter 'headline' should be passed by const reference. [passedByValue][0m
+                               std::string headline) {
+                                           ^
+[1mChat_server/DB_Queries_DML.h:178:41: [31mperformance:[39m Function parameter 'headline' should be passed by const reference. [passedByValue][0m
+                            std::string headline) {
+                                        ^
+[1mChat_server/DB_Queries_DML.h:191:56: [31mperformance:[39m Function parameter 'headline' should be passed by const reference. [passedByValue][0m
+  no_errors execute_stmt(MYSQL_STMT* stmt, std::string headline) {
+                                                       ^
+[1mChat_server/DB_Queries_DML.h:204:38: [31mperformance:[39m Function parameter 'headline' should be passed by const reference. [passedByValue][0m
+                         std::string headline) {
+                                     ^
+[1mChat_server/DB_Queries_DML.h:217:60: [31mperformance:[39m Function parameter 'headline' should be passed by const reference. [passedByValue][0m
+  no_errors free_result_stmt(MYSQL_STMT* stmt, std::string headline) {
+                                                           ^
+[1mChat_server/DB_Queries_DML.h:232:64: [31mperformance:[39m Function parameter 'headline' should be passed by const reference. [passedByValue][0m
+                       MYSQL_RES* result_metadata, std::string headline) {
+                                                               ^
+[1mChat_server/DB_Queries_DML.h:249:11: [31mstyle:[39m Variable 'query' can be declared with const [constVariable][0m
+    auto& query = arg_struct.Query_struct;
+          ^
+[1mChat_server/DB_Queries_DML.h:250:11: [31mstyle:[39m Variable 'result' can be declared with const [constVariable][0m
+    auto& result = arg_struct.Result_struct;
+          ^
+[1mChat_server/DB_Queries_DML.h:279:11: [31mstyle:[39m Variable 'result' can be declared with const [constVariable][0m
+    auto& result = arg_struct.Result_struct;
+          ^
+[1mChat_server/DB_Queries_DML.cpp:46:9: [31mstyle:[39m Variable 'result' can be declared with const [constVariable][0m
+  auto& result = arg_struct.Result_struct;
+        ^
+[1mChat_server/DB_Queries_DML.cpp:140:9: [31mstyle:[39m Variable 'result' can be declared with const [constVariable][0m
+  auto& result = arg_struct.Result_struct;
+        ^
+[1mChat_server/DB_Queries_DML.cpp:233:9: [31mstyle:[39m Variable 'result' can be declared with const [constVariable][0m
+  auto& result = arg_struct.Result_struct;
+        ^
+[1mChat_server/DB_Queries_DML.cpp:291:9: [31mstyle:[39m Variable 'result' can be declared with const [constVariable][0m
+  auto& result = arg_struct.Result_struct;
+        ^
+[1mChat_server/DB_Queries_DML.cpp:314:9: [31mstyle:[39m Variable 'timesend' can be declared with const [constVariable][0m
+  auto& timesend = arg_struct.Result_struct.timesend.data;
+        ^
+[1mChat_server/DB_Queries_DML.cpp:357:9: [31mstyle:[39m Variable 'timesend' can be declared with const [constVariable][0m
+  auto& timesend = arg_struct.Result_struct.timesend.data;
+        ^
+[1mChat_server/DB_Queries_DML.cpp:405:9: [31mstyle:[39m Variable 'result' can be declared with const [constVariable][0m
+  auto& result = arg_struct.Result_struct;
+        ^
+[1mChat_server/DB_Queries_DML.cpp:425:9: [31mstyle:[39m Variable 'result' can be declared with const [constVariable][0m
+  auto& result = arg_struct.Result_struct;
+        ^
+[1mChat_server/DB_Queries_DML.cpp:47:22: [31mstyle:[39m Variable 'no_errors' is assigned a value that is never used. [unreadVariable][0m
+  no_errors no_errors{true};
+                     ^
+[1mChat_server/DB_Queries_DML.cpp:72:22: [31mstyle:[39m Variable 'no_errors' is assigned a value that is never used. [unreadVariable][0m
+  no_errors no_errors{true};
+                     ^
+[1mChat_server/DB_Queries_DML.cpp:106:22: [31mstyle:[39m Variable 'no_errors' is assigned a value that is never used. [unreadVariable][0m
+  no_errors no_errors{true};
+                     ^
+[1mChat_server/DB_Queries_DML.cpp:141:22: [31mstyle:[39m Variable 'no_errors' is assigned a value that is never used. [unreadVariable][0m
+  no_errors no_errors{true};
+                     ^
+[1mChat_server/DB_Queries_DML.cpp:164:22: [31mstyle:[39m Variable 'no_errors' is assigned a value that is never used. [unreadVariable][0m
+  no_errors no_errors{true};
+                     ^
+[1mChat_server/DB_Queries_DML.cpp:197:22: [31mstyle:[39m Variable 'no_errors' is assigned a value that is never used. [unreadVariable][0m
+  no_errors no_errors{true};
+                     ^
+[1mChat_server/DB_Queries_DML.cpp:234:22: [31mstyle:[39m Variable 'no_errors' is assigned a value that is never used. [unreadVariable][0m
+  no_errors no_errors{true};
+                     ^
+[1mChat_server/DB_Queries_DML.cpp:256:22: [31mstyle:[39m Variable 'no_errors' is assigned a value that is never used. [unreadVariable][0m
+  no_errors no_errors{true};
+                     ^
+[1mChat_server/DB_Queries_DML.cpp:292:22: [31mstyle:[39m Variable 'no_errors' is assigned a value that is never used. [unreadVariable][0m
+  no_errors no_errors{true};
+                     ^
+[1mChat_server/DB_Queries_DML.cpp:315:22: [31mstyle:[39m Variable 'no_errors' is assigned a value that is never used. [unreadVariable][0m
+  no_errors no_errors{true};
+                     ^
+[1mChat_server/DB_Queries_DML.cpp:358:22: [31mstyle:[39m Variable 'no_errors' is assigned a value that is never used. [unreadVariable][0m
+  no_errors no_errors{true};
+                     ^
+[1mChat_server/DB_Queries_DML.cpp:406:22: [31mstyle:[39m Variable 'no_errors' is assigned a value that is never used. [unreadVariable][0m
+  no_errors no_errors{true};
+                     ^
+[1mChat_server/DB_Queries_DML.cpp:426:22: [31mstyle:[39m Variable 'no_errors' is assigned a value that is never used. [unreadVariable][0m
+  no_errors no_errors{true};
+                     ^
+[1mChat_server/DB_Queries_DML.cpp:441:22: [31mstyle:[39m Variable 'no_errors' is assigned a value that is never used. [unreadVariable][0m
+  no_errors no_errors{true};
+                     ^
+[1mChat_server/DB_Queries_DML.cpp:463:22: [31mstyle:[39m Variable 'no_errors' is assigned a value that is never used. [unreadVariable][0m
+  no_errors no_errors{true};
+                     ^
+[1mChat_server/Main.cpp:27:16: [31mstyle:[39m Unused variable: users [unusedVariable][0m
+  queue_user_t users;
+               ^
 [1mChat_server/SaveRestor.cpp:174:8: [31mstyle:[39m Redundant initialization for 'pos'. The initialized value is overwritten before it is read. [redundantInitialization][0m
    pos = line.find(timesend);
        ^
@@ -94,25 +346,64 @@ class Message
 [1mChat_client/User.h:11:1: [31merror:[39m The one definition rule is violated, different classes/structs have the same name 'User' [ctuOneDefinitionRuleViolation][0m
 class User
 ^
-[1mChat_server/User.h:11:1: [2mnote:[0m The one definition rule is violated, different classes/structs have the same name 'User'
+[1mChat_server/User.h:10:1: [2mnote:[0m The one definition rule is violated, different classes/structs have the same name 'User'
 class User
 ^
 [1mChat_client/User.h:11:1: [2mnote:[0m The one definition rule is violated, different classes/structs have the same name 'User'
 class User
 ^
-[1mChat_client/TCP_client.cpp:77:0: [31mstyle:[39m The function 'closeConnection' is never used. [unusedFunction][0m
+[1mChat_server/DB_Queries_DML.cpp:462:0: [31mstyle:[39m The function 'closeAll' is never used. [unusedFunction][0m
+
+^
+[1mChat_client/TCP_client.cpp:79:0: [31mstyle:[39m The function 'closeConnection' is never used. [unusedFunction][0m
+
+^
+[1mChat_server/DB_Queries_DDL.cpp:78:0: [31mstyle:[39m The function 'connectToMySQLserver_close' is never used. [unusedFunction][0m
+
+^
+[1mChat_server/DB_Queries_DML.cpp:137:0: [31mstyle:[39m The function 'insertChat' is never used. [unusedFunction][0m
+
+^
+[1mChat_server/DB_Queries_DML.cpp:229:0: [31mstyle:[39m The function 'insertChatUser' is never used. [unusedFunction][0m
+
+^
+[1mChat_server/DB_Queries_DML.cpp:287:0: [31mstyle:[39m The function 'insertMessage' is never used. [unusedFunction][0m
 
 ^
 [1mChat_server/Chats.cpp:5:0: [31mstyle:[39m The function 'mainmenu' is never used. [unusedFunction][0m
 
 ^
-[1mChat_server/Chats.cpp:354:0: [31mstyle:[39m The function 'remoteCycle' is never used. [unusedFunction][0m
+[1mChat_server/Chats.cpp:356:0: [31mstyle:[39m The function 'remoteCycle' is never used. [unusedFunction][0m
 
 ^
-[1mChat_server/Chats.cpp:271:0: [31mstyle:[39m The function 'restordata' is never used. [unusedFunction][0m
+[1mChat_server/Chats.cpp:273:0: [31mstyle:[39m The function 'restordata' is never used. [unusedFunction][0m
 
 ^
-[1mChat_server/Chats.cpp:279:0: [31mstyle:[39m The function 'savedata' is never used. [unusedFunction][0m
+[1mChat_server/Chats.cpp:281:0: [31mstyle:[39m The function 'savedata' is never used. [unusedFunction][0m
+
+^
+[1mChat_server/DB_Queries_DML.cpp:160:0: [31mstyle:[39m The function 'selectChatById' is never used. [unusedFunction][0m
+
+^
+[1mChat_server/DB_Queries_DML.cpp:193:0: [31mstyle:[39m The function 'selectChatByName' is never used. [unusedFunction][0m
+
+^
+[1mChat_server/DB_Queries_DML.cpp:251:0: [31mstyle:[39m The function 'selectChatUser' is never used. [unusedFunction][0m
+
+^
+[1mChat_server/DB_Queries_DML.cpp:309:0: [31mstyle:[39m The function 'selectMessage' is never used. [unusedFunction][0m
+
+^
+[1mChat_server/DB_Queries_DML.cpp:350:0: [31mstyle:[39m The function 'select_Messages_Mult' is never used. [unusedFunction][0m
+
+^
+[1mChat_server/DB_Queries_DML.cpp:68:0: [31mstyle:[39m The function 'select_User_By_Id_fc' is never used. [unusedFunction][0m
+
+^
+[1mChat_server/DB_Queries_DML.cpp:400:0: [31mstyle:[39m The function 'updateStatusDelivered' is never used. [unusedFunction][0m
+
+^
+[1mChat_server/DB_Queries_DML.cpp:420:0: [31mstyle:[39m The function 'updateStatusRead' is never used. [unusedFunction][0m
 
 ^
 [1mnofile:0:0: [31minformation:[39m Cppcheck cannot find all the include files (use --check-config for details) [missingInclude][0m
