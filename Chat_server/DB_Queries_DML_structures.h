@@ -54,7 +54,7 @@ struct ParamDatetime {
   unsigned long length;  // Current buffer length for output or input
   //                           // data (for character and binary C data)
   bool is_null{false};  // For input/output set inform that the data is NULL
-  bool error{false};     // For output (received), set indicate Truncation
+  bool error{true};     // For output (received), set indicate Truncation
   ParamDatetime() = delete;
   ParamDatetime(MYSQL_BIND& bind) {
     bind.buffer_type = MYSQL_TYPE_TIMESTAMP; // zdec' MYSQL_TYPE_TIMESTAMP blin!!! bliiiinnnn!!! long a ne int! nedelya prosrana!
@@ -306,28 +306,29 @@ struct Select_Messages_Mult {
   MYSQL_RES* result_metadata{nullptr};
   const std::string headline{"select_messages_mult_query "};
   /* chat_id, user_id , message_id , timesend, user_login , message , status */
-  // const std::string query{"SELECT message_id, message  FROM message_view WHERE chat_id = ? AND message_id BETWEEN ? AND ? AND status = ? LIMIT ?"};
-  const std::string query{"SELECT id, chat_user_id, dt, message, status FROM messages  WHERE chat_user_id = ? OR chat_user_id = ? AND id BETWEEN ? AND ? AND status = ? ORDER BY dt ASC LIMIT ?"};
+  const std::string query{"SELECT message_id, user_login, message, timesend  FROM message_view WHERE chat_id = ? AND status = ? ORDER BY timesend"};
+  // const std::string query{"SELECT id, chat_user_id, dt, message, status FROM messages  WHERE chat_user_id = ? OR chat_user_id = ? AND id BETWEEN ? AND ? AND status = ? ORDER BY dt ASC LIMIT ?"};
+  //const std::string query{"SELECT message FROM messages  WHERE chat_user_id = ? OR chat_user_id = ?"};
 
 
   struct query {
-    const int param_count{6};  // Number of prepared parameters expected
-    MYSQL_BIND bind[6];
+    const int param_count{2};  // Number of prepared parameters expected
+    MYSQL_BIND bind[2];
     ParamUint chat_user_id_1 = ParamUint(bind[0]);  // First parameter
-    ParamUint chat_user_id_2 = ParamUint(bind[1]);  // Second parameter
-    ParamUint message_id_begin = ParamUint(bind[2]);  // Third parameter
-    ParamUint message_id_end = ParamUint(bind[3]);  // 4 parameter
-    ParamUint status = ParamUint(bind[4]);  // 5 parameter
-    ParamUint limit = ParamUint(bind[5]); // 6 parameter
+    // ParamUint chat_user_id_2 = ParamUint(bind[1]);  // Second parameter
+    // ParamUint message_id_begin = ParamUint(bind[2]);  // Third parameter
+    // ParamUint message_id_end = ParamUint(bind[3]);  // 4 parameter
+    ParamUint status = ParamUint(bind[1]);  // 5 parameter
+    // ParamUint limit = ParamUint(bind[5]); // 6 parameter
   } Query_struct;
   struct result {
-    const int param_count{5};  // Number of result filds expected
-    MYSQL_BIND bind[5];
+    const int param_count{4};  // Number of result filds expected
+    MYSQL_BIND bind[4];
     ParamUint id = ParamUint(bind[0]);  // First parameter
-    ParamUint chat_user_id = ParamUint(bind[1]);  // Second parameter
-    ParamDatetime dt = ParamDatetime(bind[2]);  // third parameter
-    ParamString message = ParamString(bind[3]);  // 4 parameter
-    ParamUint status = ParamUint(bind[4]);  // 5 parameter
+    ParamString user_login = ParamString(bind[1]);  // Second parameter
+    ParamDatetime timesend = ParamDatetime(bind[3]);  // third parameter
+    ParamString message = ParamString(bind[2]);  // 4 parameter
+    // ParamUint status = ParamUint(bind[4]);  // 5 parameter
     int column_count;
     int row_count;
   } Result_struct;

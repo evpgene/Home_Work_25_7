@@ -370,7 +370,7 @@ class DB_Queries_DML {
 
           for (size_t i = 0; i < stmt_field_count; i++)
           {
-            std::cout << " name: " << stmt_field_list[i].name << " type: " << stmt_field_list[i].type << std::endl;
+            std::cout << " field " << i << ". " << stmt_field_list[i].name << " type: " << stmt_field_list[i].type << std::endl;
           }
 
     }

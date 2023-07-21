@@ -419,7 +419,7 @@ queue_message_t DB_Queries_DML::select_Messages_Mult_fc(
   Select_Messages_Mult& arg_struct = Select_Messages_Mult_struct;
   auto& query = arg_struct.Query_struct;
   auto& result = arg_struct.Result_struct;
-  //const auto& timesend = arg_struct.Result_struct.timesend.data;
+  auto& timesend = arg_struct.Result_struct.timesend.data;
   no_errors no_errors{true};
 
   /* Prepare data for execution */
@@ -429,12 +429,12 @@ queue_message_t DB_Queries_DML::select_Messages_Mult_fc(
   // query.status.data = message_status;
   // query.limit.data = limit;
 
-    query.chat_user_id_1.data = 5;
-    query.chat_user_id_2.data = 6;
-  query.message_id_begin.data = 1;
-  query.message_id_end.data = 1;
+    query.chat_user_id_1.data = 3;
+    //query.chat_user_id_2.data = 6;
+  // query.message_id_begin.data = 1;
+  // query.message_id_end.data = 2;
   query.status.data = 1;
-  query.limit.data = 2;
+  // query.limit.data = 2;
 
   /* Execute statement */
   no_errors &= execute<Select_Messages_Mult&>(arg_struct);
@@ -453,11 +453,11 @@ queue_message_t DB_Queries_DML::select_Messages_Mult_fc(
     if (status == 1 || status == MYSQL_NO_DATA) break;
     result.row_count++;
 
-    queue->emplace<Message>(Message(/* (std::to_string(timesend.hour) + ':' + std::to_string(timesend.minute) +
+    queue->emplace<Message>(Message((std::to_string(timesend.hour) + ':' + std::to_string(timesend.minute) +
          ':' + std::to_string(timesend.second) + ' ' +
          std::to_string(timesend.day) + '-' + std::to_string(timesend.month) +
-         '-' + std::to_string(timesend.year)) */"--","--",result.message.data/* ,
-        result.user_login.data, result.message.data */));
+         '-' + std::to_string(timesend.year)) ,
+        result.user_login.data, result.message.data ));
   }
   no_errors &= (status != 1);
 
