@@ -54,5 +54,5 @@ std::string Message::getMessageText() const
 
 void Message::printMessage() const
 {
-	std::cout << _timeSend << _userName << ": " << _message << std::endl;
+	std::cout << _timeSend << "   "<< _userName << ": " << _message << std::endl;
 }

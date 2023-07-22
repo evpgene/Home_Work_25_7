@@ -169,8 +169,7 @@ no_errors Chats::printAllMessages(const Chat_t chat) {
 #endif
 
   queue_message_t messages = db_queries_dml.select_Messages_Mult_fc(
-      chat_id, 1, /* sizeof(unsigned long int) */(unsigned long)(-1), 1,
-      /* sizeof(unsigned long int) */(unsigned long)(-1));
+      chat_id, 1);
   if (!messages) {
     std::cout << "Нет сообщений! " << std::endl;
     return no_errors(false);

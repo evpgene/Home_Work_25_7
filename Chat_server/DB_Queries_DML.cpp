@@ -1,5 +1,6 @@
 #include "DB_Queries_DML.h"
 
+
 DB_Queries_DML::DB_Queries_DML() {}
 
 DB_Queries_DML::~DB_Queries_DML() {}
@@ -388,7 +389,9 @@ Message_t DB_Queries_DML::select_Message_fc(const size_t chat_id,
 
   // Fetch all rows
   result.row_count = 0;
-  std::cout << arg_struct.headline << " Fetching results ... " << std::endl;
+#if _DEBUG
+  std::cout << arg_struct.headline << "Fetching results ... " << std::endl;
+#endif
   int status;
   while (true) {
     status = mysql_stmt_fetch(arg_struct.stmt);
@@ -403,19 +406,19 @@ Message_t DB_Queries_DML::select_Message_fc(const size_t chat_id,
   // Free result
   no_errors &= free_result_stmt(arg_struct.stmt, arg_struct.headline);
 
+  std::string date_string =
+      (std::to_string(timesend.year) + '-' + std::to_string(timesend.month) +
+       '-' + std::to_string(timesend.day) + " " +
+       std::to_string(timesend.hour) + ':' + std::to_string(timesend.minute) +
+       ':' + std::to_string(timesend.second));
+
   if (!no_errors) return 0;
-  return make_shared<Message>(Message(
-      std::to_string(timesend.hour) + ':' + std::to_string(timesend.minute) +
-          ':' + std::to_string(timesend.second) + ' ' +
-          std::to_string(timesend.day) + '-' + std::to_string(timesend.month) +
-          '-' + std::to_string(timesend.year),
-      result.login.data, result.message.data));
+  return make_shared<Message>(
+      Message(date_string, result.login.data, result.message.data));
 }
 
 queue_message_t DB_Queries_DML::select_Messages_Mult_fc(
-    const size_t chat_id, const size_t message_id_begin,
-    const size_t message_id_end, const size_t message_status,
-    const size_t limit) {
+    const size_t chat_id, const size_t message_status) {
   Select_Messages_Mult& arg_struct = Select_Messages_Mult_struct;
   auto& query = arg_struct.Query_struct;
   auto& result = arg_struct.Result_struct;
@@ -423,18 +426,8 @@ queue_message_t DB_Queries_DML::select_Messages_Mult_fc(
   no_errors no_errors{true};
 
   /* Prepare data for execution */
-  // query.chat_id.data = chat_id;
-  // query.message_id_begin.data = message_id_begin;
-  // query.message_id_end.data = message_id_end;
-  // query.status.data = message_status;
-  // query.limit.data = limit;
-
-    query.chat_user_id_1.data = 3;
-    //query.chat_user_id_2.data = 6;
-  // query.message_id_begin.data = 1;
-  // query.message_id_end.data = 2;
-  query.status.data = 1;
-  // query.limit.data = 2;
+  query.chat_id.data = chat_id;
+  query.status.data = message_status;
 
   /* Execute statement */
   no_errors &= execute<Select_Messages_Mult&>(arg_struct);
@@ -453,10 +446,11 @@ queue_message_t DB_Queries_DML::select_Messages_Mult_fc(
     if (status == 1 || status == MYSQL_NO_DATA) break;
     result.row_count++;
 
-    queue->emplace<Message>(Message((std::to_string(timesend.hour) + ':' + std::to_string(timesend.minute) +
-         ':' + std::to_string(timesend.second) + ' ' +
-         std::to_string(timesend.day) + '-' + std::to_string(timesend.month) +
-         '-' + std::to_string(timesend.year)) ,
+    std::string date_string = (std::to_string(timesend.year) + '-'+ std::to_string(timesend.month) + '-' +
+         std::to_string(timesend.day) + " " + std::to_string(timesend.hour) + ':' + std::to_string(timesend.minute) +
+         ':' + std::to_string(timesend.second));
+
+    queue->emplace<Message>(Message( date_string,
         result.user_login.data, result.message.data ));
   }
   no_errors &= (status != 1);
