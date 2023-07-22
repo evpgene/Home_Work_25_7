@@ -3,19 +3,22 @@
 
 void Chats::prepare(void) {
   //DB_Queries_DDL db_queries_ddl;
-  MYSQL_Config mysqlconfig;
-  mysqlconfig.passwd = (char*)("Root123_Root123");
-  db_queries_ddl.connectToMySQLserver_open(mysqlconfig);
+  MYSQL_Config mysqlconfig_ddl;
+  mysqlconfig_ddl.passwd = (char*)("Root123_Root123");
+  db_queries_ddl.connectToMySQLserver_open(mysqlconfig_ddl);
   db_queries_ddl.createDataBase();
+  db_queries_ddl.connectToMySQLserver_close();
 
   //DB_Queries_DML db_queries_dml;
-  db_queries_dml.connectDB_open();
+   MYSQL_Config mysqlconfig_dml = mysqlconfig_ddl;
+   mysqlconfig_dml.db = "chat_db";
+  db_queries_dml.connectDB_open(mysqlconfig_dml);
   db_queries_dml.prepareAll();
 }
 
 void Chats::shutdown(void) {
   db_queries_dml.closeAll();
-  db_queries_ddl.connectToMySQLserver_close();
+  //db_queries_ddl.connectToMySQLserver_close();
 }
 
 void Chats::mainmenu() {

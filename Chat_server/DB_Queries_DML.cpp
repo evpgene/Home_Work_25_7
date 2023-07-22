@@ -1,37 +1,38 @@
-#include "DB_Queries_DML.h"
+
+#include "DB_Queries_DML_utilities.cpp"
 
 
 DB_Queries_DML::DB_Queries_DML() {}
 
 DB_Queries_DML::~DB_Queries_DML() {}
 
-no_errors DB_Queries_DML::connectDB_open(void) {
+no_errors DB_Queries_DML::connectDB_open(const MYSQL_Config& config) {
+  unsigned int ret_val{0};
   // Получаем дескриптор соединения
-  mysql_init(mysql);
-  if (mysql == nullptr) {
+  if(!(mysql = mysql_init(mysql))) {
     // Если дескриптор не получен — выводим сообщение об ошибке
     std::cout << "Error: can't create MySQL-descriptor" << std::endl;
-    return false;
-  }
+  };
 
   // Подключаемся к серверу
-  if (!mysql_real_connect(mysql, "localhost", "root", "Root123_Root123",
-                          "chat_db", 0, NULL, 0)) {
+  if (!(mysql = mysql_real_connect(mysql, config.host, config.user, config.passwd,
+                          config.db, config.port, config.unix_socket,
+                          config.clientflag))) {
     // Если нет возможности установить соединение с БД выводим сообщение об
     // ошибке
     std::cout << "Error: can't connect to database " << mysql_error(mysql)
               << std::endl;
-    return false;
+    return mysql_errno(mysql);
   } else {
     // Если соединение успешно установлено выводим фразу — "Success!"
-    std::cout << "Success!" << std::endl;
-    return true;
+    std::cout << "Connect to database successfull" << std::endl;
   }
 
-  mysql_set_character_set(mysql, "utf8");
+  mysql_set_character_set(mysql, "utf8mb4");
   // Смотрим изменилась ли кодировка на нужную, по умолчанию идёт latin1
   std::cout << "connection characterset: " << mysql_character_set_name(mysql)
             << std::endl;
+  return mysql_errno(mysql);;
 }
 
 no_errors DB_Queries_DML::connectDB_close(void) {
@@ -41,7 +42,7 @@ no_errors DB_Queries_DML::connectDB_close(void) {
 }
 
 // V
-insert_id DB_Queries_DML::insert_User_fc(const User_t user) {
+insert_id_t DB_Queries_DML::insert_User_fc(const User_t user) {
   Insert_User& arg_struct = Insert_User_struct;
   auto& query = arg_struct.Query_struct;
   auto& result = arg_struct.Result_struct;
@@ -179,7 +180,7 @@ queue_user_t DB_Queries_DML::select_Users_All_fc(void) {
 }
 
 // V
-insert_id DB_Queries_DML::insert_Chat_fc(const std::string chatname) {
+insert_id_t DB_Queries_DML::insert_Chat_fc(const std::string chatname) {
   Insert_Chat& arg_struct = Insert_Chat_struct;
   auto& query = arg_struct.Query_struct;
   auto& result = arg_struct.Result_struct;
@@ -282,7 +283,7 @@ Chat_t DB_Queries_DML::select_Chat_By_Name_fc(const std::string& name) {
 }
 
 // V
-insert_id DB_Queries_DML::insert_Chat_User_fc(const size_t chat_id,
+insert_id_t DB_Queries_DML::insert_Chat_User_fc(const size_t chat_id,
                                               const size_t user_id,
                                               const size_t user_no) {
   Insert_Chat_User& arg_struct = Insert_Chat_User_struct;
@@ -348,7 +349,7 @@ size_t DB_Queries_DML::select_Chat_User_fc(const size_t chat_id,
 }
 
 // V
-insert_id DB_Queries_DML::insert_Message_fc(const size_t chat_user_id,
+insert_id_t DB_Queries_DML::insert_Message_fc(const size_t chat_user_id,
                                             std::string message) {
   Insert_Message& arg_struct = Insert_Message_struct;
   auto& query = arg_struct.Query_struct;
@@ -446,9 +447,12 @@ queue_message_t DB_Queries_DML::select_Messages_Mult_fc(
     if (status == 1 || status == MYSQL_NO_DATA) break;
     result.row_count++;
 
+   // std::string date_string = "и тут пусто";
     std::string date_string = (std::to_string(timesend.year) + '-'+ std::to_string(timesend.month) + '-' +
          std::to_string(timesend.day) + " " + std::to_string(timesend.hour) + ':' + std::to_string(timesend.minute) +
          ':' + std::to_string(timesend.second));
+
+         
 
     queue->emplace<Message>(Message( date_string,
         result.user_login.data, result.message.data ));
@@ -462,7 +466,7 @@ queue_message_t DB_Queries_DML::select_Messages_Mult_fc(
   return queue;
 }
 
-affected_rows DB_Queries_DML::update_Status_Delivered_fc(
+affected_rows_t DB_Queries_DML::update_Status_Delivered_fc(
     const size_t chat_user_id, const size_t message_id_begin,
     const size_t message_id_end) {
   Update_Status_Delivered& arg_struct = Update_Status_Delivered_struct;
@@ -483,7 +487,7 @@ affected_rows DB_Queries_DML::update_Status_Delivered_fc(
   return affected_rows(arg_struct.stmt, arg_struct.headline);
 }
 
-affected_rows DB_Queries_DML::update_Status_Read_fc(
+affected_rows_t DB_Queries_DML::update_Status_Read_fc(
     const size_t chat_user_id, const size_t message_id_begin,
     const size_t message_id_end) {
   Update_Status_Read& arg_struct = Update_Status_Read_struct;

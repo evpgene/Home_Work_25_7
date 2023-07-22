@@ -30,7 +30,7 @@ Server.o: Server.h Server.cpp ReceivedType.h ReceivedData.h
 DB_Queries_DDL.o: DB_Queries_DDL.h DB_Queries_DDL.cpp
 	$(COMPILE) DB_Queries_DDL.o DB_Queries_DDL.cpp $(FLAGS)
 
-DB_Queries_DML.o: DB_Queries_DML.h DB_Queries_DML_structures.h DB_Queries_DML.cpp
+DB_Queries_DML.o: DB_Queries_DML.h DB_Queries_DML_structures.h DB_Queries_DML_utilities.cpp DB_Queries_DML.cpp
 	$(COMPILE) DB_Queries_DML.o DB_Queries_DML.cpp $(FLAGS)
 
 Main.o: Main.cpp

@@ -185,7 +185,7 @@ no_errors Chats::printAllMessages(const Chat_t chat) {
 }
 
 // отправляет сообщение в указанный чат в базёнку от указанного пользователя
-insert_id Chats::sendMessage(const Chat_t chat, const User_t user,
+insert_id_t Chats::sendMessage(const Chat_t chat, const User_t user,
                              std::string message_text) {
   // проверяем исходные дынные
   if (!(chat && user)) return 0;
@@ -213,7 +213,7 @@ insert_id Chats::sendMessage(const Chat_t chat, const User_t user,
   if (bool(message_id)) {
     saveLastSendMessageId(message_id);
   }
-  return insert_id(message_id);
+  return insert_id_t(message_id);
 }
 
 // сохраняет id последнего отправленного в базёнку сообщения

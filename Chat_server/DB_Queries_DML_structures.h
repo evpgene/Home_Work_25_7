@@ -6,7 +6,7 @@
 const int string_size{255};
 
 struct ParamUint {
-  unsigned long data; // zdec' long blin!!! bliiiinnnn!!! long a ne int! 3 dnya prosrano!
+  unsigned long int data; // zdec' long blin!!! ne unsigned!!! bliiiinnnn!!! long a ne int! 3 dnya prosrano!
   unsigned long length;  // Current buffer length for output or input
                           // data (for character and binary C data)
   bool is_null{false};  // For input/output set inform that the data is NULL
@@ -15,11 +15,12 @@ struct ParamUint {
   bool error{true};    // For output (received), set indicate Truncation
   ParamUint() = delete;
   ParamUint(MYSQL_BIND& bind) {
-    bind.buffer_type = MYSQL_TYPE_LONG;
+    bind.buffer_type = MYSQL_TYPE_LONG ;
     bind.buffer_length = sizeof(data);
-    bind.is_unsigned = true;  // Inform binding to signed or unsigned type -
+    bind.is_unsigned = &is_unsigned;  // Inform binding to signed or unsigned type -
                               // mean only for client side
     bind.buffer = (char*)&data;
+    bind.length = &length;
     bind.is_null = &is_null;
     bind.error = &error;
   };
@@ -54,13 +55,15 @@ struct ParamDatetime {
   unsigned long length;  // Current buffer length for output or input
   //                           // data (for character and binary C data)
   bool is_null{false};  // For input/output set inform that the data is NULL
-  bool error{true};     // For output (received), set indicate Truncation
+  bool is_unsigned{false};   // Inform binding to signed or unsigned type - mean
+                          // only for client side
+  bool error{false};     // For output (received), set indicate Truncation
   ParamDatetime() = delete;
   ParamDatetime(MYSQL_BIND& bind) {
-    bind.buffer_type = MYSQL_TYPE_TIMESTAMP; // zdec' MYSQL_TYPE_TIMESTAMP blin!!! bliiiinnnn!!! long a ne int! nedelya prosrana!
-    bind.is_unsigned = true;  // Inform binding to signed or unsigned type -
-                               // mean only for client side
+    bind.buffer_type = MYSQL_TYPE_DATETIME; // zdec' MYSQL_TYPE_TIMESTAMP blin!!! bliiiinnnn!!! long a ne int! nedelya prosrana!
     bind.buffer_length = sizeof(data);
+    bind.is_unsigned = &is_unsigned;  // Inform binding to signed or unsigned type -
+                          // mean only for client side
     bind.buffer = (char*)&data;
     bind.length = &length;
     bind.is_null = &is_null;
@@ -309,6 +312,7 @@ struct Select_Messages_Mult {
   MYSQL_STMT* stmt{nullptr};
   MYSQL_RES* result_metadata{nullptr};
   const std::string headline{"select_messages_mult_query "};
+  //const std::string query{"SELECT message_id, user_login, message, timesend, status  FROM message_view WHERE chat_id = ? AND status >= ? ORDER BY timesend"};
   const std::string query{"SELECT message_id, user_login, message, timesend, status  FROM message_view WHERE chat_id = ? AND status >= ? ORDER BY timesend"};
   struct query {
     const int param_count{2};  // Number of prepared parameters expected
@@ -319,7 +323,7 @@ struct Select_Messages_Mult {
   struct result {
     const int param_count{5};  // Number of result filds expected
     MYSQL_BIND bind[5];
-    ParamUint id = ParamUint(bind[0]);  // First parameter
+    ParamUint message_id = ParamUint(bind[0]);  // First parameter
     ParamString user_login = ParamString(bind[1]);  // Second parameter
     ParamString message = ParamString(bind[2]);  // third parameter
     ParamDatetime timesend = ParamDatetime(bind[3]);  // 4 parameter
