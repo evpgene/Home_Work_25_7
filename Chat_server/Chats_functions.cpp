@@ -184,6 +184,32 @@ no_errors Chats::printAllMessages(const Chat_t chat) {
   return no_errors(true);
 }
 
+// Возвращает непрочитанные сообщения для сетевого интерфейса
+queue_message_t Chats::getUnreadMessages(const Chat_t chat) {
+  if (!chat) return nullptr;
+  size_t chat_id =
+      db_queries_dml.select_Chat_By_Name_fc(chat->getChatName())->getId();
+
+#if _DEBUG
+  std::cout << " chat id - " << chat_id << std::endl;
+#endif
+
+  queue_message_t messages = db_queries_dml.select_Messages_Mult_fc(
+      chat_id, 1);
+  if (!messages) {
+    std::cout << "Нет сообщений! " << std::endl;
+    return nullptr;
+  }
+  // // выводим все сообщения
+  // std::cout << "Сообщения: " << std::endl;
+  // while (!(messages->empty())) {
+  //   messages->front().printMessage();
+  //   std::cout << endl;
+  //   messages->pop();
+  // }
+  return messages;
+}
+
 // отправляет сообщение в указанный чат в базёнку от указанного пользователя
 insert_id_t Chats::sendMessage(const Chat_t chat, const User_t user,
                              std::string message_text) {

@@ -338,15 +338,13 @@ struct Update_Status_Delivered {
   MYSQL_RES* result_metadata{nullptr};
   const std::string headline{"update_status_delivered_query "};
   const std::string query{
-      "UPDATE messages SET status = 2, dt_delivered = CURRENT_TIMESTAMP() "
-      "WHERE chat_user_id = ? AND id BETWEEN ? AND ? AND status != 2 AND "
-      "status != 3"};
+      "UPDATE messages SET status = 2, dt_delivered = CURRENT_TIMESTAMP() WHERE id = ? AND status != 2 AND status != 3"};
   struct query {
     const int param_count{3};  // Number of prepared parameters expected
     MYSQL_BIND bind[3];
-    ParamUint chat_user_id = ParamUint(bind[0]);      // First parameter
-    ParamUint message_id_begin = ParamUint(bind[1]);  // Second parameter
-    ParamUint message_id_end = ParamUint(bind[2]);    // Third parameter
+    ParamUint id = ParamUint(bind[0]);      // First parameter
+    // ParamUint message_id_begin = ParamUint(bind[1]);  // Second parameter
+    // ParamUint message_id_end = ParamUint(bind[2]);    // Third parameter
   } Query_struct;
   NoResult Result_struct;
 };

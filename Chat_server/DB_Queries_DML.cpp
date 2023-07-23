@@ -454,7 +454,7 @@ queue_message_t DB_Queries_DML::select_Messages_Mult_fc(
 
          
 
-    queue->emplace<Message>(Message( date_string,
+    queue->emplace<Message>(Message( result.message_id.data, date_string,
         result.user_login.data, result.message.data ));
   }
   no_errors &= (status != 1);
@@ -467,17 +467,14 @@ queue_message_t DB_Queries_DML::select_Messages_Mult_fc(
 }
 
 affected_rows_t DB_Queries_DML::update_Status_Delivered_fc(
-    const size_t chat_user_id, const size_t message_id_begin,
-    const size_t message_id_end) {
+    const size_t message_id) {
   Update_Status_Delivered& arg_struct = Update_Status_Delivered_struct;
   auto& query = arg_struct.Query_struct;
   auto& result = arg_struct.Result_struct;
   no_errors no_errors{true};
 
   /* Prepare data for execution */
-  query.chat_user_id.data = chat_user_id;
-  query.message_id_begin.data = message_id_begin;
-  query.message_id_end.data = message_id_end;
+  query.id.data = message_id;
 
   /* Execute statement */
   no_errors &= execute<Update_Status_Delivered&>(arg_struct);

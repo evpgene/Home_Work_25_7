@@ -77,10 +77,16 @@ void Chats::logon() {
 }
 
 // logon для сетевого интерфейса - ищет пользователя в базёнке
-User_t Chats::logon(const User_t user_ptr) {
-  if (!user_ptr) return nullptr;
-  return db_queries_dml.select_User_By_Login_fc(user_ptr->getLogin());
-}
+User_t Chats::logon(const User_t user) {
+  if (!user) {return nullptr;} // проверка на нулевой указатель
+
+  User_t restored_user{db_queries_dml.select_User_By_Login_fc(user->getLogin())};
+  if (!bool(restored_user)) {return nullptr;} // проверка на нулевой указатель
+  if(*user != *restored_user) {
+    std::cout << "Неверные учётные данные. " << std::endl;
+    return nullptr;}
+    return restored_user;
+  }
 
 // регистрация пользователя в базёнке для терминала
 no_errors Chats::userRegistration() {
@@ -104,17 +110,19 @@ no_errors Chats::userRegistration() {
 
 // регистрация пользователя в базёнке для сетевого интерфейса
 User_t Chats::userRegistration(const User_t user) {
-  // проверка исходных данных
-  if (!user) return nullptr;
-  // ищем пользователя с заданным логином и паролем (или хэшем)
-  if (*user == *db_queries_dml.select_User_By_Login_fc(user->getLogin())) {
-      return nullptr;
-  }
+  if (!user) return nullptr; // проверка на нулевой указатель
+
+  // ищем пользователя с заданным логином
+  User_t restored_user{db_queries_dml.select_User_By_Login_fc(user->getLogin())};
+  if (bool(restored_user)) {
+    std::cout << "Такой пользователь уже есть. " << std::endl;
+    return nullptr;} // пользователь с  таким-же логином уже есть
+
   // вносим нового пользователя в базёнку и находим его по id
   return db_queries_dml.select_User_By_Id_fc(db_queries_dml.insert_User_fc(user));
 }
 
-// Написать сообщение.
+// Написать сообщение для терминала
 void Chats::write() {
   // Выводим имя активного пользователя
   if (!currentUserPtr) {
@@ -171,10 +179,11 @@ void Chats::write() {
 
 void Chats::logoff() {
   if (currentUserPtr) {
-    std::cout << "Вы вышли из учётной записи";
+    std::cout << "Вы вышли из учётной записи - ";
     currentUserPtr->printUser();
     std::cout << std::endl;
     currentUserPtr = nullptr;
+    currentChatPtr = nullptr;
   } else {
     std::cout << "Прежде чем выйти из учётной записи необходимо в неё войти. "
                  "Вы не вошли в учётую запись."
@@ -380,19 +389,20 @@ void Chats::remoteCycle() {
           string_to_send = "чат не существует";
           break;
         };
-        lastMessages = chat->getLastMessages();
+        //lastMessages = chat->getLastMessages();
+        lastMessages = getUnreadMessages(chat);
 
-        // std::cout << "last messages from queue step get_messages start "
-        //           << std::endl;  // диагностическая информация на сервер
-
-        // while (!lastMessages.empty()) {
+        std::cout << "last messages from queue step get_messages start "
+                  << std::endl;  // диагностическая информация на сервер
+//!!! тут проверить указатель
+        // while (!lastMessages->empty()) {
         //   std::cout << std::endl;
-        //   lastMessages.front().printMessage();
+        //   lastMessages->front().printMessage();
         //   std::cout << std::endl;
-        //   lastMessages.pop();
+        //   lastMessages->pop();
         // }
-        // std::cout << "last messages from queue step get_messages end "
-        //           << std::endl;  // диагностическая информация на сервер
+        std::cout << "last messages from queue step get_messages end "
+                  << std::endl;  // диагностическая информация на сервер
 
       case CONTINUE_MESSAGES:
         std::cout << "continuemessages step"
@@ -403,8 +413,16 @@ void Chats::remoteCycle() {
           break;
         };
         if (!lastMessages->empty()) {
-          string_to_send = server.getMessageString(lastMessages->front());
-          lastMessages->pop();
+          {
+            Message msg{lastMessages->front()}; // аккуратней, тут всё зависит только от конструктора!
+            string_to_send = server.getMessageString(msg);
+
+            db_queries_dml.update_Status_Delivered_fc(msg.getId());
+            std::cout << "lastMessages->front().getId()" << msg.getId()
+                      << std::endl;
+          }
+            lastMessages->pop();
+
           std::cout << "one message pop "
                     << std::endl;  // диагностическая информация на сервер
         } else {

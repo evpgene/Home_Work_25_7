@@ -73,9 +73,7 @@ class DB_Queries_DML {
   Message_t select_Message_fc(const size_t chat_id, const size_t message_id);
   queue_message_t select_Messages_Mult_fc(const size_t chat_id,
                                           const size_t message_status);
-  size_t update_Status_Delivered_fc(const size_t chat_user_id,
-                                    const size_t message_id_begin,
-                                    const size_t message_id_end);
+  size_t update_Status_Delivered_fc(const size_t message_id);
   size_t update_Status_Read_fc(const size_t chat_user_id,
                                const size_t message_id_begin,
                                const size_t message_id_end);

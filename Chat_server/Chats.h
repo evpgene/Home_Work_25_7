@@ -82,6 +82,8 @@ class Chats {
   std::shared_ptr<std::queue<std::string>> getUserNames();
   const std::string getMessageString(const Message_t message);
   no_errors printAllMessages(const Chat_t chat);
+  queue_message_t getUnreadMessages(const Chat_t chat);
+
   insert_id_t sendMessage(const Chat_t chat, const User_t user,
                         std::string message_text);
   void saveLastSendMessageId(size_t id);
